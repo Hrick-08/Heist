@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VICE CITY: THE CAMPUS TAKEOVER — GDG Chitkara × DGIT</title>
+<meta name="description" content="A GTA-inspired campus challenge. Crews of 4–5, three mission rounds, a police target list, Dexter's clearance desk and one Big Heist for the top five. GDG on Campus Chitkara × DGIT Gaming Club.">
+<meta name="theme-color" content="#100620">
+<meta property="og:title" content="VICE CITY: THE CAMPUS TAKEOVER">
+<meta property="og:description" content="One campus. Three rounds. Five finalists. Points, not guesses.">
+<meta property="og:image" content="assets/img/og.jpg">
+<link rel="icon" href="assets/img/favicon.png">
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body id="top">
+
+<a class="skip" href="#setup">Skip to the brief</a>
+
+<!-- texture stack ------------------------------------------------------- -->
+<div class="crt" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="vig" aria-hidden="true"></div>
+
+<!-- masthead ------------------------------------------------------------ -->
+<header class="masthead">
+  <!-- band 1 — the masthead -->
+  <div class="mast-top">
+    <a class="mast-logo" href="#top" aria-label="Vice City: The Campus Takeover, back to top">
+      <span class="mast-mark" aria-hidden="true"><img src="assets/img/vi-mark.png" alt="" width="720" height="405"></span>
+      <span class="mast-name">
+        <span class="mast-word">VICE<em>CITY</em></span>
+        <span class="mast-slug">The campus takeover <i>·</i> case 2027</span>
+      </span>
+    </a>
+
+    <p class="mast-wire" aria-label="Event wire">
+      <span class="wire-item"><i class="wire-dot" aria-hidden="true"></i>Board live 09:00 IST</span>
+      <span class="wire-item">Sat 13 Feb 2027</span>
+      <span class="wire-item wire-item--dim">Chitkara × DGIT</span>
+    </p>
+
+    <div class="mast-cta">
+      <span class="stars mast-stars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <a class="btn btn--go" href="#assemble">Register crew</a>
+    </div>
+  </div>
+
+  <!-- band 2 — the chapter rail (drag, scroll or arrow-key it) -->
+  <nav class="site-nav" id="site-nav" aria-label="Chapters">
+    <div class="rail-track" id="navRail" tabindex="0" aria-label="Chapter list — drag or use the arrow keys">
+      <ol>
+        <li><a href="#setup"><b>01</b><span>Takeover</span></a></li>
+        <li><a href="#crew"><b>02</b><span>Crew &amp; ID</span></a></li>
+        <li><a href="#city"><b>03</b><span>Who runs it</span></a></li>
+        <li><a href="#missions"><b>04</b><span>Missions</span></a></li>
+        <li><a href="#wanted"><b>05</b><span>Target list</span></a></li>
+        <li><a href="#board"><b>06</b><span>The board</span></a></li>
+        <li><a href="#clock"><b>07</b><span>Run of day</span></a></li>
+        <li><a href="#heist"><b>08</b><span>Big Heist</span></a></li>
+        <li><a href="#payoff"><b>09</b><span>Awards</span></a></li>
+        <li><a href="#code"><b>10</b><span>Rules</span></a></li>
+        <li><a href="#control"><b>11</b><span>Control</span></a></li>
+        <li><a href="#intel"><b>12</b><span>Mission Lab</span></a></li>
+      </ol>
+    </div>
+    <span class="rail-scan" aria-hidden="true"></span>
+    <span class="rail-prog" aria-hidden="true"><i id="railProg"></i></span>
+  </nav>
+</header>
+
+<!-- GTA-style HUD ------------------------------------------------------- -->
+<aside class="hud" id="hud" aria-label="Player heads-up display">
+  <div class="hud-block hud-points">
+    <span class="hud-label">POINTS</span>
+    <b id="hudPoints" class="hud-num">0</b>
+  </div>
+  <div class="hud-block hud-cash">
+    <span class="hud-label">CASH</span>
+    <b id="hudCash" class="hud-num money">$1,000</b>
+  </div>
+  <div class="hud-block">
+    <span class="hud-label">WANTED</span>
+    <span class="stars" id="hudStars"><i></i><i></i><i></i><i></i><i></i></span>
+  </div>
+  <div class="hud-block hud-round">
+    <span class="hud-label">ROUND</span>
+    <b id="hudRound" class="hud-num">1<span class="hud-of">/3</span></b>
+  </div>
+</aside>
+
+<main>
+
+  <!-- ============ HERO : open sky at the end of the day ============ -->
+  <section class="horizon" id="cover">
+    <div class="hz-sky" aria-hidden="true">
+      <span class="hz-glow"></span>
+      <span class="hz-sun"><i></i><i></i><i></i></span>
+      <svg class="hz-grid" viewBox="0 0 1200 300" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+  <g class="hz-g-v" fill="none" stroke="rgba(34,217,245,.42)">
+    <path d="M535 0 L-934 300"/>
+    <path d="M540 0 L-816 300"/>
+    <path d="M545 0 L-698 300"/>
+    <path d="M550 0 L-580 300"/>
+    <path d="M555 0 L-462 300"/>
+    <path d="M560 0 L-344 300"/>
+    <path d="M565 0 L-226 300"/>
+    <path d="M570 0 L-108 300"/>
+    <path d="M575 0 L10 300"/>
+    <path d="M580 0 L128 300"/>
+    <path d="M585 0 L246 300"/>
+    <path d="M590 0 L364 300"/>
+    <path d="M595 0 L482 300"/>
+    <path d="M600 0 L600 300"/>
+    <path d="M605 0 L718 300"/>
+    <path d="M610 0 L836 300"/>
+    <path d="M615 0 L954 300"/>
+    <path d="M620 0 L1072 300"/>
+    <path d="M625 0 L1190 300"/>
+    <path d="M630 0 L1308 300"/>
+    <path d="M635 0 L1426 300"/>
+    <path d="M640 0 L1544 300"/>
+    <path d="M645 0 L1662 300"/>
+    <path d="M650 0 L1780 300"/>
+    <path d="M655 0 L1898 300"/>
+    <path d="M660 0 L2016 300"/>
+    <path d="M665 0 L2134 300"/>
+  </g>
+  <g class="hz-g-h" fill="none" stroke="rgba(255,42,109,.42)">
+    <path d="M0 2.6 H1200"/>
+    <path d="M0 6.1 H1200"/>
+    <path d="M0 10.8 H1200"/>
+    <path d="M0 17.0 H1200"/>
+    <path d="M0 25.4 H1200"/>
+    <path d="M0 36.6 H1200"/>
+    <path d="M0 51.7 H1200"/>
+    <path d="M0 71.8 H1200"/>
+    <path d="M0 98.9 H1200"/>
+    <path d="M0 135.1 H1200"/>
+    <path d="M0 183.6 H1200"/>
+    <path d="M0 248.7 H1200"/>
+    <path d="M0 335.8 H1200"/>
+  </g>
+</svg>
+      <svg class="hz-palm" viewBox="0 0 260 320" focusable="false">
+        <g fill="none" stroke="rgba(9,3,20,.92)" stroke-width="7" stroke-linecap="round">
+          <path d="M188 320c-6-74-2-128 14-176"/>
+          <path d="M202 144c-34-22-72-26-104-8"/>
+          <path d="M202 144c-12-34-40-58-76-64"/>
+          <path d="M202 144c22-30 56-44 92-38"/>
+          <path d="M202 144c34-12 72-4 98 22"/>
+          <path d="M202 144c-30 6-56 26-72 54"/>
+          <path d="M202 144c30 10 52 34 62 64"/>
+        </g>
+      </svg>
+      <span class="hz-horizon"></span>
+    </div>
+
+    <div class="hz-inner">
+      <p class="hz-kicker"><span class="rec"></span>GDG on Campus Chitkara <span class="hz-x">&times;</span> DGIT Gaming Club</p>
+
+      <h1 class="hz-title">
+        <span class="hz-word">Vice City</span>
+        <span class="hz-sub">The campus takeover</span>
+      </h1>
+
+      <p class="hz-lede">One Saturday, Chitkara is redrawn as a city that keeps score: three rounds, five zones,
+        and a shortlist the whole campus watches. <b>It is played for points, not cash.</b></p>
+
+      <div class="hz-cta">
+        <a class="btn btn--go btn--xl" href="#setup">Enter the city</a>
+        <a class="btn btn--ghost" href="#lab">Suggest a mission</a>
+      </div>
+    </div>
+
+    <div class="hz-meta">
+      <p class="hz-when"><time datetime="2027-02-13T09:00:00+05:30"><span data-event-date>Saturday 13 February 2027</span></time>
+        <span class="hz-dot" aria-hidden="true"></span>09:00 &rarr; 15:30 IST</p>
+      <p class="hz-entry">Entry <b>&#8377;0</b> <span class="hz-dot" aria-hidden="true"></span> crews of 3&ndash;5</p>
+      <p class="hz-hint">Scroll for the brief<span class="hz-caret" aria-hidden="true"></span></p>
+    </div>
+  </section>
+
+  <!-- ============ countdown strip ============ -->
+  <aside class="alert-strip" aria-label="Countdown to the takeover">
+    <div class="alert-head">
+      <span class="alert-label">Takeover begins</span>
+      <time class="alert-date" data-event-iso datetime="2027-02-13T09:00:00+05:30"><span data-event-date>Saturday 13 February 2027</span> · 09:00 IST</time>
+    </div>
+    <ul class="clock" id="countdown">
+      <li><b data-unit="days">--</b><span>days</span></li>
+      <li><b data-unit="hours">--</b><span>hrs</span></li>
+      <li><b data-unit="minutes">--</b><span>min</span></li>
+      <li><b data-unit="seconds">--</b><span>sec</span></li>
+    </ul>
+    <p class="alert-note">Final whistle <b>15:00</b>. Scores, prizes and photos by <b>15:30</b>.</p>
+  </aside>
+
+  <!-- ============ dispatch ticker ============ -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>Round ends · the top three crews on the board become tonight's targets</span><i>★</i>
+      <span>Dexter clears wanted status for 100 in-game cash</span><i>★</i>
+      <span>Play while wanted and every mission pays 20% less</span><i>★</i>
+      <span>Missions are 3–8 minutes. Same sheet at every station.</span><i>★</i>
+      <span>Top five after Round 3 get the Big Heist. Everyone else watches — and judges.</span><i>★</i>
+      <span>No running. No grabbing. A photo is a capture, not a tackle.</span><i>★</i>
+      <span>Round ends · the top three crews on the board become tonight's targets</span><i>★</i>
+      <span>Dexter clears wanted status for 100 in-game cash</span><i>★</i>
+      <span>Play while wanted and every mission pays 20% less</span><i>★</i>
+      <span>Missions are 3–8 minutes. Same sheet at every station.</span><i>★</i>
+      <span>Top five after Round 3 get the Big Heist. Everyone else watches — and judges.</span><i>★</i>
+      <span>No running. No grabbing. A photo is a capture, not a tackle.</span><i>★</i>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       01 · THE TAKEOVER
+       ============================================================ -->
+  <section class="chapter" id="setup" data-page="01">
+    <header class="chapter-head">
+      <span class="chapter-no">File 01</span>
+      <h2 class="chapter-title">ONE CAMPUS,<br><em>REWRITTEN</em></h2>
+      <p class="chapter-dek">Four panels and you know the day. Everything after this is detail.</p>
+    </header>
+
+    <div class="page-grid grid--prologue">
+
+      <article class="cell reveal w5">
+        <div class="art art--tall">
+          <img src="assets/img/skyline-sunset.jpg" alt="The Vice City skyline at sunset across the bay" loading="lazy" width="1600" height="685">
+          <span class="dither"></span>
+        </div>
+        <p class="caption caption--overlay">Turn the campus into a game world for a day: missions, money, police and a city that keeps score.</p>
+      </article>
+
+      <article class="cell cell--text cell--dark reveal w4">
+        <p class="dj-voice">“Register in a crew. Run the missions. Watch the board — because the crews at the top of it become the crews the police are sent to find.”</p>
+        <p class="dj-attr">— THE BRIEFING, 09:30 IST</p>
+        <img class="cell-thumb" src="assets/img/final-transmission.jpg" alt="Two people on a motorcycle under a sunset sky" loading="lazy" width="1600" height="900">
+      </article>
+
+      <article class="cell reveal w3">
+        <div class="art art--tall">
+          <img src="assets/img/standoff.jpg" alt="Two people armed at a dockside, city behind them" loading="lazy" width="1100" height="618">
+          <span class="dither"></span>
+        </div>
+        <span class="hud-tag hud-tag--alert" style="--r:-6deg">TOP 3<br>BECOME TARGETS</span>
+      </article>
+
+      <article class="cell cell--text reveal w7">
+        <h3 class="h-mini">What this is, honestly</h3>
+        <p>Students register in <b>crews of 4–5</b> and spend a day running short missions at stations across campus: puzzles, tech challenges, creative tasks, physical team games and clue hunts. Every mission pays <b>points</b>. Some crews end up <b>wanted</b> — and wanted crews have to decide whether to pay Dexter or eat the penalty.</p>
+        <p>This is not a gaming tournament and nobody plays <em>Grand Theft Auto</em> on a screen. <b>The campus is the map, the day is the clock, the missions are run by hand.</b> A web platform built by GDG keeps the points, the target list, the clearances and the leaderboard honest while you work.</p>
+        <div class="chips"><span>crews of 4–5</span><span>free entry</span><span>6.5 hours</span><span>3 rounds + final</span><span>every branch welcome</span><span>no rig, no console</span></div>
+      </article>
+
+      <article class="cell reveal w5">
+        <div class="art art--wide">
+          <img src="assets/img/evidence-robbery.jpg" alt="Two people with faces covered walking out of a convenience store" loading="lazy" width="825" height="619">
+          <span class="dither"></span>
+        </div>
+        <p class="caption caption--under">Being at the top of the board is the goal and the problem at the same time. <b>Winning the round puts your face on the target list.</b></p>
+      </article>
+
+      <ul class="stat-strip reveal w12">
+        <li><b>4–5</b><span>students per crew, one crew ID each</span></li>
+        <li><b>3</b><span>mission rounds, same set for every crew</span></li>
+        <li><b>5</b><span>mission categories, one scoring sheet</span></li>
+        <li><b>5</b><span>crews reach the final heist. Only five.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       02 · CREW & CREW ID
+       ============================================================ -->
+  <section class="chapter" id="crew" data-page="02">
+    <div class="inner">
+    <header class="chapter-head">
+      <span class="chapter-no">File 02</span>
+      <h2 class="chapter-title">ASSEMBLE<br>A <em>CREW</em></h2>
+      <p class="chapter-dek">Nobody registers as an individual and nobody registers as police. You come as a crew, you leave as a crew ID on a board.</p>
+    </header>
+
+    <ol class="mission">
+      <li class="cell reveal">
+        <div class="art art--wide"><img src="assets/img/assemble-crew.jpg" alt="A crew of two sitting on the bonnet of a car with palms behind" loading="lazy" width="704" height="396"><span class="dither dither--ink"></span></div>
+        <div class="cell-body">
+          <span class="step-no">01</span>
+          <h3>Pick four or five, and a name</h3>
+          <p>A crew is <b>4–5 students</b>, each with a valid Chitkara ID. The name is your identity all day — board, posters, target list, awards. Pick one a speaker can read loudly.</p>
+          <p class="note">// one registration = one crew = one crew ID</p>
+        </div>
+      </li>
+
+      <li class="cell reveal">
+        <div class="art art--wide"><img src="assets/img/crew-identity.jpg" alt="Two people leaning against a wall outside a shopfront" loading="lazy" width="1200" height="900"><span class="dither dither--ink"></span></div>
+        <div class="cell-body">
+          <span class="step-no">02</span>
+          <h3>Get checked in, get your ID</h3>
+          <p>At registration the crew receives a <b>team ID</b> and hears the story, the schedule and the rules. That ID is how a station verifies you, how points land in your total and how the control team knows who to send the police to.</p>
+          <p class="note">// photograph it. a dead phone is a lost day otherwise.</p>
+        </div>
+      </li>
+
+      <li class="cell reveal">
+        <div class="art art--wide"><img src="assets/img/crew-night.jpg" alt="A crew member checking a phone on a neon-lit street at night" loading="lazy" width="760" height="950"><span class="dither dither--ink"></span></div>
+        <div class="cell-body">
+          <span class="step-no">03</span>
+          <h3>Name a team leader for the poster</h3>
+          <p>If your crew lands on the target list, the police take a photo of your <b>team leader</b> and upload it to the event site. The site links that photo to your crew ID and publishes the wanted poster. <b>That photo is used only for the internal wanted board and it is deleted after the event.</b></p>
+          <p class="note">// would rather not be photographed? Say so at registration — see rule 9</p>
+        </div>
+      </li>
+
+      <li class="cell reveal">
+        <div class="art art--wide"><img src="assets/img/crew-palms.jpg" alt="Two crew members standing between palm trees at dusk" loading="lazy" width="1200" height="900"><span class="dither dither--ink"></span></div>
+        <div class="cell-body">
+          <span class="step-no">04</span>
+          <h3>Take the same hand as everyone else</h3>
+          <p>All crews get the <b>same missions, the same time limits and the same opening wallet</b> of in-game cash. Nothing is hidden from you: scoring criteria are published before the event, and every station uses the same sheet.</p>
+          <p class="note note--cash">// opening wallet: $1,000 in-game (proposed · final number set by control)</p>
+        </div>
+      </li>
+
+      <li class="cell reveal">
+        <div class="art art--wide"><img src="assets/img/billiard-negotiation.jpg" alt="Two people leaning over a pool table in a dim hall" loading="lazy" width="825" height="619"><span class="dither dither--ink"></span></div>
+        <div class="cell-body">
+          <span class="step-no">05</span>
+          <h3>Spend money like it means something</h3>
+          <p>In-game cash is not your score — <b>points are</b>. Cash is what you spend: to clear a wanted status at Dexter's desk, to buy a hint, to win the strategy missions that ask you to choose between a safe return and a greedy one.</p>
+          <p class="note">// the strategy is real even though the money is not</p>
+        </div>
+      </li>
+
+      <li class="cell reveal">
+        <div class="art art--wide"><img src="assets/img/crew-table.jpg" alt="A crew around a table at night" loading="lazy" width="760" height="950"><span class="dither dither--ink"></span></div>
+        <div class="cell-body">
+          <span class="step-no">06</span>
+          <h3>Watch your own file</h3>
+          <p>Your crew page is live from the first entry: points, cash, missions completed, hints used, <b>wanted status</b>, the poster if you have one, and your position on the board. So is every other crew's.</p>
+          <p class="note">// the board is public. Your decisions are public. Behave accordingly.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="crew-card reveal" style="margin-top:var(--gut)">
+      <div class="crew-card-top">
+        <div class="qr">
+          <svg id="crewQR" viewBox="0 0 21 21" shape-rendering="crispEdges" role="img" aria-label="Sample crew ID code — the platform issues the real one at check-in"><rect width="21" height="21" fill="#fdf6ea"/><g fill="#150a20"><path id="crewQRPath" d="M0 0h7v7H0zM2 2h3v3H2zM14 0h7v7h-7zM16 2h3v3h-3zM0 14h7v7H0zM2 16h3v3H2zM8 0h1v1H8zM10 1h1v1h-1zM8 3h2v1H8zM11 4h2v1h-2zM9 6h1v2H9zM12 8h2v1h-2zM8 9h1v2H8zM10 11h3v1h-3zM14 9h1v2h-1zM16 11h2v1h-2zM19 9h2v1h-2zM14 14h2v2h-2zM17 15h1v2h-1zM19 14h2v2h-2zM15 18h3v1h-3zM19 18h2v2h-2zM8 14h2v1H8zM9 16h2v1H9zM8 18h3v1H8zM0 9h2v1H0zM3 10h2v1H3zM1 12h3v1H1z"/></g></svg>
+        </div>
+        <div>
+          <p class="crew-tag">Crew file · live from the first entry</p>
+          <p class="crew-id" id="crewIdOut">THE NEON UNDERTAKERS</p>
+          <p class="crew-tag" id="crewMetaOut">ID VP-11-047 · 5 members · Picasso Block</p>
+        </div>
+      </div>
+      <form class="crew-claim" id="crewClaim">
+        <label for="crewNameInput">Punch a crew name and watch the file redraw</label>
+        <div class="crew-claim-row">
+          <input id="crewNameInput" name="crew" type="text" maxlength="26" placeholder="The Neon Undertakers" autocomplete="off" spellcheck="false">
+          <button class="btn btn--go btn--sm" type="submit">Stamp it</button>
+        </div>
+        <p class="crew-claim-msg" id="crewClaimMsg" role="status" aria-live="polite">3–26 characters. One crew, one ID, one poster.</p>
+      </form>
+      <div class="crew-card-body">
+        <div class="crew-field"><span>Points</span><b class="points">1,840</b></div>
+        <div class="crew-field"><span>In-game cash</span><b class="cash">$4,250</b></div>
+        <div class="crew-field"><span>Wanted status</span><b class="wanted-word">WANTED · round 3</b></div>
+        <div class="crew-field"><span>Hints used</span><b>2 · −10 pts</b></div>
+        <div class="crew-field"><span>Missions banked</span><b>17 / 21</b></div>
+        <div class="crew-field"><span>Clearance at Dexter's</span><b>$100</b></div>
+        <div class="crew-field"><span>Board position</span><b>1st of 42</b></div>
+        <div class="crew-field"><span>Final heist</span><b>Qualified</b></div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       03 · WHO RUNS IT
+       ============================================================ -->
+  <section class="chapter" id="city" data-page="03">
+    <header class="chapter-head">
+      <span class="chapter-no">File 03</span>
+      <h2 class="chapter-title">THE CITY<br>HAS <em>EMPLOYEES</em></h2>
+      <p class="chapter-dek">Every role you meet is played by a member of the organising team. Nobody improvises the rules, and nobody touches you.</p>
+    </header>
+
+    <div class="cast">
+      <article class="cell cell--text reveal">
+        <div class="art"><img src="assets/img/police-arrest.jpg" alt="A police officer in an evidence room" loading="lazy" width="1137" height="640"><span class="dither"></span></div>
+        <div class="cell-body">
+          <span class="role-tag role-tag--cop">Police</span>
+          <h3>Vice City PD <span class="role-sub">volunteer officers</span></h3>
+          <p>Game operators, not law enforcement. They patrol only the approved event areas, check a crew ID off the current target list, ask that crew to pause, photograph the <b>team leader</b>, and mark the status in the site.</p>
+          <ul class="duty"><li>Patrol designated areas only</li><li>Verify the ID against the target list</li><li>Take and upload the leader photo</li><li>Set wanted status in the platform</li><li>Never chase, grab, block or run</li></ul>
+        </div>
+      </article>
+
+      <article class="cell cell--text reveal">
+        <div class="art"><img src="assets/img/face-jason.jpg" alt="A man checking a phone outside a neon-lit building at night" loading="lazy" width="760" height="1013"><span class="dither"></span></div>
+        <div class="cell-body">
+          <span class="role-tag role-tag--broker">Dexter</span>
+          <h3>The Broker <span class="role-sub">one desk, one queue</span></h3>
+          <p>The only place a wanted crew can fix itself. Dexter issues special missions and bonus tasks, announces round updates, takes your <b>100 in-game cash</b> and removes your wanted status on the spot.</p>
+          <ul class="duty"><li>Clear wanted status for the fee</li><li>Issue special and bonus missions</li><li>Read out round updates</li><li>Log every payment and status change</li></ul>
+        </div>
+      </article>
+
+      <article class="cell cell--text reveal">
+        <div class="art"><img src="assets/img/booth-recording.jpg" alt="Two people at microphones in a recording booth" loading="lazy" width="825" height="619"><span class="dither"></span></div>
+        <div class="cell-body">
+          <span class="role-tag">Stations</span>
+          <h3>Mission coordinators <span class="role-sub">one per category</span></h3>
+          <p>They explain the task in ninety seconds, run the clock, score you on the published sheet, and check whether you walked in wanted — before the mission starts, not after.</p>
+          <ul class="duty"><li>Explain, start and time the mission</li><li>Score on the same sheet everywhere</li><li>Check crew ID and status first</li><li>Record the 20% deduction if you played wanted</li></ul>
+        </div>
+      </article>
+
+      <article class="cell cell--text cell--dark reveal">
+        <span class="panel-tab"></span>
+        <span class="role-tag role-tag--gm">Control</span>
+        <h3>Event control <span class="role-sub">the people who can stop it</span></h3>
+        <p>They own the format, the permissions, the target lists and the tie-breaks. They publish the top three at the end of every round, authorise any exception, and can pause or end the day.</p>
+        <ul class="duty"><li>Publish the target list each round</li><li>Authorise any police action off-list</li><li>Hold the scoring rubric and disputes</li><li>Confirm final scores and qualifiers</li></ul>
+        <img class="cell-thumb" src="assets/img/leonida-seal.png" alt="The seal of the State of Leonida" loading="lazy" width="520" height="292">
+      </article>
+
+      <article class="cell cell--text reveal">
+        <div class="art"><img src="assets/img/hustle-gym.jpg" alt="Two people in a training space" loading="lazy" width="495" height="619"><span class="dither"></span></div>
+        <div class="cell-body">
+          <span class="role-tag">Story</span>
+          <h3>Story &amp; experience <span class="role-sub">the atmosphere department</span></h3>
+          <p>The opening briefing, the announcements, the characters at the stations and the reason a scoring board feels like a city instead of a quiz.</p>
+          <ul class="duty"><li>Opening story, rules and round calls</li><li>Character roles and voice</li><li>Keep the day moving</li></ul>
+        </div>
+      </article>
+
+      <article class="cell cell--text reveal">
+        <div class="art"><img src="assets/img/safehouse.jpg" alt="A stilt house in the wetlands with a car parked below" loading="lazy" width="1200" height="900"><span class="dither"></span></div>
+        <div class="cell-body">
+          <span class="role-tag">Logistics</span>
+          <h3>Logistics &amp; safety <span class="role-sub">boring on purpose</span></h3>
+          <p>Props, printouts, signage, water, crowd flow and the zone walk-through the night before. If a station is unsafe, it does not open — no matter how good the mission is.</p>
+          <ul class="duty"><li>Zones, signs and station set-up</li><li>Water and shade</li><li>Safety checks before every round</li></ul>
+        </div>
+      </article>
+    </div>
+
+    <div class="page-grid page-grid--duo">
+      <article class="cell cell--text cell--amber reveal">
+        <span class="role-tag">GDG on Campus, Chitkara</span>
+        <h3 class="h-mini">Who builds it</h3>
+        <ul class="tick-list">
+          <li><b>Core planning</b> — format, venues, permissions, budget, final calls</li>
+          <li><b>Mission design</b> — collect ideas, write problem statements, test, hold answer keys</li>
+          <li><b>The Control Center</b> — registration, crew IDs, points, target list, board</li>
+          <li>Technology and cybersecurity missions</li>
+        </ul>
+      </article>
+      <article class="cell cell--text cell--cash reveal">
+        <span class="role-tag">DGIT — Gaming Club</span>
+        <h3 class="h-mini">Who runs the floor</h3>
+        <ul class="tick-list">
+          <li><b>Station operations</b> — set up, explain, time, record</li>
+          <li><b>Police &amp; Dexter operations</b> — target lists, photos, clearances</li>
+          <li><b>Scoring &amp; results</b> — one master sheet, verification, disputes</li>
+          <li>Co-hosted: <b>everything that touches a player</b></li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       04 · MISSIONS
+       ============================================================ -->
+  <section class="chapter chapter--dark" id="missions" data-page="04">
+    <div class="inner">
+    <header class="chapter-head">
+      <span class="chapter-no">File 04</span>
+      <h2 class="chapter-title">THE MISSION<br><em>BOARD</em></h2>
+      <p class="chapter-dek">Five categories, three rounds, one scoring sheet. Missions are short — <em>3 to 8 minutes</em> — so a crew can actually see the whole board in a day.</p>
+    </header>
+
+    <div class="zone-filters" role="group" aria-label="Filter missions by category">
+      <button class="zone-filter" data-zone="all" aria-pressed="true">All five categories</button>
+      <button class="zone-filter" data-zone="tech" aria-pressed="false">Tech &amp; logic</button>
+      <button class="zone-filter" data-zone="physical" aria-pressed="false">Physical team games</button>
+      <button class="zone-filter" data-zone="creative" aria-pressed="false">Creative</button>
+      <button class="zone-filter" data-zone="clue" aria-pressed="false">Clue hunt</button>
+      <button class="zone-filter" data-zone="strategy" aria-pressed="false">Strategy</button>
+    </div>
+
+    <div class="zones">
+      <article class="zone reveal" data-zone="tech">
+        <div class="zone-head"><img src="assets/img/neon-club-front.jpg" alt="A neon-lit club front at night" loading="lazy" width="1200" height="900"><span class="dither"></span><span class="zone-head-t">Tech &amp; logic</span></div>
+        <div class="zone-body">
+          <p class="note">// no specialist knowledge required — every station explains itself</p>
+          <p>Decode a message, spot the bug, finish the logic grid. Read the brief twice; the second line is always the clue.</p>
+          <div class="job"><b>Decode the message</b><i>6 min</i></div>
+          <div class="job"><b>Spot the bug</b><i>5 min</i></div>
+          <div class="job job--hot"><b>Cybersecurity puzzle</b><i>8 min</i></div>
+          <div class="job"><b>AI / logic challenge</b><i>7 min</i></div>
+        </div>
+        <div class="zone-foot"><span>shortlist</span><span>accuracy pays</span></div>
+      </article>
+
+      <article class="zone reveal" data-zone="physical">
+        <div class="zone-head"><img src="assets/img/hustle-gym.jpg" alt="Two people in a training space" loading="lazy" width="495" height="619"><span class="dither"></span><span class="zone-head-t">Physical team games</span></div>
+        <div class="zone-body">
+          <p class="note">// supervised, walked — never run</p>
+          <p>Blindfold navigation, cup stacks, memory relays. Communication beats speed, and nobody has to be an athlete.</p>
+          <div class="job"><b>Blindfold navigation</b><i>6 min</i></div>
+          <div class="job"><b>Cup stack challenge</b><i>4 min</i></div>
+          <div class="job"><b>Memory relay</b><i>5 min</i></div>
+          <div class="job"><b>Obstacle sequence</b><i>8 min</i></div>
+        </div>
+        <div class="zone-foot"><span>shortlist</span><span>speed bonus lives here</span></div>
+      </article>
+
+      <article class="zone reveal" data-zone="creative">
+        <div class="zone-head"><img src="assets/img/booth-recording.jpg" alt="Two performers at microphones in a recording booth" loading="lazy" width="825" height="619"><span class="dither"></span><span class="zone-head-t">Creative</span></div>
+        <div class="zone-body">
+          <p class="note">// judged on a checklist, in front of you</p>
+          <p>Make the poster, cut the wanted video, write the slogan, play the scene. Fast ideas beat perfect ones — you have minutes.</p>
+          <div class="job"><b>Crew poster</b><i>7 min</i></div>
+          <div class="job job--hot"><b>Wanted-style video</b><i>8 min</i></div>
+          <div class="job"><b>Team slogan</b><i>3 min</i></div>
+          <div class="job"><b>Quick roleplay scene</b><i>5 min</i></div>
+        </div>
+        <div class="zone-foot"><span>shortlist</span><span>quality pays</span></div>
+      </article>
+
+      <article class="zone reveal" data-zone="clue">
+        <div class="zone-head"><img src="assets/img/retro-crew.jpg" alt="Two people at a dockyard port, one pointing a phone" loading="lazy" width="1200" height="900"><span class="dither"></span><span class="zone-head-t">Clue hunt &amp; observation</span></div>
+        <div class="zone-body">
+          <p class="note">// the category that rewards walking with your eyes open</p>
+          <p>Find the hidden clue, name the campus location, solve the riddle, decode the audio. Hints exist. They cost 5 points each.</p>
+          <div class="job"><b>Hidden clue search</b><i>8 min</i></div>
+          <div class="job"><b>Identify the location</b><i>4 min</i></div>
+          <div class="job"><b>Riddle chain</b><i>6 min</i></div>
+          <div class="job"><b>Audio clue decode</b><i>5 min</i></div>
+        </div>
+        <div class="zone-foot"><span>shortlist</span><span>hints cost 5 pts</span></div>
+      </article>
+
+      <article class="zone reveal" data-zone="strategy">
+        <div class="zone-head"><img src="assets/img/market-supercar.jpg" alt="A supercar parked outside a rounded hotel at dusk" loading="lazy" width="1200" height="900"><span class="dither"></span><span class="zone-head-t">Strategy</span></div>
+        <div class="zone-body">
+          <p class="note">// the category where the wallet is the puzzle</p>
+          <p>Choose between a safe return and a greedy one. Negotiate with a character who has their own brief. Decide what a piece of information is worth.</p>
+          <div class="job job--hot"><b>Risk or reward?</b><i>5 min</i></div>
+          <div class="job"><b>Cash allocation trial</b><i>6 min</i></div>
+          <div class="job"><b>The negotiation</b><i>8 min</i></div>
+          <div class="job"><b>Buy or skip the intel</b><i>3 min</i></div>
+        </div>
+        <div class="zone-foot"><span>shortlist</span><span>decides championships</span></div>
+      </article>
+    </div>
+
+    <div class="page-grid page-grid--duo" style="margin-top:var(--gut)">
+      <article class="calc reveal" aria-label="Mission score calculator">
+        <h3 class="h-mini h-mini--paper">The scoring sheet</h3>
+        <p class="note">// the same at every station. move the dials, see what a crew actually earns.</p>
+        <div class="calc-row">
+          <div class="calc-field"><label for="scDone">Mission completion <span>max 60</span></label><input id="scDone" type="range" min="0" max="60" step="5" value="60"></div>
+          <output id="scDoneOut" for="scDone">60</output>
+        </div>
+        <div class="calc-row">
+          <div class="calc-field"><label for="scQuality">Accuracy / quality <span>max 25</span></label><input id="scQuality" type="range" min="0" max="25" step="1" value="25"></div>
+          <output id="scQualityOut" for="scQuality">25</output>
+        </div>
+        <div class="calc-row">
+          <div class="calc-field"><label for="scSpeed">Speed bonus <span>max 15</span></label><input id="scSpeed" type="range" min="0" max="15" step="1" value="5"></div>
+          <output id="scSpeedOut" for="scSpeed">5</output>
+        </div>
+        <div class="calc-row">
+          <div class="calc-field"><label for="scBonus">Bonus task <span>+10 if taken</span></label><input id="scBonus" type="range" min="0" max="10" step="10" value="0"></div>
+          <output id="scBonusOut" for="scBonus">0</output>
+        </div>
+        <div class="calc-row">
+          <div class="calc-field"><label for="scHints">Hints used <span>−5 each</span></label><input id="scHints" type="range" min="0" max="4" step="1" value="0"></div>
+          <output id="scHintsOut" for="scHints">0</output>
+        </div>
+        <div class="calc-out">
+          <span class="big-total" id="scTotal">90</span>
+          <p class="calc-verdict"><b id="scVerdict">Crew A finishes the job</b><span id="scTone">Same mission as Crew B — two seconds slower on the relay, ten points quieter on the board.</span></p>
+        </div>
+      </article>
+
+      <div class="stack-sm">
+        <article class="cell cell--text reveal">
+          <h3 class="h-mini">How points actually land</h3>
+          <ul class="point-table">
+            <li><span>Mission completion</span><b>up to 60</b></li>
+            <li><span>Accuracy / quality</span><b>up to 25</b></li>
+            <li><span>Speed bonus</span><b>up to 15</b></li>
+            <li><span>Optional bonus task</span><b>+10</b></li>
+            <li><span>Using a hint</span><b>−5 each</b></li>
+            <li class="pt-total"><span>Best possible mission</span><b>110</b></li>
+          </ul>
+        </article>
+        <article class="cell cell--text cell--dark reveal">
+          <h3 class="h-mini h-mini--paper">Three rules about scoring</h3>
+          <ul class="tick-list">
+            <li>The criteria are <b>published before the event</b> — no station invents a rubric at 13:00.</li>
+            <li>Creative and physical missions are judged against a <b>short pre-decided checklist</b>.</li>
+            <li>Timed missions record the clock. Ties are broken by time, then by missions banked.</li>
+          </ul>
+        </article>
+        <article class="cell cell--text cell--pink reveal">
+          <h3 class="h-mini">Wanted? Your mission pays 20% less</h3>
+          <p>The coordinator checks your status <b>before</b> the mission starts. If you are wanted you can still play — you simply keep 80% of what you earned. Or you walk to Dexter first.</p>
+        </article>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       05 · TARGET LIST
+       ============================================================ -->
+  <section class="chapter" id="wanted" data-page="05">
+    <header class="chapter-head">
+      <span class="chapter-no">File 05</span>
+      <h2 class="chapter-title">THE <em>TARGET LIST</em></h2>
+      <p class="chapter-dek">Nobody gets targeted because a volunteer felt like it. There is one trigger, one verification step and one way out.</p>
+    </header>
+
+    <ol class="flow">
+      <li class="cell reveal">
+        <span class="flow-no">1</span>
+        <h3>A round ends</h3>
+        <p>Scores are locked for the round. The board updates and everybody can see it — including the crews about to have a hard next hour.</p>
+      </li>
+      <li class="cell reveal">
+        <span class="flow-no">2</span>
+        <h3>The top three become targets</h3>
+        <p><b>The current top three crews on the leaderboard become the official police targets for the next round.</b> Control shares their crew IDs and team-leader photos with the officer volunteers. The list can change after every single round.</p>
+      </li>
+      <li class="cell reveal">
+        <span class="flow-no">3</span>
+        <h3>Police find the crew, verify the ID</h3>
+        <p>An officer approaches a <b>listed</b> crew inside an approved event zone, asks them to pause, and checks the crew ID. Off-list crews are left alone unless control authorises it for a specific rule.</p>
+      </li>
+      <li class="cell reveal">
+        <span class="flow-no">4</span>
+        <h3>One photo of the team leader</h3>
+        <p>The officer takes or uploads a clear photo of the <b>team leader</b> through the event website. The site links the photo to that crew ID and shows the wanted poster on the team page and the operator view.</p>
+      </li>
+      <li class="cell reveal">
+        <span class="flow-no">5</span>
+        <h3>Wanted — until you fix it</h3>
+        <p>Verified ID plus photo equals <b>wanted</b>. From that moment every mission you play pays <b>20% less</b>, until you clear it.</p>
+      </li>
+      <li class="cell reveal flow--dexter">
+        <span class="flow-no flow-no--dexter">$</span>
+        <h3>Dexter clears it for $100</h3>
+        <p>Walk to Dexter's desk, pay the <b>100 in-game cash</b> clearance fee, and the status is removed on the site — logged, timed and announced. From the next mission you score full points again.</p>
+      </li>
+    </ol>
+
+    <div class="page-grid page-grid--duo">
+      <article class="calc reveal" aria-label="Pay Dexter or keep playing wanted">
+        <h3 class="h-mini h-mini--paper">Pay Dexter, or eat the 20%?</h3>
+        <p class="note">// this is the real decision of the day. put your numbers in.</p>
+        <div class="calc-row">
+          <div class="calc-field"><label for="wnMissions">Missions you plan to run next</label><input id="wnMissions" type="range" min="1" max="8" step="1" value="4"></div>
+          <output id="wnMissionsOut" for="wnMissions">4</output>
+        </div>
+        <div class="calc-row">
+          <div class="calc-field"><label for="wnPoints">Points you expect per mission</label><input id="wnPoints" type="range" min="20" max="110" step="5" value="80"></div>
+          <output id="wnPointsOut" for="wnPoints">80</output>
+        </div>
+        <div class="calc-row">
+          <div class="calc-field"><label for="wnCash">In-game cash you can spare</label><input id="wnCash" type="range" min="0" max="2000" step="50" value="600"></div>
+          <output id="wnCashOut" for="wnCash">$600</output>
+        </div>
+        <div class="calc-out">
+          <span class="big-total big-total--warn" id="wnLoss">−64</span>
+          <p class="calc-verdict"><b id="wnVerdict">Pay Dexter now</b><span id="wnTone">Playing wanted across 4 missions costs you 64 points. The fee is 100 cash you will earn back by Round 3.</span></p>
+        </div>
+      </article>
+
+      <div class="stack-sm">
+        <article class="cell cell--text reveal">
+          <h3 class="h-mini">Why this is fair</h3>
+          <ul class="tick-list">
+            <li>The trigger is <b>performance, not preference</b> — top three of the board, nothing else.</li>
+            <li>A crew is only wanted after its <b>ID is verified</b>. A photo alone proves nothing.</li>
+            <li>Officers cannot mark crews <b>off the current list</b> without control authorising it.</li>
+            <li>The fee is fixed and published, so clearing status is a plan, not a negotiation.</li>
+            <li>The target list <b>changes every round</b>. Nobody is hunted all day.</li>
+          </ul>
+        </article>
+        <article class="cell cell--text cell--dark reveal">
+          <span class="role-tag">Privacy</span>
+          <h3 class="h-mini h-mini--paper">About that photo</h3>
+          <p>Leader photos exist for one thing: the internal wanted board. Access is restricted to event operators, participants are told this at registration, and <b>every image is deleted after the event</b>.</p>
+          <p class="note">// do not want your photo taken at all? Say so at registration. Your crew is verified by crew ID instead, and nothing about your scoring changes.</p>
+        </article>
+        <article class="cell cell--text cell--amber reveal">
+          <h3 class="h-mini">What police never do</h3>
+          <ul class="tick-list">
+            <li>No chasing, no running at a crew</li>
+            <li>No touching, blocking or surrounding anybody</li>
+            <li>No patrolling outside the approved zones</li>
+            <li>No photos of crews that are not on the list</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       06 · THE BOARD
+       ============================================================ -->
+  <section class="chapter chapter--dark" id="board" data-page="06">
+    <div class="inner">
+    <header class="chapter-head">
+      <span class="chapter-no">File 06</span>
+      <h2 class="chapter-title">THE <em>BOARD</em></h2>
+      <p class="chapter-dek">Live all day on every phone. Three ways to read the same crews — and only one of them decides anything.</p>
+    </header>
+
+    <div class="ledger-shell reveal" id="ledger-sim">
+      <div class="ledger-head">
+        <div>
+          <h3>City Board <span class="note" style="display:block">// demo data · the real board opens at check-in</span></h3>
+        </div>
+        <div class="ledger-controls">
+          <div class="seg" role="tablist" aria-label="Board view">
+            <button class="seg-btn" role="tab" aria-selected="true" data-board="overall">Points</button>
+            <button class="seg-btn" role="tab" aria-selected="false" data-board="targets">Target list</button>
+            <button class="seg-btn" role="tab" aria-selected="false" data-board="clean">Least hints</button>
+          </div>
+          <button class="btn btn--go btn--sm" id="runRound">Run round</button>
+          <button class="btn btn--cop btn--sm" id="raid">Publish targets</button>
+          <button class="btn btn--sm" id="alert">Dexter clears one</button>
+          <button class="btn btn--sm" id="heistBtn">Big Heist · top 5</button>
+        </div>
+      </div>
+
+      <p class="ledger-hint">Swipe sideways on the board →</p>
+      <div class="ledger-table" role="table" aria-label="Simulated city board">
+        <div class="lrow lrow--head" role="row">
+          <span role="columnheader">#</span>
+          <span role="columnheader">Crew</span>
+          <span role="columnheader" style="text-align:right">Points</span>
+          <span role="columnheader" style="text-align:right">Cash</span>
+          <span role="columnheader" style="text-align:right">Missions</span>
+          <span role="columnheader" style="text-align:right">Hints</span>
+          <span role="columnheader">Status</span>
+          <span role="columnheader" style="text-align:right">Δ</span>
+        </div>
+        <div id="ledgerBody" role="rowgroup"></div>
+      </div>
+      <p class="ledger-foot" id="ledgerMsg">Press <b>Run round</b> to push a round through the city, then <b>Publish targets</b> to see who the police get sent to.</p>
+    </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       07 · RUN OF DAY
+       ============================================================ -->
+  <section class="chapter chapter--litho" id="clock" data-page="07">
+    <div class="inner">
+    <header class="chapter-head">
+      <span class="chapter-no">File 07</span>
+      <h2 class="chapter-title chapter-title--litho">THE RUN<br>OF <em>THE DAY</em></h2>
+      <p class="chapter-dek">09:00 to 15:30. Three rounds, a lunch that nobody skips, and a final heist five crews earn.</p>
+    </header>
+
+    <div class="tl-shell">
+    <ol class="timeline" tabindex="0" aria-label="Event timeline, scroll horizontally">
+      <li class="tpanel reveal"><span class="tpanel-date">09:00 – 09:30</span><h3>Registration &amp; crew IDs</h3><p>Crews check in, collect their team ID, opt in or out of the leader photo, and get the board in their pocket.</p></li>
+      <li class="tpanel reveal"><span class="tpanel-date">09:30 – 10:00</span><h3>Opening story &amp; rules</h3><p>The city is explained, the scoring sheet is read out loud, and every question you were about to ask gets answered here.</p></li>
+      <li class="tpanel reveal"><span class="tpanel-date">10:00 – 11:30</span><h3>Mission Round 1 · starters</h3><p>The short, kind missions. Every crew learns the format and puts the first points on the board.</p></li>
+      <li class="tpanel tpanel--alert reveal"><span class="tpanel-date">11:30 – 11:45</span><h3>Scores &amp; first target list</h3><p>Scores update, the top three crews become police targets, and the board resets for Round 2.</p></li>
+      <li class="tpanel reveal"><span class="tpanel-date">11:45 – 12:45</span><h3>Mission Round 2 · the main set</h3><p>The long missions and the strategy stations. First real Dexter traffic: somebody always pays the fee here.</p></li>
+      <li class="tpanel tpanel--lunch reveal"><span class="tpanel-date">12:45 – 13:15</span><h3>Lunch · gameplay paused</h3><p>The board freezes. Crews argue about the maths. Most of them change their plan.</p></li>
+      <li class="tpanel tpanel--alert reveal"><span class="tpanel-date">13:15 – 14:15</span><h3>Mission Round 3 · final round</h3><p>The last regular missions plus the bonus tasks. Every point here is a point with a deadline.</p></li>
+      <li class="tpanel tpanel--gold reveal"><span class="tpanel-date">14:15 – 14:30</span><h3>Top five announced</h3><p>The leaderboard is checked and read out. Five crews qualify for the Big Heist. The rest become the crowd.</p></li>
+      <li class="tpanel tpanel--gold reveal"><span class="tpanel-date">14:30 – 15:00</span><h3>The Big Heist</h3><p>One final challenge, five crews, live scoring. See File 08.</p></li>
+      <li class="tpanel tpanel--seal reveal"><span class="tpanel-date">15:00 – 15:30</span><h3>Final scores, prizes, photos</h3><p>Points verified, bonuses added, penalties checked, winners announced. Dispersal by 15:30 sharp.</p></li>
+    </ol>
+    <div class="tl-rail" aria-hidden="true"><i></i></div>
+  </div>
+  <p class="timeline-hint">drag the strip or use the arrow keys · all times IST</p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       08 · THE BIG HEIST
+       ============================================================ -->
+  <section class="chapter chapter--dark" id="heist" data-page="08">
+    <div class="inner">
+    <header class="chapter-head">
+      <span class="chapter-no">File 08</span>
+      <h2 class="chapter-title">THE <em>BIG HEIST</em></h2>
+      <p class="chapter-dek">14:30. Five crews, one final challenge, bonus points that can move a championship — and cannot rescue one.</p>
+    </header>
+
+    <!-- the case file's 3D prop lives here now: the heist is what it is evidence FOR -->
+    <div class="heist-case">
+      <div class="case-stage" id="case-stage" aria-hidden="true"><canvas id="case-canvas"></canvas></div>
+      <div class="heist-case-txt">
+        <h3 class="h-mini">Exhibit A</h3>
+        <p>Everything the day is played for, in one prop: the case the five finalists walk out with. Drag it,
+          flip it open, read what is stencilled on the lid.</p>
+        <p class="note">// drag the case · click to flip it open</p>
+      </div>
+      <p class="sr-only" id="case-sfx" aria-live="polite"></p>
+    </div>
+
+    <div class="stages">
+      <article class="stage reveal">
+        <h3>Everyone plays to 14:15</h3>
+        <p>No crew is eliminated early. Every registered crew runs the regular mission rounds, and every crew's points count. The heist is a final, not a second chance for the crews who spent the day in the tank.</p>
+        <p class="note">// consistency across three rounds is what qualifies you</p>
+        <div class="art art--wide" style="margin-top:.6rem"><img src="assets/img/districts-montage.jpg" alt="A montage of Leonida districts: coast, city, keys, wetlands" loading="lazy" width="1100" height="440"><span class="dither"></span></div>
+      </article>
+
+      <article class="stage reveal">
+        <h3>Five crews, one challenge</h3>
+        <p>The top five on the board after Round 3 walk into the final challenge together, in front of everyone else. The format is the one thing still being locked by the team — see the open decisions in File 11.</p>
+        <p class="note">// the crowd is part of it: the other crews watch and judge</p>
+        <div class="art art--wide" style="margin-top:.6rem"><img src="assets/img/customs-garage.jpg" alt="A restored coupe on polished wheels under warm light" loading="lazy" width="1200" height="900"><span class="dither"></span></div>
+      </article>
+
+      <article class="stage reveal">
+        <h3>Position pays, in points</h3>
+        <p>Finishing order in the heist adds a fixed bonus to your day: <b>+150, +120, +100</b> for the first three crews to complete, and <b>+75</b> for every other finalist that finishes. Nobody leaves the heist with zero.</p>
+        <p class="note">// completing it at all is worth more than a clever attempt that does not finish</p>
+        <div class="art art--wide" style="margin-top:.6rem"><img src="assets/img/the-keys.jpg" alt="An aerial view of the coastal keys with a small plane" loading="lazy" width="1100" height="618"><span class="dither"></span></div>
+      </article>
+    </div>
+
+    <div class="page-grid page-grid--heist">
+      <article class="formula reveal" aria-label="Final score calculator">
+        <h3 class="h-mini h-mini--paper">How the winner is decided</h3>
+        <p class="note">// published now. it does not change at 15:00.</p>
+        <div class="formula-line">
+          <span class="term term--plus">Mission points</span>
+          <span class="term term--plus">+ Heist bonus</span>
+          <span class="term term--minus">− Penalties</span>
+          <span class="term term--eq">= Final score</span>
+        </div>
+        <div class="calc-row" style="margin-top:1.2rem">
+          <div class="calc-field"><label for="fPoints">Mission points (3 rounds)</label><input id="fPoints" type="number" min="0" step="10" value="1840"></div>
+          <div class="calc-field"><label for="fHeist">Heist bonus</label>
+            <select id="fHeist">
+              <option value="150">1st to complete · +150</option>
+              <option value="120">2nd to complete · +120</option>
+              <option value="100">3rd to complete · +100</option>
+              <option value="75" selected>Finished finalist · +75</option>
+              <option value="0">Did not qualify / did not finish · 0</option>
+            </select>
+          </div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-field"><label for="fPenalty">Penalties</label><input id="fPenalty" type="number" min="0" step="10" value="20"></div>
+          <div class="calc-field"><label for="fRivals">Closest rival's score</label><input id="fRivals" type="number" min="0" step="10" value="1865"></div>
+        </div>
+        <p class="note" style="margin-top:1.2rem">Your final score</p>
+        <p class="formula-result" id="heistScore">1,895</p>
+        <div class="score-bar" aria-hidden="true"><i id="scoreBar" style="width:98.7%"></i></div>
+        <p class="note" id="heistVerdict">Ahead by 30. One hint in the last round would have lost this.</p>
+      </article>
+
+      <div class="stack-sm">
+        <article class="cell cell--text cell--pink reveal">
+          <h3 class="h-mini">The heist bonus table</h3>
+          <ul class="point-table">
+            <li><span>1st crew to complete</span><b>+150</b></li>
+            <li><span>2nd crew to complete</span><b>+120</b></li>
+            <li><span>3rd crew to complete</span><b>+100</b></li>
+            <li><span>Every other finalist that completes</span><b>+75</b></li>
+            <li class="pt-total"><span>Maximum heist swing</span><b>150 pts</b></li>
+          </ul>
+          <p class="note">// 150 points is a lot and a little: roughly one excellent mission, or three careless hints.</p>
+        </article>
+        <article class="cell cell--text cell--dark reveal">
+          <h3 class="h-mini h-mini--paper">Why the maths rewards the whole day</h3>
+          <p>A crew that wins the heist but spent the day at 60% completion will still lose to a crew that banked three clean rounds. The bonus moves a close day; it does not rewrite an average one. <b>That is deliberate.</b></p>
+          <ul class="tick-list">
+            <li>Points from three rounds are the base</li>
+            <li>Heist bonus sits on top, fixed and published</li>
+            <li>Penalties are deducted last, and shown on the audit sheet</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       09 · AWARDS
+       ============================================================ -->
+  <section class="chapter chapter--stripes" id="payoff" data-page="09">
+    <div class="inner">
+    <header class="chapter-head">
+      <span class="chapter-no">File 09</span>
+      <h2 class="chapter-title chapter-title--litho">THE <em>AWARDS</em></h2>
+      <p class="chapter-dek">Final scores are confirmed on stage, not in a group chat. Prize tiers follow the budget conversation — the trophies do not.</p>
+    </header>
+
+    <div class="podium">
+      <article class="prize prize--1 reveal">
+        <div class="art"><img src="assets/img/skyline-sunset.jpg" alt="The city skyline at sunset" loading="lazy" width="1600" height="685"><span class="dither"></span></div>
+        <div class="cell-body">
+          <span class="tag-proposed">Tier · budget pending</span>
+          <span class="role-tag">1st · top of the board</span>
+          <h3>Owners of the City</h3>
+          <ul class="tick-list">
+            <li>Championship trophy and medals for all five names</li>
+            <li>Certificate signed by the organising team</li>
+            <li>The crew name and photo on the GDG board for a term</li>
+            <li>First pick of roles at the next build night</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="prize reveal">
+        <div class="cell-body">
+          <span class="tag-proposed">Tier · budget pending</span>
+          <span class="role-tag">2nd</span>
+          <div class="prize-medal" aria-hidden="true">2</div>
+          <h3>Ran The City Close</h3>
+          <ul class="tick-list"><li>Trophy and medals</li><li>“Finalist — Top 3” certificate, shareable</li><li>Framed final audit sheet for your notice board</li></ul>
+        </div>
+      </article>
+
+      <article class="prize reveal">
+        <div class="cell-body">
+          <span class="tag-proposed">Tier · budget pending</span>
+          <span class="role-tag">3rd</span>
+          <div class="prize-medal" aria-hidden="true">3</div>
+          <h3>Still On The Board</h3>
+          <ul class="tick-list"><li>Trophy and medals</li><li>Feature in the after-film and the recap post</li><li>A seat at the next joint GDG × DGIT session</li></ul>
+        </div>
+      </article>
+    </div>
+
+    <div class="mech" style="margin-top:var(--gut)">
+      <article class="cell cell--text reveal"><span class="role-tag">Category</span><h3 class="h-mini">Best Crew Identity</h3><p>Name, look, banner, the way a crew walks into a station. Judged on commitment, which is the only thing you can bring for free.</p></article>
+      <article class="cell cell--text reveal"><span class="role-tag">Category</span><h3 class="h-mini">Best Wanted Video</h3><p>The creative mission that got out of hand. The best one is cut into the official after-film with your name on it.</p></article>
+      <article class="cell cell--text reveal"><span class="role-tag">Category</span><h3 class="h-mini">Cleanest Run</h3><p>Highest score with the fewest hints taken. The award for crews who read the brief instead of buying the answer.</p></article>
+      <article class="cell cell--text reveal"><span class="role-tag">Category</span><h3 class="h-mini">Deal of the Day</h3><p>The negotiation the control room stopped to read out loud. Strategy crews, this is your podium.</p></article>
+      <article class="cell cell--text cell--amber reveal"><span class="role-tag">Honour</span><h3 class="h-mini">One Line of Dialogue</h3><p>Every crew submits one line. The best is read over the speakers during Round 3 and printed in the recap.</p></article>
+      <article class="cell cell--text cell--dark reveal"><span class="role-tag">Everyone</span><h3 class="h-mini h-mini--paper">The participation file</h3><p>Every crew that finishes gets a certificate and their <b>full score export</b> — missions, points, hints, clearances, final totals. Your day, in a file you keep.</p></article>
+    </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       10 · RULES
+       ============================================================ -->
+  <section class="chapter chapter--litho" id="code" data-page="10">
+    <div class="inner">
+    <figure class="wide-art reveal">
+      <img src="assets/img/skyline-night.jpg" alt="The city at night from above — lit blocks, roads and water" loading="lazy" width="1100" height="471">
+      <figcaption><b>Approved zones only.</b> Buildings, labs, hostels and service roads are not part of the city. If there is no mission marker and no staff member, the game ends there.</figcaption>
+    </figure>
+
+    <header class="chapter-head">
+      <span class="chapter-no">File 10</span>
+      <h2 class="chapter-title chapter-title--litho">THE <em>RULES</em></h2>
+      <p class="chapter-dek">Nine of them. Rule 5 is the one that ends days, and it is not about winning.</p>
+    </header>
+
+    <div class="dossier reveal">
+      <div class="dossier-head">
+        <span class="note" style="margin:0">VICE CITY · EVENT CONTROL · RULE SET VP-11</span>
+        <span class="note" style="margin:0">READ BEFORE YOU REGISTER</span>
+      </div>
+
+      <ol class="laws">
+        <li><b>Crews of 4–5</b>, all with a valid Chitkara ID, using <b>one crew ID</b> for the whole event. A sixth member is not enthusiasm, it is a rules breach.</li>
+        <li><b>Every crew gets the same missions and the same time limits.</b> If a station is running long, control adjusts it for everybody at once, not for one crew.</li>
+        <li><b>Station coordinators' instructions are the station's rules.</b> Score entries can be reviewed by the control team if you dispute them — afterwards, at the desk.</li>
+        <li><b>No sharing answers, sabotaging another crew, tampering with props or disturbing other teams.</b> This is a competition, not a turf war.</li>
+        <li class="law-key"><b>No running, pushing, grabbing, chasing or blocking pathways.</b> <span class="hl">Not at a station, not from the police, not towards a clue.</span> A crew that does this is finished early, not penalised.</li>
+        <li><b>Stay inside the approved event zones</b> and respect regular campus activity. Classes, exams and staff corridors outrank the game.</li>
+        <li><b>Late submissions are not accepted.</b> When a mission's time window closes, it closes — for everyone.</li>
+        <li><b>Control may deduct points or disqualify</b> a crew for cheating, unsafe behaviour or repeated disruption. The decision is announced, not debated.</li>
+        <li><b>Police photos and wanted status are part of the game only.</b> Photos are used on the internal wanted board, restricted to operators and deleted after the event. <b>Any participant may opt out of photo use</b> — their crew is then verified by crew ID and scored exactly the same way.</li>
+      </ol>
+
+      <div class="dossier-foot">
+        <div class="seal-box">
+          <span class="note">// assistance</span>
+          <p>Any crew can stop playing and report a problem to a badge-holder at any moment. Injury, harassment, an unfair station, a phone that died — say so, immediately. The day exists for you, not the other way round.</p>
+          <p class="note" style="margin:0">Final scores are checked at 15:00 and announced by 15:30.</p>
+        </div>
+        <div style="display:flex;gap:14px;align-items:center">
+          <img class="seal-img" src="assets/img/leonida-seal.png" alt="Seal of the State of Leonida" loading="lazy" width="520" height="292">
+          <p class="bc-note">Filed by event control:<br>GDG on Campus, Chitkara<br>DGIT — Gaming Club</p>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       11 · CONTROL
+       ============================================================ -->
+  <section class="chapter" id="control" data-page="11">
+    <header class="chapter-head">
+      <span class="chapter-no">File 11</span>
+      <h2 class="chapter-title">THE CONTROL<br><em>ROOM</em></h2>
+      <p class="chapter-dek">Four interfaces, one database, one master score sheet. The platform exists so that nobody has to argue about a notebook at 15:20.</p>
+    </header>
+
+    <div class="dash">
+      <article class="cell cell--text reveal"><span class="role-tag">Players</span><h3 class="h-mini">Crew view</h3><ul><li>Crew profile, ID and members</li><li>Points, cash and hints used</li><li>Wanted status and poster</li><li>Missions available and banked</li><li>Live leaderboard</li></ul></article>
+      <article class="cell cell--text reveal"><span class="role-tag role-tag--cop">Police</span><h3 class="h-mini">Officer view</h3><ul><li>Current target list (three crew IDs)</li><li>Leader photo capture and upload</li><li>Set wanted status on verified ID</li><li>Nothing else — no scoring, no fees</li></ul></article>
+      <article class="cell cell--text reveal"><span class="role-tag role-tag--broker">Dexter</span><h3 class="h-mini">Dexter view</h3><ul><li>Clear wanted status for $100</li><li>Log every payment with a timestamp</li><li>Issue special and bonus missions</li><li>Read round updates to the floor</li></ul></article>
+      <article class="cell cell--text cell--dark reveal"><span class="role-tag role-tag--gm">Control</span><h3 class="h-mini h-mini--paper">Master sheet</h3><ul><li>One scoring sheet across all stations</li><li>Verify entries, handle disputes</li><li>Publish targets after each round</li><li>Announce qualifiers and final scores</li><li>Pause or end gameplay</li><li>Delete all photos at close</li></ul></article>
+    </div>
+
+    <p class="note reveal" style="margin-top:1rem">// operator views are permission-gated. a coordinator cannot clear a status and an officer cannot edit a score.</p>
+
+    <div class="flow-table reveal" role="table" aria-label="Who does what on the website">
+      <div class="ft-row ft-head" role="row"><span role="columnheader">Who</span><span role="columnheader">Website action</span></div>
+      <div class="ft-row" role="row"><b role="cell">Police volunteer</b><span role="cell">Select the verified crew ID → take or upload the leader photo → submit wanted status.</span></div>
+      <div class="ft-row" role="row"><b role="cell">Website</b><span role="cell">Links the photo to that crew ID and shows the wanted poster on the team page and operator view.</span></div>
+      <div class="ft-row" role="row"><b role="cell">Mission coordinator</b><span role="cell">Checks crew status before the mission starts, and records the 20% deduction if the crew played wanted.</span></div>
+      <div class="ft-row" role="row"><b role="cell">Dexter operator</b><span role="cell">Records the clearance payment → removes wanted status → confirms it on the site.</span></div>
+      <div class="ft-row" role="row"><b role="cell">Event control</b><span role="cell">Publishes the top three as targets at the end of every round, and holds the master score sheet.</span></div>
+    </div>
+
+    <div class="spec reveal" id="spec">
+      <div class="spec-head">
+        <h3 class="spec-title">THE CONTRACT <span class="note" style="margin:0">v0.2 · for the build team</span></h3>
+        <p class="note">Deliberately boring where it counts: points move in one place, every status change is logged, and the board is a view over that log rather than a second copy of the truth.</p>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Platform contract">
+        <div class="tab-row">
+          <button class="tab" role="tab" id="t-crew" aria-controls="p-crew" aria-selected="true">Crew</button>
+          <button class="tab" role="tab" id="t-score" aria-controls="p-score" aria-selected="false">Mission score</button>
+          <button class="tab" role="tab" id="t-target" aria-controls="p-target" aria-selected="false">Targets</button>
+          <button class="tab" role="tab" id="t-clear" aria-controls="p-clear" aria-selected="false">Clearance</button>
+          <button class="tab" role="tab" id="t-board" aria-controls="p-board" aria-selected="false">Board</button>
+          <button class="tab" role="tab" id="t-realtime" aria-controls="p-realtime" aria-selected="false">Realtime</button>
+        </div>
+        <div class="tab-code">
+          <button class="copy-btn" data-copy-target type="button" aria-label="Copy code">Copy</button>
+<pre class="code panel" id="p-crew" role="tabpanel" aria-labelledby="t-crew"><code># one crew, one ID, one wallet
+GET  /api/crews/me                 # Authorization: crew token
+200 {
+  "crew_id": "VP-11-047",
+  "name": "The Neon Undertakers",
+  "members": 5,
+  "leader_id": "m_04",             // photographed if this crew is targeted
+  "photo_optout": false,
+  "points": 1840,
+  "cash": 4250,
+  "hints_used": 2,                 // -5 points each, already applied
+  "wanted": true,                  // set only by an officer on a listed ID
+  "wanted_round": 3,
+  "rank": 1
+}</code></pre>
+<pre class="code panel" id="p-score" role="tabpanel" aria-labelledby="t-score" hidden><code># a coordinator submits a mission score on the published sheet
+POST /api/missions/:id/score
+{ "crew_id": "VP-11-047", "completion": 60, "quality": 25,
+  "speed": 5, "bonus_task": false, "hints": 0,
+  "verifier": "staff_21", "nonce": "n_88f1" }
+
+200 {
+  "raw": 90,
+  "wanted_deduction": 18,          // 20% because status was WANTED
+  "credited": 72,
+  "points": 1912
+}
+
+# enforced on the server, never trusted from the client:
+#  - one score per (crew, mission) — nonce + unique index
+#  - completion <=60, quality <=25, speed <=15, bonus 0|10, hints -5 each
+#  - verifier must hold that station's role
+#  - the 20% deduction is computed from status at start-time, not at submit-time</code></pre>
+<pre class="code panel" id="p-target" role="tabpanel" aria-labelledby="t-target" hidden><code># round closes: the top three crews become the next round's targets
+POST /api/rounds/:n/close
+200 { "locked_at": "2027-02-13T11:30:00+05:30",
+      "targets": ["VP-11-047", "VP-11-012", "VP-11-031"] }
+
+# an officer marks a LISTED crew wanted with the leader's photo
+POST /api/wanted
+{ "crew_id": "VP-11-047", "officer": "pd_07", "photo": "&lt;multipart&gt;" }
+
+201 { "status": "WANTED", "round": 3, "poster": "/p/VP-11-047" }
+
+403 { "error": "not_on_target_list" }
+422 { "error": "photo_optout" }      // verify by crew ID instead, no photo
+
+# guards: list is per round, published, and immutable once posted.
+# photos: operator-only access, deleted by a job at 18:00 the same day.</code></pre>
+<pre class="code panel" id="p-clear" role="tabpanel" aria-labelledby="t-clear" hidden><code># Dexter clears a wanted status for the published fee
+POST /api/wanted/clear
+{ "crew_id": "VP-11-047", "dexter": "dx_01", "method": "cash" }
+
+200 { "status": "CLEAR", "fee": 100, "cash": 4150,
+      "cleared_at": "2027-02-13T12:04:11+05:30" }
+
+# one clearance per crew per round; the ledger row is immutable.
+# the board subscribes to this event — the poster comes down live,
+# on every phone in the city, while the crew is still at the desk.</code></pre>
+<pre class="code panel" id="p-board" role="tabpanel" aria-labelledby="t-board" hidden><code># the board is a VIEW over the score log. it cannot disagree with it.
+GET /api/board?view=points|targets|clean&amp;limit=50
+
+200 [ { "rank": 1, "crew_id": "VP-11-047", "points": 1840,
+        "cash": 4250, "missions": 17, "hints": 2,
+        "wanted": true, "heist_bonus": 0, "status": "LIVE" } ]
+
+# championship order = points + heist_bonus - penalties
+# heist_bonus ∈ {150, 120, 100, 75, 0} and only for the five qualifiers
+# freeze: after 15:00 the view stops accepting writes</code></pre>
+<pre class="code panel" id="p-realtime" role="tabpanel" aria-labelledby="t-realtime" hidden><code># realtime channels
+subscribe  board              # rank + point deltas, throttled to 1s
+subscribe  crew:VP-11-047     # your points, your wallet, your status
+subscribe  targets            # who just became a target (officer role too)
+subscribe  city               # round calls, Dexter queue, heist qualifier list
+
+# the hall screen reads the same channel your phone does.
+# one truth, many screens — that is the whole architecture.</code></pre>
+        </div>
+      </div>
+      <p class="spec-downloads">
+        <a class="btn btn--ghost" href="spec.md" download>Download the platform SPEC</a>
+        <a class="btn btn--ghost btn--cash" href="#intel">Submit a mission idea</a>
+      </p>
+    </div>
+
+    <article class="cell cell--text cell--dark reveal" style="margin-top:var(--gut)">
+      <span class="role-tag">Open decisions</span>
+      <h3 class="h-mini h-mini--paper">Still being decided by the team</h3>
+      <p class="note">// we would rather publish the gaps than pretend they are not there.</p>
+      <ul class="open-list">
+        <li><b>Crew count</b> — final number of crews and participants.</li>
+        <li><b>Mission shortlist</b> — how many missions per category, and which ideas make the cut.</li>
+        <li><b>Station layout</b> — campus locations and the walking map between them.</li>
+        <li><b>Scoring rubric</b> — the final sheet, the clearance fee, and whether the deduction stays at 20%.</li>
+        <li><b>Target count</b> — whether three crews per round is the right number to hand to police.</li>
+        <li><b>The heist itself</b> — concept, props and the prize budget.</li>
+        <li><b>Volunteers</b> — how many, and who owns each responsibility.</li>
+      </ul>
+    </article>
+  </section>
+
+  <!-- ============================================================
+       12 · MISSION LAB + FAQ
+       ============================================================ -->
+  <section class="chapter chapter--stripes" id="intel" data-page="12">
+    <div class="inner">
+    <header class="chapter-head">
+      <span class="chapter-no">File 12</span>
+      <h2 class="chapter-title chapter-title--litho">THE MISSION<br><em>LAB</em></h2>
+      <p class="chapter-dek">The next step of this event is not code, it is ideas. Every team member submits one or two. Fill this in and it formats itself for the group review.</p>
+    </header>
+
+    <div class="page-grid page-grid--duo">
+      <form class="idea-form reveal" id="ideaForm">
+        <div class="if-field">
+          <label for="ifName">Mission name <span>a short, catchy name that fits the theme</span></label>
+          <input id="ifName" name="name" type="text" maxlength="40" placeholder="Pier 4 Ledger Switch" autocomplete="off">
+        </div>
+        <div class="if-field">
+          <label for="ifProblem">Problem statement <span>what exactly must the crew do?</span></label>
+          <textarea id="ifProblem" name="problem" rows="3" placeholder="Reconstruct the access code from four receipts scattered around the station."></textarea>
+        </div>
+        <div class="if-field">
+          <label for="ifCategory">Category</label>
+          <select id="ifCategory" name="category">
+            <option value="Tech &amp; logic">Tech &amp; logic</option>
+            <option value="Physical team games">Physical team games</option>
+            <option value="Creative">Creative</option>
+            <option value="Clue hunt &amp; observation">Clue hunt &amp; observation</option>
+            <option value="Strategy">Strategy</option>
+          </select>
+        </div>
+        <div class="if-row">
+          <div class="if-field">
+            <label for="ifTime">Time required <span>3–8 minutes</span></label>
+            <input id="ifTime" name="time" type="range" min="3" max="8" step="1" value="5">
+            <output id="ifTimeOut" for="ifTime">5 min</output>
+          </div>
+        </div>
+        <div class="if-field">
+          <label for="ifMaterials">Materials needed <span>props, printouts, laptop, phone, speaker</span></label>
+          <input id="ifMaterials" name="materials" type="text" maxlength="120" placeholder="4 printed receipts, 1 envelope, marker, table" autocomplete="off">
+        </div>
+        <div class="if-field">
+          <label for="ifWin">How to win <span>what counts as success, and how it is judged?</span></label>
+          <textarea id="ifWin" name="win" rows="2" placeholder="Correct code in the envelope. Speed bonus under 4 min; −5 per hint."></textarea>
+        </div>
+        <div class="if-actions">
+          <button class="btn btn--go btn--sm" type="submit">Build the card</button>
+          <button class="btn btn--ghost btn--sm" type="button" id="ifCopy">Copy as text</button>
+        </div>
+        <p class="if-msg" id="ifMsg" role="status" aria-live="polite">Nothing leaves this page — it formats a card you paste into the group review.</p>
+      </form>
+
+      <div class="idea-preview reveal">
+        <article class="idea-card" id="ideaCard">
+          <span class="ic-tag">Mission idea · VP-11</span>
+          <h3 class="ic-name" id="icName">Pier 4 Ledger Switch</h3>
+          <p class="ic-problem" id="icProblem">Reconstruct the access code from four receipts scattered around the station.</p>
+          <ul class="ic-spec">
+            <li><span>Category</span><b id="icCategory">Tech &amp; logic</b></li>
+            <li><span>Time</span><b id="icTime">5 min</b></li>
+            <li><span>Materials</span><b id="icMaterials">4 printed receipts, 1 envelope, marker, table</b></li>
+            <li><span>How to win</span><b id="icWin">Correct code in the envelope. Speed bonus under 4 min; −5 per hint.</b></li>
+          </ul>
+          <p class="ic-note" id="icNote">// short, cheap, safe, testable in ten minutes. that is the bar.</p>
+        </article>
+
+        <article class="cell cell--text reveal">
+          <h3 class="h-mini">What gets a mission cut</h3>
+          <ul class="tick-list">
+            <li>Needs <b>complicated software</b> or a special account nobody has</li>
+            <li>Needs <b>expensive equipment</b> or props that cost more than the prize</li>
+            <li>Needs <b>specialist knowledge</b> only one branch of students has</li>
+            <li>Involves <b>unsafe physical activity</b>, running, or anything height-related</li>
+            <li>Cannot be explained in ninety seconds and scored in thirty</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+
+    <header class="chapter-head" style="margin-top:clamp(28px,4vw,54px)">
+      <h2 class="chapter-title chapter-title--litho">QUESTIONS<br>THE <em>CITY</em> ASKS</h2>
+      <p class="chapter-dek">The questions the organisers have already answered three times in the group chat.</p>
+    </header>
+
+    <div class="page-grid page-grid--auto">
+      <details class="faq cell reveal"><summary>Do I need a gaming rig, a console or GTA VI?</summary><p>No. Nobody plays the game on a screen. This is a real-world challenge across campus with a web platform keeping score. A charged phone and comfortable shoes are the equipment list.</p></details>
+      <details class="faq cell reveal"><summary>Do I have to be a coder?</summary><p>No. Tech &amp; logic is one of five categories. Physical, creative, clue hunt and strategy reward communication, memory, nerve and judgement. Build a crew that covers all five.</p></details>
+      <details class="faq cell reveal"><summary>Is the score cash or points?</summary><p><b>Points.</b> Completion up to 60, accuracy up to 25, speed up to 15, an optional bonus task for +10, and −5 for every hint. In-game cash is a separate resource you spend — mostly on Dexter.</p></details>
+      <details class="faq cell reveal"><summary>Why would I want to be top of the board?</summary><p>Because the top three crews become the police targets for the next round. Being first is worth points and costs you freedom, which is the entire tension of the day.</p></details>
+      <details class="faq cell reveal"><summary>What exactly happens when I'm wanted?</summary><p>An officer verifies your crew ID against the current target list, photographs your team leader, and the site marks you WANTED. Every mission you then play pays <b>80%</b> of what you earned, until Dexter clears the status for <b>$100</b> in-game.</p></details>
+      <details class="faq cell reveal"><summary>Can I refuse to be photographed?</summary><p>Yes — say so at registration. Your crew is verified by crew ID instead, your scoring is identical, and no photo is taken or stored. <b>This is rule 9, not a favour.</b></p></details>
+      <details class="faq cell reveal"><summary>Are the police allowed to touch or chase us?</summary><p>Never. No chasing, grabbing, blocking or running at a crew, and officers stay inside the approved zones. If an officer breaks that, report it to control immediately; the crew is not at fault.</p></details>
+      <details class="faq cell reveal"><summary>Can we team up with another crew?</summary><p>Inside a mission that says so. Otherwise you are five people against a clock, and another crew's answers are their answers.</p></details>
+      <details class="faq cell reveal"><summary>How many crews get into the Big Heist?</summary><p>Five — the top five on the board after Round 3, announced at 14:15. Nobody is eliminated before that: every crew plays all three rounds and every point counts.</p></details>
+      <details class="faq cell reveal"><summary>My phone died. Am I out?</summary><p>No. Report to any station or checkpoint: your crew is verified against your ID and control's copy of your crew ID. Keep a screenshot of your crew ID for exactly this reason.</p></details>
+      <details class="faq cell reveal"><summary>Is any of this money real?</summary><p>None of it. Cash, fees and the opening wallet are fictional numbers inside the platform. Nothing can be exchanged for money, food or marks, and if somebody offers that, tell control.</p></details>
+      <details class="faq cell reveal"><summary>What if it rains, or a zone gets unsafe?</summary><p>Control can pause the day, move stations indoors or end gameplay. It goes out on the board and the speakers at the same moment, and it is not negotiable.</p></details>
+      <article class="cell reveal"><div class="art"><img src="assets/img/face-lucia.jpg" alt="A crew member outside a motel at dusk" loading="lazy" width="760" height="1013"><span class="dither"></span></div><div class="cell-body"><span class="role-tag">Still deciding?</span><h3 class="h-mini">One day. One campus. One story nobody retells the same way.</h3><p>No lab, no rig, no portfolio required. A name, four friends and six and a half hours. <a href="#assemble">Register the crew →</a></p></div></article>
+    </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ASSEMBLE
+       ============================================================ -->
+  <section class="assemble" id="assemble">
+    <div class="assemble-art" aria-hidden="true">
+      <img src="assets/img/radio-mural.jpg" alt="" loading="lazy" width="1493" height="640">
+      <span class="dither"></span>
+    </div>
+    <div class="assemble-inner">
+      <div class="assemble-card">
+        <span class="role-tag role-tag--broker">Last page</span>
+        <h2 class="assemble-title">PICK<br>A CREW NAME</h2>
+        <p class="assemble-body">Registration closes when the city opens — <b data-event-date>Saturday 13 February 2027</b>, 09:00 IST. Crews of 4–5, one crew ID, the mission board in your pocket from the moment you are checked in.</p>
+        <div class="assemble-cta">
+          <a class="btn btn--xl btn--go" href="https://gdg.community.dev/gdg-on-campus-chitkara-university-chandigarh-india/" data-link="register">Register your crew</a>
+          <a class="btn btn--xl btn--ghost" href="https://gdg.community.dev/gdg-on-campus-chitkara-university-chandigarh-india/" data-link="discord">Join the city Discord</a>
+        </div>
+        <ul class="assemble-check">
+          <li>crew name + 4–5 members</li><li>valid Chitkara IDs</li><li>team leader named for the poster</li><li>photo opt-out if you want it</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============================================================
+     BACK COVER
+     ============================================================ -->
+<footer class="backcover">
+  <div class="bc-inner">
+    <h3 class="posters-title">CURRENT TARGET LIST · ROUND 3</h3>
+    <ul class="posters">
+      <li class="poster reveal" style="--r:-1.4deg"><img src="assets/img/face-lucia.jpg" alt="Wanted poster crew portrait" loading="lazy" width="760" height="1013"><span class="poster-head">VICE CITY · ROUND 3 TARGET</span><span class="poster-name">The Neon Undertakers</span><span class="poster-row"><span>Points</span><b>1,840</b></span><span class="poster-row"><span>Clearance</span><b>$100</b></span></li>
+      <li class="poster reveal" style="--r:1.1deg"><img src="assets/img/face-jason.jpg" alt="Wanted poster crew portrait" loading="lazy" width="760" height="1013"><span class="poster-head">VICE CITY · ROUND 3 TARGET</span><span class="poster-name">Sunset Syndicate</span><span class="poster-row"><span>Points</span><b>1,795</b></span><span class="poster-row"><span>Clearance</span><b>$100</b></span></li>
+      <li class="poster reveal" style="--r:-0.7deg"><img src="assets/img/crew-table.jpg" alt="Wanted poster crew portrait" loading="lazy" width="760" height="950"><span class="poster-head">VICE CITY · ROUND 3 TARGET</span><span class="poster-name">Picasso Block Boys</span><span class="poster-row"><span>Points</span><b>1,780</b></span><span class="poster-row"><span>Clearance</span><b>$100</b></span></li>
+      <li class="poster poster--clear reveal" style="--r:1.6deg"><img src="assets/img/hustle-gym.jpg" alt="Crew portrait, status cleared" loading="lazy" width="495" height="619"><span class="poster-head">CLEARED BY DEXTER · 12:04</span><span class="poster-name">Salt &amp; Static</span><span class="poster-row"><span>Points</span><b>1,610</b></span><span class="poster-row"><span>Status</span><b>Playing full rate</b></span></li>
+      <li class="poster poster--bust reveal" style="--r:-1.9deg"><img src="assets/img/in-custody.jpg" alt="Two crew members walked in after the round 2 bust" loading="lazy" width="495" height="619"><span class="poster-head">CAUGHT IN ROUND 2 · NEVER CLEARED</span><span class="poster-name">Aqua Vitamins</span><span class="poster-row"><span>Points</span><b>1,232</b></span><span class="poster-row"><span>Heist seat</span><b>lost to the cut</b></span></li>
+      <li class="poster poster--qual reveal" style="--r:0.9deg"><img src="assets/img/bike-bar.jpg" alt="Crew portrait, heist qualifier" loading="lazy" width="495" height="619"><span class="poster-head">HEIST QUALIFIER · TOP 5</span><span class="poster-name">The Nightshift</span><span class="poster-row"><span>Points</span><b>1,505</b></span><span class="poster-row"><span>Heist bonus</span><b>up to +150</b></span></li>
+    </ul>
+
+    <ul class="rack">
+      <li><span class="rack-tag">All day · on every phone</span><p><b>The board is online, not projected.</b> Crews watch points, cash and the target list from the queue, the lawn and the lab. Round calls go out on the same channel.</p></li>
+      <li><span class="rack-tag rack-tag--gold">15:00 · the check</span><p><b>Then the stage.</b> Points are verified against the master sheet, heist bonuses are added, penalties are read out, and the top five are confirmed before a single trophy is handed over.</p></li>
+    </ul>
+
+    <div class="bc-grid">
+      <div class="bc-col">
+        <h3 class="bc-logo">VICE<span>CITY</span></h3>
+        <p class="bc-blurb">A GTA-inspired campus challenge: three mission rounds, a police target list, Dexter's clearance desk and one Big Heist for the top five. Designed, built and refereed by students.</p>
+        <img class="bc-gdg" src="assets/img/gdg-logo.svg" alt="Google Developers Group" loading="lazy" width="600" height="140">
+        <p class="bc-note">with <b>DGIT — Gaming Club</b>, Chitkara University</p>
+      </div>
+      <div class="bc-col">
+        <h4>The hosts</h4>
+        <p>Google Developers Group on Campus<br>Chitkara University · Punjab, India</p>
+        <ul class="bc-links">
+          <li><a href="https://gdg.community.dev/gdg-on-campus-chitkara-university-chandigarh-india/">gdg.community.dev</a></li>
+          <li><a href="https://github.com/GDG-On-Campus-Chitkara">github.com/GDG-On-Campus-Chitkara</a></li>
+          <li><a href="https://instagram.com/gdsc_ciet">@gdsc_ciet</a></li>
+          <li><a href="mailto:cse.dsc@chitkara.edu.in">cse.dsc@chitkara.edu.in</a></li>
+        </ul>
+      </div>
+      <div class="bc-col">
+        <h4>Key times (IST)</h4>
+        <ul class="bc-dates">
+          <li><span>Crew registration closes</span><b data-event-date>Sat 13 Feb 2027</b></li>
+          <li><span>Registration &amp; briefing</span><b>09:00</b></li>
+          <li><span>First target list</span><b>11:30</b></li>
+          <li><span>Top five announced</span><b>14:15</b></li>
+          <li><span>The Big Heist</span><b>14:30 – 15:00</b></li>
+          <li><span>Final scores &amp; awards</span><b>15:00 – 15:30</b></li>
+        </ul>
+      </div>
+      <div class="bc-col">
+        <div class="bc-campus"><img src="assets/img/campus.jpg" alt="The Chitkara University campus" loading="lazy" width="1100" height="733"><span class="dither dither--ink"></span></div>
+        <p class="bc-note">The map is the campus.<br>Picasso Block is the precinct.</p>
+        <a class="btn btn--ghost btn--sm" href="#top">Back to the top of the city</a>
+      </div>
+    </div>
+
+    <div class="bc-fine">
+      <span>© <span data-event-year>2027</span> GDG on Campus, Chitkara University, with DGIT Gaming Club. A student event site made in the spirit of a fictional crime-city theme. Not affiliated with, endorsed by, or representing Google LLC, Rockstar Games or Take-Two Interactive. All in-game currency is fictional; all photos are deleted at close. Artwork from official Grand Theft Auto VI promotion is used here as commentary on that theme.</span>
+      <span>Built by students · two communities · one city</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/vendor/three.min.js"></script>
+<script src="assets/js/scene3d.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

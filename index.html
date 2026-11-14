@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vice City: The Campus Takeover — two designs</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' rx='9' fill='%230a0411'/><rect x='4' y='4' width='15' height='15' rx='4' fill='%23ff2a6d'/><rect x='21' y='4' width='15' height='15' rx='4' fill='%2322d9f5'/><rect x='4' y='21' width='15' height='15' rx='4' fill='%23ffb02e'/><rect x='21' y='21' width='15' height='15' rx='4' fill='%2316c98d'/></svg>">
+<meta name="description" content="Two self-contained event sites for VICE CITY: THE CAMPUS TAKEOVER — Concept A Neon Vice and Concept B Neon Material. GDG on Campus Chitkara × DGIT Gaming Club.">
+<style>
+  :root{
+    --ink:#12061f;--bone:#fdf6ea;--pink:#ff2a6d;--cyan:#22d9f5;--amber:#ffb02e;--money:#16c98d;
+    --g-blue:#1a73e8;--g-red:#ea4335;--g-yellow:#fbbc04;--g-green:#34a853;
+    --sans:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"Cascadia Mono",Consolas,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:#0a0411;color:var(--bone);font-family:var(--sans);line-height:1.6;
+    background-image:radial-gradient(120% 80% at 12% -10%,#3a0f4e 0%,transparent 60%),
+                     radial-gradient(100% 70% at 92% 0%,#0b3b58 0%,transparent 55%),
+                     linear-gradient(180deg,#0a0411,#0d0718 60%,#0a0411)}
+  a{color:inherit}
+  .wrap{max-width:1180px;margin-inline:auto;padding-inline:clamp(16px,4vw,40px)}
+  header{padding-block:clamp(34px,7vw,84px) clamp(20px,3vw,34px)}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--cyan);margin:0 0 .9rem}
+  h1{margin:0;font-size:clamp(40px,9.2vw,104px);line-height:.88;letter-spacing:-.02em;font-weight:900;text-transform:uppercase}
+  h1 .a{color:var(--bone)}h1 .b{color:var(--pink)}
+  .sub{margin:1.1rem 0 0;font-size:clamp(15px,1.7vw,20px);max-width:62ch;color:#d9cfe8}
+  .sub b{color:var(--amber)}
+  .facts{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:1.6rem;font-family:var(--mono);font-size:12px;
+    letter-spacing:.12em;text-transform:uppercase;color:#b9a9cd}
+  .facts span::before{content:"◆ ";color:var(--pink)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:clamp(16px,2.4vw,28px);
+    padding-bottom:clamp(30px,6vw,64px)}
+  .card{position:relative;display:flex;flex-direction:column;overflow:hidden;text-decoration:none;
+    border:1px solid rgba(253,246,234,.16);border-radius:14px;background:#120a1f;
+    transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .35s}
+  .card:hover,.card:focus-visible{transform:translateY(-6px)}
+  .card--a:hover{border-color:var(--pink);box-shadow:0 26px 70px -26px rgba(255,42,109,.55)}
+  .card--b:hover{border-color:var(--g-blue);box-shadow:0 26px 70px -26px rgba(26,115,232,.5)}
+  .shot{aspect-ratio:16/9;overflow:hidden;position:relative}
+  .shot img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+  .card:hover .shot img{transform:scale(1.05)}
+  .shot::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,#120a1f 98%)}
+  .tag{position:absolute;z-index:2;top:12px;left:12px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+    text-transform:uppercase;padding:6px 10px;border-radius:999px;background:#0a0411cc;border:1px solid rgba(253,246,234,.22)}
+  .body{padding:clamp(16px,2.4vw,26px);display:flex;flex-direction:column;gap:.7rem;flex:1}
+  .name{margin:0;font-size:clamp(23px,3vw,34px);line-height:1;letter-spacing:-.01em;text-transform:uppercase;font-weight:900}
+  .card--a .name{font-family:var(--mono);letter-spacing:.02em}
+  .card--a .name em{font-style:normal;color:var(--pink)}
+  .card--b .name{font-family:var(--sans);font-weight:700;letter-spacing:-.02em}
+  .card--b .name em{font-style:normal;color:var(--g-blue)}
+  .blurb{margin:0;color:#c9bcdc;font-size:15px}
+  .list{margin:.3rem 0 0;padding:0;list-style:none;display:grid;gap:.42rem;font-size:13.5px;color:#b6a7cb}
+  .list li::before{content:"— ";color:var(--cyan)}
+  .card--b .list li::before{color:var(--g-green)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:.9rem}
+  .chip{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+    padding:5px 9px;border-radius:999px;border:1px solid rgba(253,246,234,.2);color:#d8cbe8}
+  .card--b .chip{border-radius:6px}
+  .go{margin-top:.9rem;font-weight:700;font-size:14px;letter-spacing:.04em;text-transform:uppercase}
+  .card--a .go{color:var(--pink)}.card--b .go{color:#8ab4f8}
+  section.band{border-top:1px solid rgba(253,246,234,.14);padding-block:clamp(28px,5vw,54px)}
+  h2{margin:0 0 1.1rem;font-size:clamp(20px,3vw,30px);text-transform:uppercase;letter-spacing:-.01em}
+  .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:clamp(14px,2vw,26px)}
+  .note{border:1px solid rgba(253,246,234,.14);border-radius:12px;padding:clamp(14px,2vw,22px);background:#100819}
+  .note h3{margin:0 0 .5rem;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);font-family:var(--mono)}
+  .note p{margin:0 0 .6rem;font-size:14.5px;color:#c6b8d6}
+  code{font-family:var(--mono);font-size:12.5px;background:#1d1230;padding:2px 5px;border-radius:4px;color:#e8dcff}
+  pre{margin:0;padding:14px;background:#07030d;border:1px solid rgba(253,246,234,.14);border-radius:8px;overflow-x:auto}
+  pre code{background:none;padding:0;color:#a8f0c8;font-size:12.5px}
+  footer{border-top:1px solid rgba(253,246,234,.14);padding-block:26px 46px;font-size:13px;color:#9c8db0}
+  footer p{margin:.3rem 0}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}.card:hover .shot img{transform:none}}
+</style>
+</head>
+<body>
+<header class="wrap">
+  <p class="kicker">GDG on Campus, Chitkara University × DGIT Gaming Club · Case VP-11</p>
+  <h1><span class="a">VICE</span> <span class="b">CITY</span><br>The Campus Takeover</h1>
+  <p class="sub">One brief, one day, two complete sites. <b>Six and a half hours</b> of live campus challenge —
+    three mission rounds, a police target list, one broker called Dexter and a Big Heist for the top five —
+    documented for players and for the team building the platform. Pick the direction; both are finished,
+    offline-capable and editable. <b>Points win the day; cash is only a tool.</b></p>
+  <div class="facts">
+    <span>Sat 13 Feb 2027 · 09:00–15:30 IST</span><span>Chitkara University, Punjab</span>
+    <span>Crews of 4–5 · one entry per team</span><span>5 mission categories · 3 rounds</span>
+    <span>Top 3 listed · top 5 reach the heist</span><span>No CDN · no build step</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="grid">
+    <a class="card card--a" href="concept-a-neon-litho/index.html">
+      <div class="shot"><span class="tag">Concept A</span>
+        <img src="concept-a-neon-litho/assets/img/cover-walk.jpg" alt="Concept A cover art: two figures on a Vice City street, night duotone" loading="lazy" width="1200" height="675">
+      </div>
+      <div class="body">
+        <h2 class="name">NEON <em>VICE</em></h2>
+        <p class="blurb">A crime chronicle printed on a hot night press: comic-cover front and back, chaptered
+          story, neon hairlines on dark glass, CRT scanlines and film grain. No paper, no cream — a city at 2 a.m.
+          Loud on purpose.</p>
+        <ul class="list">
+          <li>12 chapters + printed cover &amp; back cover with wanted posters</li>
+          <li>3D evidence case in three.js — drag to rotate, click to flip</li>
+          <li>Corner HUD: points, cash, wanted stars, round — parks itself over the footer</li>
+          <li>Scoring sheet, Dexter trade-off and final-score calculators</li>
+          <li>City board simulator (3 views, FLIP reordering) + RESPECT-style toasts</li>
+          <li>Anton / Bungee / Monoton / Chakra Petch / Archivo</li>
+        </ul>
+        <div class="chips"><span class="chip">print stylesheet</span><span class="chip">WebGL + fallback</span><span class="chip">reduced-motion</span></div>
+        <p class="go">Open Concept A →</p>
+      </div>
+    </a>
+
+    <a class="card card--b" href="concept-b-material-vice/index.html">
+      <div class="shot"><span class="tag">Concept B</span>
+        <img src="concept-b-material-vice/assets/img/cover-walk.jpg" alt="Concept B cover art: the same street scene graded bright and clean" loading="lazy" width="1200" height="675">
+      </div>
+      <div class="body">
+        <h2 class="name">NEON <em>MATERIAL</em></h2>
+        <p class="blurb">Google's own Material 3 surface — colour roles, tonal containers, elevation, state
+          layers, shape scale — lit like a Vice City night: neon gradients, scanlines, wanted stars and a HUD
+          chip in the app bar. Legible, projector-proof, still unmistakably GTA.</p>
+        <ul class="list">
+          <li>16 sections, app bar with four-colour progress rail, drawer nav</li>
+          <li>Full M3 kit: segmented buttons, chips, expansion panels, snackbar, FAB, data table</li>
+          <li>Search that indexes the rules and falls back to the page text</li>
+          <li>Dispatch reel — five moments, segment scrubber, autoplay you can pause</li>
+          <li>Same four calculators and the board simulator, in Material parts</li>
+          <li>Roboto / Roboto Condensed / Roboto Mono · night default, “Leonida morning” light</li>
+        </ul>
+        <div class="chips"><span class="chip">full-text search</span><span class="chip">theme persistence</span><span class="chip">FAB + snackbar</span></div>
+        <p class="go">Open Concept B →</p>
+      </div>
+    </a>
+  </div>
+
+  <section class="band" id="shared">
+    <h2>What both builds already do</h2>
+    <div class="two">
+      <div class="note"><h3>Same content, same rules</h3>
+        <p>Full brief coverage: overview, crews and crew ID, staff roles, five mission categories with sample
+          missions, the points sheet, the target list and Dexter's desk, the board, run of day, the Big Heist,
+          prizes, platform internals, control room, mission-idea lab, FAQ, registration.</p>
+        <p>Neither build invents mechanics: <b>60 + 25 + 15 + 10 − 5×hints</b> per mission, top 3 crews listed
+          each round, <b>−20 %</b> while wanted, <b>100</b> cash to clear with Dexter, top 5 reach the heist,
+          <b>+150 / +120 / +100 / +75</b> by finish position.</p></div>
+      <div class="note"><h3>Live, interactive, offline</h3>
+        <p>Scoring-sheet calculator, pay-Dexter-or-eat-the-20 % calculator, final-score calculator, category
+          filter, idea-lab card builder with copy, SPEC tabs with copy buttons, a countdown to first light, and a
+          city board you can push through three rounds, a target list, a clearance and the Big Heist.</p>
+        <p>Fonts, icons and imagery are all local (three.js only in Concept A). Unplug the network; the page still works.</p></div>
+      <div class="note"><h3>Built for the day of</h3>
+        <p>No page-level horizontal overflow at 390 / 768 / 1440 px, keyboard access and skip links,
+          <code>aria-live</code> on async regions, reduced-motion respected, print stylesheet in both.</p>
+        <p>Zero console errors, zero broken references, verified in Chromium.</p></div>
+      <div class="note"><h3>Hand-off</h3>
+        <p><a href="spec.md"><code>spec.md</code></a> v2.0 is the endpoint contract the platform implements:
+          crew + QR, mission attempts with speed derived server-side, target-list publication, wanted rules with
+          photo opt-out, Dexter's clearance ledger, heist qualification and bonuses, board views, realtime
+          envelope, penalties, tie-breaks and the audit.</p>
+        <p>Swap the demo board for <code>GET /api/board</code> and the page is live.</p></div>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Run locally</h2>
+    <pre><code>cd vice-city
+python -m http.server 8123
+# http://localhost:8123/concept-a-neon-litho/
+# http://localhost:8123/concept-b-material-vice/</code></pre>
+    <p style="margin-top:1rem;color:#c6b8d6;font-size:14.5px">Every path is relative, so either folder can be
+      dropped on any static host — or a USB stick — without changing a line. Every event number lives in one
+      place: the <code>CONFIG</code> object at the top of each build's <code>assets/js/main.js</code>
+      (<code>eventDate</code>, <code>dexterFee</code>, <code>wantedCut</code>, <code>heistBonus</code>,
+      <code>hintCost</code>, <code>links</code>).</p>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p><b>Vice City: The Campus Takeover</b> — a fiction-grade event with real-world rules. Organised by GDG on
+    Campus, Chitkara University with DGIT Gaming Club (SDGPST).</p>
+  <p>Theme and franchise characters are the property of their rights holders. Scene stills are official
+    promotional material, re-graded here for an editorial fan event page; sources and licences are listed in
+    <code>_source/provenance.tsv</code>. Nothing on these pages is an affiliation with or endorsement by Rockstar Games.</p>
+</footer>
+</body>
+</html>
