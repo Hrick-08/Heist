@@ -1,0 +1,1046 @@
+import "server-only";
+
+import { ObjectId } from "mongodb";
+
+import {
+  adminsCol,
+  missionsCol,
+  stateCol,
+  tasksCol,
+  teamTasksCol,
+  teamsCol,
+  type AdminUser,
+} from "./collections";
+import { hashPassword } from "./auth";
+import type {
+  DexterMission,
+  EventState,
+  LeaderboardRow,
+  Member,
+  MissionRow,
+  Task,
+  TaskRow,
+  TaskType,
+  Team,
+  TeamRow,
+  TeamStatus,
+  TeamTask,
+} from "./types";
+
+export type TeamTaskView = TeamTask & { task: Task };
+
+export const DEFAULT_STATE: Omit<EventState, "_id" | "updatedAt"> = {
+  currentRound: 1,
+  totalRounds: 4,
+  maxTeams: 40,
+  physicalPerRound: 3,
+  technicalPerRound: 1,
+  hintCostMultiplier: 1,
+  wantedRemovalCost: 2500,
+  endgameCost: 5000,
+  eventLive: true,
+  eventEnded: false,
+  championTeamId: null,
+};
+
+/* ------------------------------------------------------------------ */
+/* Event state                                                         */
+/* ------------------------------------------------------------------ */
+
+/** Stable fallback so a missing state document never destabilises a render. */
+const FALLBACK_UPDATED_AT = new Date("2024-01-01T00:00:00.000Z");
+
+export async function getEventState(): Promise<EventState> {
+  const col = await stateCol();
+  const existing = await col.findOne({ _id: "state" });
+  if (existing) return existing;
+  return {
+    _id: "state",
+    ...DEFAULT_STATE,
+    updatedAt: FALLBACK_UPDATED_AT,
+  };
+}
+
+export async function updateEventState(
+  patch: Partial<Omit<EventState, "_id">>,
+): Promise<EventState> {
+  const col = await stateCol();
+  await col.updateOne(
+    { _id: "state" },
+    { $set: { ...patch, updatedAt: new Date() } },
+    { upsert: true },
+  );
+  return getEventState();
+}
+
+/* ------------------------------------------------------------------ */
+/* Teams                                                               */
+/* ------------------------------------------------------------------ */
+
+export async function getTeam(teamId: string): Promise<Team | null> {
+  const col = await teamsCol();
+  return col.findOne({ teamId });
+}
+
+export async function listTeams(): Promise<Team[]> {
+  const col = await teamsCol();
+  return col.find({}).sort({ createdAt: 1 }).toArray();
+}
+
+export async function listSelectedTeams(): Promise<Team[]> {
+  const col = await teamsCol();
+  return col
+    .find({ status: { $in: ["selected", "champion"] } })
+    .sort({ createdAt: 1 })
+    .toArray();
+}
+
+export async function countTeams(): Promise<number> {
+  const col = await teamsCol();
+  return col.countDocuments();
+}
+
+export async function nextTeamId(): Promise<string> {
+  const col = await teamsCol();
+  const last = await col
+    .find({}, { projection: { teamId: 1 } })
+    .sort({ teamId: -1 })
+    .limit(1)
+    .toArray();
+  const highest = last.reduce((max, doc) => {
+    const num = Number(doc.teamId.split("-")[1] ?? "0");
+    return Number.isFinite(num) && num > max ? num : max;
+  }, 0);
+  return `TLH-${String(highest + 1).padStart(2, "0")}`;
+}
+
+export interface RegisterTeamInput {
+  name: string;
+  email: string;
+  password: string;
+  leader: Member & { photo: string };
+  members: Member[];
+}
+
+export async function registerTeam(
+  input: RegisterTeamInput,
+): Promise<{ team: Team; created: boolean }> {
+  const col = await teamsCol();
+  const state = await getEventState();
+  const teamId = await nextTeamId();
+  const existing = await col.findOne({ email: input.email.toLowerCase() });
+  if (existing) {
+    return { team: existing, created: false };
+  }
+  const selectedCount = await col.countDocuments({ status: "selected" });
+  const status: TeamStatus =
+    selectedCount < state.maxTeams ? "selected" : "waitlisted";
+  const now = new Date();
+  const team: Team = {
+    teamId,
+    name: input.name,
+    email: input.email.toLowerCase(),
+    passwordHash: await hashPassword(input.password),
+    leader: input.leader,
+    members: input.members,
+    status,
+    points: 0,
+    money: 0,
+    wanted: false,
+    wantedAt: null,
+    round: state.currentRound,
+    eliminatedInRound: null,
+    finalPoints: null,
+    hintsUsed: 0,
+    endgameUnlocked: false,
+    dexterCompleted: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+  await col.insertOne(team);
+  if (status === "selected") {
+    // Late arrivals still get this round's board.
+    await assignRoundTasks(state.currentRound, [teamId]);
+  }
+  return { team, created: true };
+}
+
+export async function updateTeam(
+  teamId: string,
+  patch: Partial<Team>,
+): Promise<void> {
+  const col = await teamsCol();
+  await col.updateOne(
+    { teamId },
+    { $set: { ...patch, updatedAt: new Date() } },
+  );
+}
+
+export async function adjustTeamScore(
+  teamId: string,
+  deltaPoints: number,
+  deltaMoney: number,
+): Promise<void> {
+  const col = await teamsCol();
+  await col.updateOne(
+    { teamId },
+    {
+      $inc: { points: deltaPoints, money: deltaMoney },
+      $set: { updatedAt: new Date() },
+    },
+  );
+}
+
+export async function setTeamStatus(
+  teamId: string,
+  status: TeamStatus,
+): Promise<void> {
+  const col = await teamsCol();
+  await col.updateOne(
+    { teamId },
+    { $set: { status, updatedAt: new Date() } },
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Task pool                                                           */
+/* ------------------------------------------------------------------ */
+
+export async function listTasks(): Promise<Task[]> {
+  const col = await tasksCol();
+  return col.find({}).sort({ round: 1, type: 1, createdAt: 1 }).toArray();
+}
+
+export async function getTask(id: string): Promise<Task | null> {
+  const col = await tasksCol();
+  if (!ObjectId.isValid(id)) return null;
+  return col.findOne({ _id: new ObjectId(id) });
+}
+
+export interface TaskInput {
+  title: string;
+  description: string;
+  type: TaskType;
+  round: number;
+  points: number;
+  money: number;
+  hint: string;
+  hintCost: number;
+  isEndgame: boolean;
+  active: boolean;
+}
+
+export async function createTask(input: TaskInput): Promise<Task> {
+  const col = await tasksCol();
+  const now = new Date();
+  const task: Task = { ...input, createdAt: now, updatedAt: now };
+  await col.insertOne(task);
+  return task;
+}
+
+export async function updateTask(
+  id: string,
+  patch: Partial<TaskInput>,
+): Promise<void> {
+  const col = await tasksCol();
+  if (!ObjectId.isValid(id)) return;
+  await col.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { ...patch, updatedAt: new Date() } },
+  );
+}
+
+export async function deleteTask(id: string): Promise<void> {
+  const col = await tasksCol();
+  if (!ObjectId.isValid(id)) return;
+  await col.deleteOne({ _id: new ObjectId(id) });
+  const tt = await teamTasksCol();
+  await tt.deleteMany({ taskId: new ObjectId(id) });
+}
+
+export async function toggleTaskActive(id: string): Promise<void> {
+  const col = await tasksCol();
+  if (!ObjectId.isValid(id)) return;
+  const task = await col.findOne({ _id: new ObjectId(id) });
+  if (!task) return;
+  await col.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { active: !task.active, updatedAt: new Date() } },
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Team task allotments                                                */
+/* ------------------------------------------------------------------ */
+
+export async function getTeamTasks(teamId: string): Promise<TeamTaskView[]> {
+  const tt = await teamTasksCol();
+  const allotments = await tt.find({ teamId }).sort({ round: 1, createdAt: 1 }).toArray();
+  if (allotments.length === 0) return [];
+  const pool = await tasksCol();
+  const ids = allotments.map((a) => a.taskId).filter((id) => id instanceof ObjectId);
+  const tasks = await pool.find({ _id: { $in: ids } }).toArray();
+  const byId = new Map(tasks.map((t) => [String(t._id), t]));
+  return allotments.map((a) => ({
+    ...a,
+    task: byId.get(String(a.taskId)) as Task,
+  }));
+}
+
+export async function getAllotments(): Promise<TeamTask[]> {
+  const tt = await teamTasksCol();
+  return tt.find({}).toArray();
+}
+
+export async function markTaskComplete(
+  teamId: string,
+  teamTaskId: string,
+  adminName: string,
+): Promise<{ ok: boolean; message: string }> {
+  const tt = await teamTasksCol();
+  if (!ObjectId.isValid(teamTaskId)) {
+    return { ok: false, message: "Invalid task reference." };
+  }
+  const id = new ObjectId(teamTaskId);
+  const allotment = await tt.findOne({ _id: id, teamId });
+  if (!allotment) return { ok: false, message: "Task not found for this team." };
+  if (allotment.status === "completed") {
+    return { ok: false, message: "Task already completed." };
+  }
+  await tt.updateOne(
+    { _id: id },
+    {
+      $set: {
+        status: "completed",
+        completedAt: new Date(),
+        completedBy: adminName,
+      },
+    },
+  );
+  await adjustTeamScore(teamId, allotment.points, allotment.money);
+  return {
+    ok: true,
+    message: `Task completed. +${allotment.points} pts, +$${allotment.money}.`,
+  };
+}
+
+export async function unmarkTask(
+  teamId: string,
+  teamTaskId: string,
+): Promise<{ ok: boolean; message: string }> {
+  const tt = await teamTasksCol();
+  if (!ObjectId.isValid(teamTaskId)) {
+    return { ok: false, message: "Invalid task reference." };
+  }
+  const id = new ObjectId(teamTaskId);
+  const allotment = await tt.findOne({ _id: id, teamId });
+  if (!allotment) return { ok: false, message: "Task not found for this team." };
+  if (allotment.status !== "completed") {
+    return { ok: false, message: "Task is not completed." };
+  }
+  await tt.updateOne(
+    { _id: id },
+    {
+      $set: {
+        status: "pending",
+        completedAt: null,
+        completedBy: null,
+      },
+    },
+  );
+  await adjustTeamScore(teamId, -allotment.points, -allotment.money);
+  return { ok: true, message: "Task reverted to pending." };
+}
+
+export async function purchaseHint(
+  teamId: string,
+  teamTaskId: string,
+): Promise<{ ok: boolean; message: string }> {
+  const tt = await teamTasksCol();
+  if (!ObjectId.isValid(teamTaskId)) {
+    return { ok: false, message: "Invalid task reference." };
+  }
+  const id = new ObjectId(teamTaskId);
+  const allotment = await tt.findOne({ _id: id, teamId });
+  if (!allotment) return { ok: false, message: "Task not found." };
+  if (allotment.hintPurchased) {
+    return { ok: false, message: "Hint already unlocked." };
+  }
+  const pool = await tasksCol();
+  const task = await pool.findOne({ _id: allotment.taskId });
+  if (!task) return { ok: false, message: "Task missing." };
+  const state = await getEventState();
+  const cost = Math.max(0, Math.round(task.hintCost * state.hintCostMultiplier));
+  const team = await getTeam(teamId);
+  if (!team) return { ok: false, message: "Team not found." };
+  if (team.money < cost) {
+    return {
+      ok: false,
+      message: `Not enough cash. You need $${cost} to buy this clue.`,
+    };
+  }
+  await tt.updateOne({ _id: id }, { $set: { hintPurchased: true } });
+  await adjustTeamScore(teamId, 0, -cost);
+  await updateTeam(teamId, { hintsUsed: team.hintsUsed + 1 });
+  return { ok: true, message: `Clue unlocked for $${cost}.` };
+}
+
+export async function assignEndgameTask(
+  teamId: string,
+): Promise<{ ok: boolean; message: string }> {
+  const pool = await tasksCol();
+  const tt = await teamTasksCol();
+  const existing = await tt.findOne({ teamId, isEndgame: true });
+  if (existing) return { ok: false, message: "Endgame vault already opened." };
+  const used = await tt.find({ isEndgame: true }).toArray();
+  const usedIds = new Set(used.map((u) => String(u.taskId)));
+  const candidates = await pool.find({ isEndgame: true, active: true }).toArray();
+  const free = candidates.filter((c) => !usedIds.has(String(c._id)));
+  const task = free[0] ?? candidates[0];
+  if (!task) return { ok: false, message: "No endgame task available." };
+  const state = await getEventState();
+  await tt.insertOne({
+    teamId,
+    taskId: task._id as ObjectId,
+    round: state.currentRound,
+    type: "technical",
+    status: "pending",
+    points: task.points,
+    money: task.money,
+    hintPurchased: false,
+    isEndgame: true,
+    completedAt: null,
+    completedBy: null,
+    createdAt: new Date(),
+  });
+  return { ok: true, message: "The vault is open. Final target assigned." };
+}
+
+export async function unlockEndgame(
+  teamId: string,
+): Promise<{ ok: boolean; message: string }> {
+  const team = await getTeam(teamId);
+  if (!team) return { ok: false, message: "Team not found." };
+  if (team.endgameUnlocked) {
+    return { ok: false, message: "Endgame already unlocked." };
+  }
+  const state = await getEventState();
+  if (team.money < state.endgameCost) {
+    return {
+      ok: false,
+      message: `You need $${state.endgameCost} to fund the endgame heist.`,
+    };
+  }
+  await adjustTeamScore(teamId, 0, -state.endgameCost);
+  await updateTeam(teamId, { endgameUnlocked: true });
+  const assigned = await assignEndgameTask(teamId);
+  return {
+    ok: true,
+    message: assigned.ok
+      ? `Endgame unlocked for $${state.endgameCost}.`
+      : `Endgame unlocked for $${state.endgameCost}.`,
+  };
+}
+
+export async function removeWanted(
+  teamId: string,
+): Promise<{ ok: boolean; message: string }> {
+  const team = await getTeam(teamId);
+  if (!team) return { ok: false, message: "Team not found." };
+  if (!team.wanted) return { ok: false, message: "Your crew is not wanted." };
+  const state = await getEventState();
+  if (team.money < state.wantedRemovalCost) {
+    return {
+      ok: false,
+      message: `Bribing the cops costs $${state.wantedRemovalCost}. You have $${team.money}.`,
+    };
+  }
+  await adjustTeamScore(teamId, 0, -state.wantedRemovalCost);
+  await updateTeam(teamId, { wanted: false, wantedAt: null });
+  return {
+    ok: true,
+    message: `Bribe paid. You are off the wanted list.`,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Leaderboard + wanted                                                */
+/* ------------------------------------------------------------------ */
+
+export async function getLeaderboard(
+  limit?: number,
+): Promise<LeaderboardRow[]> {
+  const col = await teamsCol();
+  const teams = await col
+    .find({ status: { $in: ["selected", "eliminated", "champion"] } })
+    .toArray();
+  const tt = await teamTasksCol();
+  const completed = await tt
+    .aggregate<{ _id: string; count: number }>([
+      { $match: { status: "completed" } },
+      { $group: { _id: "$teamId", count: { $sum: 1 } } },
+    ])
+    .toArray();
+  const completedMap = new Map(completed.map((c) => [c._id, c.count]));
+  const rows = teams
+    .map((t) => ({
+      rank: 0,
+      teamId: t.teamId,
+      name: t.name,
+      points: t.points,
+      completed: completedMap.get(t.teamId) ?? 0,
+      status: t.status,
+      isWanted: t.wanted,
+    }))
+    // Money is deliberately excluded from the ranking.
+    .sort(
+      (a, b) =>
+        b.points - a.points ||
+        b.completed - a.completed ||
+        a.teamId.localeCompare(b.teamId),
+    );
+  rows.forEach((row, index) => {
+    row.rank = index + 1;
+  });
+  return limit ? rows.slice(0, limit) : rows;
+}
+
+export async function getTotals(): Promise<{
+  crews: number;
+  points: number;
+  money: number;
+}> {
+  const col = await teamsCol();
+  const rows = await col
+    .find({ status: { $in: ["selected", "eliminated", "champion"] } })
+    .project<{ points: number; money: number }>({ points: 1, money: 1 })
+    .toArray();
+  return {
+    crews: rows.length,
+    points: rows.reduce((sum, r) => sum + (r.points ?? 0), 0),
+    money: rows.reduce((sum, r) => sum + (r.money ?? 0), 0),
+  };
+}
+
+export async function getWantedTeams(): Promise<Team[]> {
+  const col = await teamsCol();
+  return col.find({ wanted: true }).sort({ points: -1 }).toArray();
+}
+
+export function toTeamRow(team: Team): TeamRow {
+  return {
+    teamId: team.teamId,
+    name: team.name,
+    email: team.email,
+    leaderName: team.leader.name,
+    status: team.status,
+    points: team.points,
+    money: team.money,
+    wanted: team.wanted,
+    round: team.round,
+    membersCount: team.members.length + 1,
+    eliminatedInRound: team.eliminatedInRound,
+    createdAt: team.createdAt,
+  };
+}
+
+export function toTaskRow(task: Task): TaskRow {
+  return {
+    id: String(task._id),
+    title: task.title,
+    description: task.description,
+    type: task.type,
+    round: task.round,
+    points: task.points,
+    money: task.money,
+    hint: task.hint,
+    hintCost: task.hintCost,
+    isEndgame: task.isEndgame,
+    active: task.active,
+  };
+}
+
+export function toMissionRow(mission: DexterMission): MissionRow {
+  return {
+    id: String(mission._id),
+    title: mission.title,
+    description: mission.description,
+    round: mission.round,
+    difficulty: mission.difficulty,
+    points: mission.points,
+    money: mission.money,
+    scope: mission.scope,
+    teamIds: mission.teamIds,
+    active: mission.active,
+    completions: mission.completions ?? 0,
+  };
+}
+
+export interface CompletionFeedItem {
+  teamId: string;
+  teamName: string;
+  title: string;
+  completedAt: Date | null;
+  completedBy: string | null;
+  points: number;
+  money: number;
+}
+
+export async function getRecentCompletions(
+  limit = 12,
+): Promise<CompletionFeedItem[]> {
+  const tt = await teamTasksCol();
+  const rows = await tt
+    .find({ status: "completed" })
+    .sort({ completedAt: -1 })
+    .limit(limit)
+    .toArray();
+  if (rows.length === 0) return [];
+
+  const pool = await tasksCol();
+  const taskDocs = await pool
+    .find({ _id: { $in: rows.map((r) => r.taskId) } })
+    .toArray();
+  const taskMap = new Map(taskDocs.map((t) => [String(t._id), t]));
+
+  const col = await teamsCol();
+  const teamDocs = await col
+    .find({ teamId: { $in: [...new Set(rows.map((r) => r.teamId))] } })
+    .toArray();
+  const teamMap = new Map(teamDocs.map((t) => [t.teamId, t]));
+
+  return rows.map((r) => ({
+    teamId: r.teamId,
+    teamName: teamMap.get(r.teamId)?.name ?? r.teamId,
+    title: taskMap.get(String(r.taskId))?.title ?? "Target",
+    completedAt: r.completedAt,
+    completedBy: r.completedBy,
+    points: r.points,
+    money: r.money,
+  }));
+}
+
+/** Marks the top N teams on the leaderboard as wanted. */
+export async function syncWantedFromLeaderboard(
+  topN = 3,
+): Promise<string[]> {
+  const board = await getLeaderboard();
+  const top = board.slice(0, topN).map((r) => r.teamId);
+  const col = await teamsCol();
+  const teams = await col.find({ wanted: true }).toArray();
+  for (const team of teams) {
+    if (!top.includes(team.teamId)) {
+      await col.updateOne(
+        { teamId: team.teamId },
+        { $set: { wanted: false, wantedAt: null, updatedAt: new Date() } },
+      );
+    }
+  }
+  for (const teamId of top) {
+    await col.updateOne(
+      { teamId },
+      { $set: { wanted: true, wantedAt: new Date(), updatedAt: new Date() } },
+    );
+  }
+  return top;
+}
+
+export async function setWanted(
+  teamId: string,
+  wanted: boolean,
+): Promise<void> {
+  const col = await teamsCol();
+  await col.updateOne(
+    { teamId },
+    {
+      $set: {
+        wanted,
+        wantedAt: wanted ? new Date() : null,
+        updatedAt: new Date(),
+      },
+    },
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Dexter missions                                                     */
+/* ------------------------------------------------------------------ */
+
+export async function listMissions(): Promise<DexterMission[]> {
+  const col = await missionsCol();
+  return col.find({}).sort({ round: 1, createdAt: -1 }).toArray();
+}
+
+export async function getMission(id: string): Promise<DexterMission | null> {
+  const col = await missionsCol();
+  if (!ObjectId.isValid(id)) return null;
+  return col.findOne({ _id: new ObjectId(id) });
+}
+
+export interface MissionInput {
+  title: string;
+  description: string;
+  round: number;
+  difficulty: "easy" | "medium" | "hard";
+  points: number;
+  money: number;
+  scope: "all" | "selected";
+  teamIds: string[];
+  active: boolean;
+}
+
+export async function createMission(
+  input: MissionInput,
+): Promise<DexterMission> {
+  const col = await missionsCol();
+  const now = new Date();
+  const mission: DexterMission = {
+    ...input,
+    completions: 0,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await col.insertOne(mission);
+  return mission;
+}
+
+export async function updateMission(
+  id: string,
+  patch: Partial<MissionInput>,
+): Promise<void> {
+  const col = await missionsCol();
+  if (!ObjectId.isValid(id)) return;
+  await col.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { ...patch, updatedAt: new Date() } },
+  );
+}
+
+export async function deleteMission(id: string): Promise<void> {
+  const col = await missionsCol();
+  if (!ObjectId.isValid(id)) return;
+  await col.deleteOne({ _id: new ObjectId(id) });
+}
+
+/** Missions visible to a given team for the given round. */
+export async function getVisibleMissions(
+  teamId: string,
+  round: number,
+): Promise<DexterMission[]> {
+  const col = await missionsCol();
+  const missions = await col
+    .find({ active: true, round: { $lte: round } })
+    .sort({ createdAt: -1 })
+    .toArray();
+  return missions.filter(
+    (m) => m.scope === "all" || m.teamIds.includes(teamId),
+  );
+}
+
+export async function completeMission(
+  missionId: string,
+  teamId: string,
+  adminName: string,
+): Promise<{ ok: boolean; message: string }> {
+  const col = await missionsCol();
+  if (!ObjectId.isValid(missionId)) {
+    return { ok: false, message: "Invalid mission reference." };
+  }
+  const id = new ObjectId(missionId);
+  const mission = await col.findOne({ _id: id });
+  if (!mission) return { ok: false, message: "Mission not found." };
+  const team = await getTeam(teamId);
+  if (!team) return { ok: false, message: "Team not found." };
+  if (team.dexterCompleted.includes(String(id))) {
+    return { ok: false, message: "Mission already completed by this team." };
+  }
+  await col.updateOne(
+    { _id: id },
+    { $inc: { completions: 1 }, $set: { updatedAt: new Date() } },
+  );
+  await updateTeam(teamId, {
+    dexterCompleted: [...team.dexterCompleted, String(id)],
+  });
+  await adjustTeamScore(teamId, mission.points, mission.money);
+  return {
+    ok: true,
+    message: `Dexter mission logged by ${adminName}. +${mission.points} pts, +$${mission.money}.`,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Round flow                                                          */
+/* ------------------------------------------------------------------ */
+
+function shuffle<T>(items: T[]): T[] {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+/**
+ * Assigns the task set for a round.
+ *
+ * Physical tasks are shared by every team; technical tasks are handed out
+ * one-to-one so a technical task is never given to two teams.
+ *
+ * Teams that already hold targets for the round are skipped, so the function
+ * can be called repeatedly (late registrations, manual re-allocation) without
+ * handing anybody the same target twice.
+ */
+export async function assignRoundTasks(
+  round: number,
+  teamIds: string[],
+): Promise<{ assigned: number; unassigned: number; skipped: number }> {
+  const pool = await tasksCol();
+  const tt = await teamTasksCol();
+  const state = await getEventState();
+
+  const existing = await tt.find({ round, isEndgame: false }).toArray();
+  const teamsWithTargets = new Set(existing.map((a) => a.teamId));
+  const technicalInUse = new Set(
+    existing.filter((a) => a.type === "technical").map((a) => String(a.taskId)),
+  );
+
+  const candidates = await pool
+    .find({ round, active: true, isEndgame: false })
+    .toArray();
+  const physical = shuffle(candidates.filter((t) => t.type === "physical"));
+  const technical = shuffle(
+    candidates.filter(
+      (t) => t.type === "technical" && !technicalInUse.has(String(t._id)),
+    ),
+  );
+
+  const physicalChosen = physical.slice(0, state.physicalPerRound);
+
+  const now = new Date();
+  const docs: TeamTask[] = [];
+  const eligible = teamIds.filter((id) => !teamsWithTargets.has(id));
+  const skipped = teamIds.length - eligible.length;
+
+  for (const teamId of eligible) {
+    for (const task of physicalChosen) {
+      docs.push({
+        teamId,
+        taskId: task._id as ObjectId,
+        round,
+        type: "physical",
+        status: "pending",
+        points: task.points,
+        money: task.money,
+        hintPurchased: false,
+        isEndgame: false,
+        completedAt: null,
+        completedBy: null,
+        createdAt: now,
+      });
+    }
+  }
+
+  // Deal technical targets one at a time so no target is ever shared.
+  const perTeam = eligible.length
+    ? Math.min(
+        state.technicalPerRound,
+        Math.floor(technical.length / eligible.length),
+      )
+    : 0;
+  const assignments = new Map<string, Task[]>();
+  let cursor = 0;
+  for (let pass = 0; pass < perTeam; pass += 1) {
+    for (const teamId of eligible) {
+      const task = technical[cursor];
+      cursor += 1;
+      if (!task) break;
+      const list = assignments.get(teamId) ?? [];
+      list.push(task);
+      assignments.set(teamId, list);
+    }
+  }
+  if (perTeam === 0) {
+    // Not enough targets to give everybody one — hand them out one each to as
+    // many crews as possible and report the rest.
+    for (const teamId of eligible) {
+      const task = technical[cursor];
+      cursor += 1;
+      if (!task) break;
+      assignments.set(teamId, [task]);
+    }
+  }
+
+  for (const [teamId, tasks] of assignments) {
+    for (const task of tasks) {
+      docs.push({
+        teamId,
+        taskId: task._id as ObjectId,
+        round,
+        type: "technical",
+        status: "pending",
+        points: task.points,
+        money: task.money,
+        hintPurchased: false,
+        isEndgame: false,
+        completedAt: null,
+        completedBy: null,
+        createdAt: now,
+      });
+    }
+  }
+
+  if (docs.length > 0) await tt.insertMany(docs);
+
+  const unassigned = eligible.length - assignments.size;
+  return {
+    assigned: assignments.size,
+    unassigned,
+    skipped,
+  };
+}
+
+export interface AdvanceRoundResult {
+  ok: boolean;
+  message: string;
+  eliminated: string[];
+  survivors: string[];
+}
+
+export async function advanceRound(): Promise<AdvanceRoundResult> {
+  const state = await getEventState();
+  if (state.eventEnded) {
+    return { ok: false, message: "The event has already ended.", eliminated: [], survivors: [] };
+  }
+  const nextRound = state.currentRound + 1;
+  if (nextRound > state.totalRounds) {
+    return {
+      ok: false,
+      message: "All rounds are complete. Crown the champion instead.",
+      eliminated: [],
+      survivors: [],
+    };
+  }
+
+  const col = await teamsCol();
+  const alive = await col.find({ status: "selected" }).toArray();
+  if (alive.length === 0) {
+    return { ok: false, message: "No active teams to advance.", eliminated: [], survivors: [] };
+  }
+
+  const completed = await (await teamTasksCol())
+    .aggregate<{ _id: string; count: number }>([
+      { $match: { status: "completed" } },
+      { $group: { _id: "$teamId", count: { $sum: 1 } } },
+    ])
+    .toArray();
+  const completedMap = new Map(
+    completed.map((c) => [c._id, c.count] as const),
+  );
+
+  const ranked = [...alive].sort(
+    (a, b) =>
+      b.points - a.points ||
+      (completedMap.get(b.teamId) ?? 0) - (completedMap.get(a.teamId) ?? 0) ||
+      a.teamId.localeCompare(b.teamId),
+  );
+
+  const keepCount = Math.max(1, Math.ceil(ranked.length / 2));
+  const survivors = ranked.slice(0, keepCount).map((t) => t.teamId);
+  const eliminated = ranked.slice(keepCount).map((t) => t.teamId);
+
+  if (eliminated.length > 0) {
+    for (const team of ranked.slice(keepCount)) {
+      await col.updateOne(
+        { teamId: team.teamId },
+        {
+          $set: {
+            status: "eliminated",
+            eliminatedInRound: state.currentRound,
+            finalPoints: team.points,
+            updatedAt: new Date(),
+          },
+        },
+      );
+    }
+  }
+
+  await col.updateMany(
+    { teamId: { $in: survivors } },
+    { $set: { round: nextRound, updatedAt: new Date() } },
+  );
+
+  const assignment = await assignRoundTasks(nextRound, survivors);
+  await updateEventState({ currentRound: nextRound });
+  await syncWantedFromLeaderboard(3);
+
+  let message = `Round ${state.currentRound} closed. ${survivors.length} team(s) advanced to round ${nextRound}, ${eliminated.length} eliminated.`;
+  if (assignment.unassigned > 0) {
+    message += ` Warning: ${assignment.unassigned} team(s) got no technical task — add more technical tasks to the pool for round ${nextRound}.`;
+  }
+  return { ok: true, message, eliminated, survivors };
+}
+
+export async function crownChampion(): Promise<AdvanceRoundResult> {
+  const state = await getEventState();
+  const board = await getLeaderboard();
+  const alive = board.filter(
+    (r) => r.status === "selected" || r.status === "champion",
+  );
+  const winner = alive[0];
+  if (!winner) {
+    return { ok: false, message: "No surviving team to crown.", eliminated: [], survivors: [] };
+  }
+  const col = await teamsCol();
+  await col.updateMany(
+    { status: "selected" },
+    {
+      $set: {
+        status: "eliminated",
+        eliminatedInRound: state.currentRound,
+        updatedAt: new Date(),
+      },
+    },
+  );
+  await col.updateOne(
+    { teamId: winner.teamId },
+    { $set: { status: "champion", updatedAt: new Date() } },
+  );
+  await updateEventState({
+    eventEnded: true,
+    championTeamId: winner.teamId,
+  });
+  return {
+    ok: true,
+    message: `${winner.name} (${winner.teamId}) takes the vault with ${winner.points} points.`,
+    eliminated: [],
+    survivors: [winner.teamId],
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Admins                                                              */
+/* ------------------------------------------------------------------ */
+
+export async function findAdmin(
+  username: string,
+): Promise<AdminUser | null> {
+  const col = await adminsCol();
+  return col.findOne({ username: username.toLowerCase() });
+}
+
+export async function ensureAdmin(
+  username: string,
+  password: string,
+  name = "Event Control",
+): Promise<void> {
+  const col = await adminsCol();
+  const existing = await col.findOne({ username: username.toLowerCase() });
+  if (existing) return;
+  await col.insertOne({
+    username: username.toLowerCase(),
+    passwordHash: await hashPassword(password),
+    name,
+    createdAt: new Date(),
+  });
+}

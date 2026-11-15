@@ -1,36 +1,170 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Last Heist
 
-## Getting Started
+A GTA VI themed campus heist event built by **GDG Campus Chitkara**.
 
-First, run the development server:
+Forty crews register, get a **TEAM ID**, and are handed personal login
+credentials. The leader signs in, works a board of targets, buys clues with
+cash, and survives four elimination rounds — **40 → 20 → 10 → 5** — before the
+last crew standing empties the vault.
+
+| | |
+| --- | --- |
+| **Stack** | Next.js 16 (App Router, Turbopack, Cache Components) · React 19 · Tailwind v4 · MongoDB · `jose` (signed session cookie) |
+| **Roles** | Team leader (`/login`) and event control (`/admin/login`) |
+| **Currencies** | **Points** drive the leaderboard and survival. **Cash** buys clues, bribes the police and funds the endgame. Cash never appears on the leaderboard. |
+
+---
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env     # then fill in your own values
+npm run dev              # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE` | MongoDB connection string (`mongodb://…` or `mongodb+srv://…`) |
+| `DATABASE_NAME` | Database name. Defaults to `last-heist`. |
+| `AUTH_SECRET` | Secret used to sign the session cookie (≥ 16 characters). |
+| `ADMIN_USERNAME` | Control-room operator username. Defaults to `admin`. |
+| `ADMIN_PASSWORD` | Control-room operator password. Defaults to `heist-control`. |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The starter target pool and the six starter Dexter missions are seeded from
+**Control room → Settings → Seed target pool**. Seeding never overwrites
+existing records, so it is safe to run more than once.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Running the event
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 1. Register the crews
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Control room → Crews → Register a crew.** For every crew enter:
 
-## Deploy on Vercel
+- crew name and the **leader's login email** (the login id),
+- leader name, phone and **leader photo** (resized to 480px in the browser and
+  stored on the crew record),
+- 3–4 further members (4–5 people per crew including the leader),
+- an optional passcode — leave it blank and one is generated.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The panel returns the generated **TEAM ID** and **passcode**. Mail those to the
+crew leader; only the leader signs in. The first 40 crews are selected; anyone
+after that lands on the waitlist and cannot sign in.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 2. Open round 1
+
+**Control room → Overview → Allocate round 1 targets.**
+
+- **Physical** targets go to every crew — they are the same for all.
+- **Technical** targets are dealt **one crew at a time** and are never handed
+  to two crews in the same round.
+
+Crews that register late get the current round's board automatically.
+
+### 3. Verify targets at the desk
+
+Crews come to the desk and show their work. Open the crew
+(**Control room → Crews → Verify**) and hit **Mark complete**. Points and cash
+land immediately. **Revert** takes a target back and removes the reward.
+
+### 4. Push Dexter missions
+
+**Control room → Dexter.** Push a mission, choose the round, the difficulty and
+whether it targets every crew or selected crews. It appears on the crew
+dashboards as a **“Dexter Spotted”** banner. Close it out from the crew page
+and the crew banks the extra points and cash.
+
+### 5. Run the rounds
+
+**Control room → Rounds → Advance to round N.** On every round close:
+
+- the bottom half of the standings (ranked on points, then targets cleared) is
+  eliminated,
+- the survivors move to the next round and get that round's board,
+- the **top three crews are posted as wanted** (and can be re-synced manually
+  with **Sync wanted (top 3)**).
+
+When the final round is done, hit **Crown the champion**.
+
+### 6. Wanted posters and the endgame
+
+- A crew on the wanted list can **pay a bribe** (cash, price in Settings) to go
+  dark. The next round's sync will post them again.
+- Cash can **buy a clue** on any pending target — the clue is revealed
+  instantly.
+- Cash can **fund the endgame**, which opens the vault and deals that crew its
+  final, endgame-only target.
+
+---
+
+## Pages
+
+| Route | Who | What |
+| --- | --- | --- |
+| `/` | everyone | Event briefing and live stats |
+| `/login` | crew leader | Team sign-in |
+| `/dashboard` | crew | Board, stats, Dexter banners, wanted posters, leaderboard |
+| `/tasks` | crew | Every target, grouped by round |
+| `/endgame` | crew | Fund and open the final vault |
+| `/leaderboard` | everyone | Public standings (points only) |
+| `/admin/login` | operator | Control-room sign-in |
+| `/admin` | operator | Overview, round control, desk activity |
+| `/admin/teams` | operator | Register crews, search, post wanted posters |
+| `/admin/teams/[teamId]` | operator | Crew record, verification desk, Dexter payouts |
+| `/admin/tasks` | operator | Target pool CRUD |
+| `/admin/dexter` | operator | Dexter mission CRUD |
+| `/admin/rounds` | operator | Advance rounds, elimination history, wanted board |
+| `/admin/settings` | operator | Slots, target counts, prices, seeding |
+
+---
+
+## Project structure
+
+```text
+app/
+  page.tsx                    event briefing (public)
+  login/                      team login
+  leaderboard/                public standings
+  (team)/                     crew area: dashboard, tasks, endgame
+  admin/
+    login/                    control-room login (outside the panel layout)
+    (panel)/                  guarded control room
+  not-found.tsx
+components/                   UI, crew dashboard widgets, admin widgets
+lib/
+  db.ts                       Mongo connection (+ io() so the driver stays out of prerender)
+  token.ts                    signed session cookie
+  auth.ts                     password hashing (scrypt) + session helpers
+  game.ts                     all game logic: crews, targets, rounds, money, wanted
+  seed.ts                     starter target pool and Dexter missions
+  session.ts                  requireTeam() / requireAdmin() guards
+  actions/                    server actions (auth, team, admin)
+proxy.ts                      route guards for /dashboard, /tasks, /endgame, /admin
+```
+
+### Data model (MongoDB)
+
+| Collection | Contents |
+| --- | --- |
+| `teams` | Crew record, leader photo, status, points, cash, wanted flag, round, completed Dexter missions |
+| `tasks` | Target pool — type (`physical` / `technical`), round, points, cash, hint and hint price, endgame flag |
+| `teamTasks` | Allotments — one row per crew per target, with completion and payout state |
+| `dexterMissions` | Dexter missions — reward, round, difficulty, target crews, completions |
+| `eventState` | Current round, slot count, prices, target counts, live/closed flag, champion |
+| `admins` | Control-room operators |
+
+---
+
+## Notes
+
+- Sessions are signed with `jose` (`HS256`) and stored in an `httpOnly`
+  cookie for 12 hours. Passwords are hashed with `scrypt` and a per-user salt.
+- Route protection lives in `proxy.ts`; every server action re-checks the
+  session itself before touching data.
+- The app is built with **Cache Components** enabled. Data reads call
+  `await io()` inside the Mongo layer so the driver never runs during
+  prerendering.
