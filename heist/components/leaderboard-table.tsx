@@ -26,7 +26,7 @@ export function LeaderboardTable({
           <tr className="border-b border-white/8 text-[10px] uppercase tracking-[0.2em] text-white/35">
             <th className="px-5 py-3 font-semibold">Rank</th>
             <th className="px-3 py-3 font-semibold">Crew</th>
-            <th className="px-3 py-3 font-semibold">Targets</th>
+            <th className="px-3 py-3 font-semibold">Tasks</th>
             {!compact && <th className="px-3 py-3 font-semibold">Status</th>}
             <th className="px-5 py-3 text-right font-semibold">Points</th>
           </tr>

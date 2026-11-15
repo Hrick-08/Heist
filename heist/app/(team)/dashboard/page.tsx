@@ -2,12 +2,12 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { DexterBanner } from "@/components/dexter-banner";
+import { LiveTaskBanner } from "@/components/live-task-banner";
 import { WantedActions } from "@/components/crew-actions";
 import { LeaderboardTable } from "@/components/leaderboard-table";
 import { RoundProgress } from "@/components/round-progress";
-import { TaskCard } from "@/components/task-card";
 import { WantedBoard } from "@/components/wanted-board";
-import { EmptyState, Panel, PanelHeader, StatCard } from "@/components/ui";
+import { Panel, PanelHeader, StatCard } from "@/components/ui";
 import {
   getEventState,
   getLeaderboard,
@@ -61,8 +61,11 @@ async function Dashboard() {
 
   const completed = allTasks.filter((t) => t.status === "completed");
   const rank = board.findIndex((row) => row.teamId === team.teamId) + 1;
-  const currentTasks = allTasks.filter(
-    (t) => t.round === state.currentRound && !t.isEndgame,
+  const liveTasks = allTasks.filter(
+    (t) =>
+      t.round === state.currentRound &&
+      !t.isEndgame &&
+      t.status !== "completed",
   );
   const pendingMissions = missions.filter(
     (m) => !team.dexterCompleted.includes(String(m._id)),
@@ -87,7 +90,7 @@ async function Dashboard() {
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/45">
               Leader <span className="text-white/80">{team.leader.name}</span>{" "}
               · {team.members.length + 1} crew members ·{" "}
-              {completed.length} of {allTasks.length} targets cleared.
+              {completed.length} of {allTasks.length} tasks cleared.
             </p>
           </div>
 
@@ -124,9 +127,9 @@ async function Dashboard() {
           tone="amber"
         />
         <StatCard
-          label="Targets cleared"
+          label="Tasks cleared"
           value={`${completed.length}/${allTasks.length}`}
-          hint="Marked by the control room"
+          hint="Approved by the desk"
           tone="lime"
         />
         <StatCard
@@ -168,36 +171,84 @@ async function Dashboard() {
         />
       </section>
 
-      {/* Current targets */}
-      <Panel>
-        <PanelHeader
-          title={`Round ${state.currentRound} targets`}
-          subtitle="Finish them in any order — the control room verifies each one."
-          accent="pink"
-          action={
-            <Link href="/tasks" className="btn-ghost btn-sm">
-              All targets
-            </Link>
-          }
-        />
-        {currentTasks.length === 0 ? (
-          <EmptyState
-            title="No targets assigned for this round yet"
-            description="The control room allocates the round before it opens. Check back shortly."
-          />
+      {/* Live tasks */}
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="headline text-lg text-white">
+              Live tasks · Round {state.currentRound}
+            </h2>
+            <p className="mt-1 text-sm text-white/45">
+              Finish a task and request sign-off from the desk — just like
+              Dexter missions.
+            </p>
+          </div>
+          <Link href="/tasks" className="btn-ghost btn-sm">
+            All tasks
+          </Link>
+        </div>
+        {liveTasks.length === 0 ? (
+          <p className="rounded-xl border border-lime/25 bg-lime/8 px-4 py-3 text-sm text-lime">
+            No live tasks right now. Every task for this round is cleared or
+            waiting to be assigned.
+          </p>
         ) : (
-          <div className="grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-3">
-            {currentTasks.map((task) => (
-              <TaskCard
+          <div className="space-y-4">
+            {liveTasks.map((task) => (
+              <LiveTaskBanner
                 key={String(task._id)}
                 allotment={task}
-                canAfford={team.money >= task.task.hintCost}
                 requested={pendingRefs.has(String(task._id))}
+                canAfford={team.money >= task.task.hintCost}
               />
             ))}
           </div>
         )}
-      </Panel>
+      </section>
+
+      {/* Cleared tasks */}
+      {completed.length > 0 && (
+        <Panel>
+          <PanelHeader
+            title="Cleared tasks"
+            subtitle="Approved by the desk — the payout is already in your ledger."
+            accent="lime"
+            action={
+              <Link href="/tasks" className="btn-ghost btn-sm">
+                All tasks
+              </Link>
+            }
+          />
+          <ul className="divide-y divide-white/8">
+            {completed.map((task) => (
+              <li
+                key={String(task._id)}
+                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+              >
+                <div className="min-w-0">
+                  <p className="headline text-sm text-white">{task.task.title}</p>
+                  <p className="mt-1 text-xs text-white/45">
+                    Round {task.round} · verified by{" "}
+                    {task.completedBy ?? "the desk"}
+                    {task.completedAt
+                      ? ` · ${task.completedAt.toLocaleString("en-IN")}`
+                      : ""}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className="rounded-md bg-cyan/10 px-2 py-1 font-mono-display text-cyan">
+                    +{task.points} pts
+                  </span>
+                  <span className="rounded-md bg-amber/10 px-2 py-1 font-mono-display text-amber">
+                    +${task.money.toLocaleString("en-IN")}
+                  </span>
+                  <span className="chip-done">Approved</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      )}
 
       {/* Wanted */}
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">

@@ -31,19 +31,19 @@ async function Tasks() {
   return (
     <div className="space-y-8">
       <header>
-        <p className="eyebrow">Target board</p>
-        <h1 className="headline mt-2 text-4xl text-white">All targets</h1>
+        <p className="eyebrow">Task board</p>
+        <h1 className="headline mt-2 text-4xl text-white">All tasks</h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/45">
-          Every target your crew has been given, in any order. Visit the control
-          room desk and an admin marks each one off for you.
+          Every task your crew has been given, in any order. Complete a live
+          task and request sign-off from the desk for admin approval.
         </p>
       </header>
 
       {rounds.length === 0 ? (
         <Panel>
           <EmptyState
-            title="No targets assigned yet"
-            description="Targets are allocated when a round opens. The control room will post them here."
+            title="No tasks assigned yet"
+            description="Tasks are allocated when a round opens. The control room will post them here."
           />
         </Panel>
       ) : (

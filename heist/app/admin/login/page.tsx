@@ -23,7 +23,7 @@ export default function AdminLoginPage() {
               Control <span className="text-cyan">Room</span>
             </h1>
             <p className="mt-2 text-sm leading-relaxed text-white/45">
-              Admin access. Mark crew targets as complete, push Dexter
+              Admin access. Mark crew tasks as complete, push Dexter
               missions, run the rounds and manage the task pool.
             </p>
           </div>

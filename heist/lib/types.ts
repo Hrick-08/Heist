@@ -138,7 +138,7 @@ export interface ApprovalRequest {
   _id?: ObjectId;
   /** "target" for a task allotment, "dexter" for a Dexter mission. */
   kind: ApprovalKind;
-  /** teamTasks._id for a target, dexterMissions._id for a Dexter mission. */
+  /** teamTasks._id for a task, dexterMissions._id for a Dexter mission. */
   refId: ObjectId;
   teamId: string;
   status: "pending" | "approved" | "dismissed";
@@ -149,12 +149,12 @@ export interface ApprovalRequest {
   resolvedBy: string | null;
 }
 
-/** A pending request joined with the crew and the target/mission it refers to.
+/** A pending request joined with the crew and the task/mission it refers to.
  *  Plain and serialisable so it can cross the server/client boundary. */
 export interface ApprovalView {
   id: string;
   kind: ApprovalKind;
-  /** teamTasks id for a target, dexterMissions id for a Dexter mission. */
+  /** teamTasks id for a task, dexterMissions id for a Dexter mission. */
   refId: string;
   teamId: string;
   crewName: string;

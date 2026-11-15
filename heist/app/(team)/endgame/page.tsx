@@ -1,8 +1,12 @@
 import { Suspense } from "react";
 
-import { EndgameActions } from "@/components/crew-actions";
+import { EndgameActions, RequestApproval } from "@/components/crew-actions";
 import { Panel, PanelHeader, StatCard } from "@/components/ui";
-import { getEventState, getTeamTasks } from "@/lib/game";
+import {
+  getEventState,
+  getTeamTasks,
+  listApprovalsForTeam,
+} from "@/lib/game";
 import { requireTeam } from "@/lib/session";
 
 export const instant = false;
@@ -17,13 +21,15 @@ export default function EndgamePage() {
 
 async function Endgame() {
   const { team } = await requireTeam();
-  const [state, tasks] = await Promise.all([
+  const [state, tasks, approvals] = await Promise.all([
     getEventState(),
     getTeamTasks(team.teamId),
+    listApprovalsForTeam(team.teamId),
   ]);
 
   const endgameTasks = tasks.filter((t) => t.isEndgame);
   const unlocked = team.endgameUnlocked;
+  const pendingRefs = new Set(approvals.map((a) => String(a.refId)));
 
   return (
     <div className="space-y-8">
@@ -44,7 +50,7 @@ async function Endgame() {
         <StatCard
           label="Vault status"
           value={unlocked ? "Open" : "Sealed"}
-          hint={unlocked ? "Final target assigned" : "Needs funding"}
+          hint={unlocked ? "Final task assigned" : "Needs funding"}
           tone={unlocked ? "lime" : "violet"}
         />
         <StatCard
@@ -64,21 +70,21 @@ async function Endgame() {
       <Panel>
         <PanelHeader
           title="Fund the heist"
-          subtitle="One payment opens the vault and assigns your final target."
+          subtitle="One payment opens the vault and assigns your final task."
           accent="violet"
         />
         <div className="space-y-4 p-6">
           {unlocked ? (
             <p className="rounded-xl border border-lime/30 bg-lime/8 px-4 py-3 text-sm text-lime">
-              The vault is open. Your final target is on the board below — get
-              it verified by the control room.
+              The vault is open. Your final task is on the board below — send it
+              to the desk for sign-off when it is done.
             </p>
           ) : (
             <>
               <p className="text-sm leading-relaxed text-white/50">
                 {team.money >= state.endgameCost
                   ? "You have the cash. One click and the endgame is live."
-                  : `You are $${(state.endgameCost - team.money).toLocaleString("en-IN")} short. Clear more targets to raise the funds.`}
+                  : `You are $${(state.endgameCost - team.money).toLocaleString("en-IN")} short. Clear more tasks to raise the funds.`}
               </p>
               <EndgameActions
                 cost={state.endgameCost}
@@ -91,13 +97,13 @@ async function Endgame() {
 
       <Panel>
         <PanelHeader
-          title="Endgame targets"
-          subtitle="The only targets worth the name."
+          title="Endgame tasks"
+          subtitle="The only tasks worth the name."
           accent="pink"
         />
         {endgameTasks.length === 0 ? (
           <p className="px-5 py-10 text-center text-sm text-white/35">
-            No endgame target yet. Fund the heist to receive one.
+            No endgame task yet. Fund the heist to receive one.
           </p>
         ) : (
           <ul className="divide-y divide-white/8">
@@ -120,6 +126,16 @@ async function Endgame() {
                     <span className="chip-eliminated">Pending</span>
                   )}
                 </div>
+                {task.status !== "completed" && (
+                  <div className="w-full">
+                    <RequestApproval
+                      kind="target"
+                      refId={String(task._id)}
+                      requested={pendingRefs.has(String(task._id))}
+                      label="Task completed? Request sign-off"
+                    />
+                  </div>
+                )}
               </li>
             ))}
           </ul>

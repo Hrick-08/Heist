@@ -80,7 +80,7 @@ async function TeamDetail({ params }: { params: Promise<{ teamId: string }> }) {
         <StatCard label="Points" value={team.points.toLocaleString("en-IN")} tone="cyan" />
         <StatCard label="Cash" value={"$" + team.money.toLocaleString("en-IN")} tone="amber" />
         <StatCard
-          label="Targets cleared"
+          label="Tasks cleared"
           value={`${completed}/${tasks.length}`}
           tone="lime"
         />
@@ -252,17 +252,17 @@ async function TeamDetail({ params }: { params: Promise<{ teamId: string }> }) {
         <ApprovalQueue approvals={approvals} showCrew={false} />
       </Panel>
 
-      {/* Targets */}
+      {/* Tasks */}
       <Panel>
         <PanelHeader
           title="Verification desk"
-          subtitle="Crews visit the desk — mark each target off here."
+          subtitle="Crews visit the desk — mark each task off here."
           accent="lime"
         />
         {rounds.length === 0 ? (
           <EmptyState
-            title="No targets allocated to this crew"
-            description="Targets are allocated when a round opens."
+            title="No tasks allocated to this crew"
+            description="Tasks are allocated when a round opens."
           />
         ) : (
           rounds.map((round) => (
@@ -280,7 +280,7 @@ async function TeamDetail({ params }: { params: Promise<{ teamId: string }> }) {
                       >
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-semibold text-white">
-                            {allotment.task?.title ?? "Target"}
+                            {allotment.task?.title ?? "Task"}
                           </p>
                           <p className="mt-0.5 text-[11px] text-white/35">
                             {allotment.type === "physical" ? "Physical" : "Technical"}

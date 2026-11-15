@@ -57,7 +57,7 @@ async function Rounds() {
         <h1 className="headline mt-2 text-4xl text-white">Rounds</h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/45">
           Closing a round knocks out the bottom half of the standings and
-          allocates the next round&apos;s targets to the survivors.
+          allocates the next round&apos;s tasks to the survivors.
         </p>
       </header>
 
@@ -123,7 +123,7 @@ async function Rounds() {
           <div className="flex flex-wrap gap-3">
             <ActionForm
               action={allocateRoundAction}
-              submitLabel={`Allocate round ${state.currentRound} targets`}
+              submitLabel={`Allocate round ${state.currentRound} tasks`}
               submitClassName="btn-violet"
             />
             <ActionForm

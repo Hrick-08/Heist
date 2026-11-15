@@ -92,7 +92,7 @@ function TaskFields({ task }: { task?: Partial<TaskRow> }) {
             defaultChecked={task?.isEndgame ?? false}
             className="h-4 w-4 accent-violet"
           />
-          Endgame target
+          Endgame task
         </label>
       </div>
     </>
@@ -149,8 +149,8 @@ export function TaskPool({ tasks }: { tasks: TaskRow[] }) {
           <option value="technical">Technical</option>
         </select>
         <span className="text-xs text-white/40">
-          {filtered.length} task(s) shown · physical targets are shared, technical
-          targets are handed out one crew at a time.
+          {filtered.length} task(s) shown · physical tasks are shared, technical
+          tasks are handed out one crew at a time.
         </span>
       </div>
 

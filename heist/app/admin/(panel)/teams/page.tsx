@@ -30,7 +30,7 @@ async function Crews() {
         <h1 className="headline mt-2 text-4xl text-white">Crews</h1>
         <p className="mt-2 text-sm text-white/45">
           Register a crew, hand over the TEAM ID and passcode, then verify their
-          targets at the desk.
+          tasks at the desk.
         </p>
       </header>
 

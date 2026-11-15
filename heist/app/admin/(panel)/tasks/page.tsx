@@ -30,12 +30,11 @@ async function Pool() {
   return (
     <div className="space-y-8">
       <header>
-        <p className="eyebrow">Target library</p>
+        <p className="eyebrow">Task library</p>
         <h1 className="headline mt-2 text-4xl text-white">Task pool</h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/45">
-          Physical targets are handed to every crew in a round. Technical targets
-          are dealt one to one crew, so a target is never given to two teams at
-          once.
+          Physical tasks are handed to every crew in a round. Technical tasks are
+          dealt one to one crew, so a task is never given to two teams at once.
         </p>
       </header>
 
@@ -43,7 +42,7 @@ async function Pool() {
         {perRound.map((entry) => (
           <StatCard
             key={entry.round}
-            label={`Round ${entry.round} targets`}
+            label={`Round ${entry.round} tasks`}
             value={`${entry.physical + entry.technical}`}
             hint={`${entry.physical} physical · ${entry.technical} technical`}
             tone={entry.round === 1 ? "pink" : "cyan"}
@@ -54,7 +53,7 @@ async function Pool() {
       <Panel>
         <PanelHeader
           title="Pool"
-          subtitle="Edit, disable or delete any target."
+          subtitle="Edit, disable or delete any task."
           accent="pink"
         />
         <TaskPool tasks={rows} />
@@ -63,7 +62,7 @@ async function Pool() {
       {endgame.length > 0 && (
         <Panel>
           <PanelHeader
-            title="Endgame targets"
+            title="Endgame tasks"
             subtitle="Dealt to the crew that funds the final heist."
             accent="violet"
           />

@@ -418,7 +418,7 @@ export async function assignEndgameTask(
     completedBy: null,
     createdAt: new Date(),
   });
-  return { ok: true, message: "The vault is open. Final target assigned." };
+  return { ok: true, message: "The vault is open. Final task assigned." };
 }
 
 export async function unlockEndgame(
@@ -617,7 +617,7 @@ export async function getRecentCompletions(
   return rows.map((r) => ({
     teamId: r.teamId,
     teamName: teamMap.get(r.teamId)?.name ?? r.teamId,
-    title: taskMap.get(String(r.taskId))?.title ?? "Target",
+    title: taskMap.get(String(r.taskId))?.title ?? "Task",
     completedAt: r.completedAt,
     completedBy: r.completedBy,
     points: r.points,
@@ -779,8 +779,8 @@ export async function completeMission(
 /* ------------------------------------------------------------------ */
 
 /**
- * A crew asks the desk to sign off on a target or a Dexter mission.
- * Only one live request may exist per crew + target.
+ * A crew asks the desk to sign off on a task or a Dexter mission.
+ * Only one live request may exist per crew + task.
  */
 export async function requestApproval(
   kind: ApprovalKind,
@@ -804,9 +804,9 @@ export async function requestApproval(
       _id: id,
       teamId,
     });
-    if (!allotment) return { ok: false, message: "Target not found." };
+    if (!allotment) return { ok: false, message: "Task not found." };
     if (allotment.status === "completed") {
-      return { ok: false, message: "This target is already verified." };
+      return { ok: false, message: "This task is already verified." };
     }
   } else {
     const mission = await (await missionsCol()).findOne({ _id: id });
@@ -832,7 +832,7 @@ export async function requestApproval(
     ok: true,
     message:
       kind === "target"
-        ? "Queued for the desk — an admin will verify your target."
+        ? "Queued for the desk — an admin will verify your task."
         : "Queued for the desk — an admin will sign off your Dexter mission.",
   };
 }
@@ -848,12 +848,12 @@ async function decorateApprovals(
     .toArray();
   const crewMap = new Map(teams.map((t) => [t.teamId, t]));
 
-  const targetIds = rows
+  const allotmentIds = rows
     .filter((r) => r.kind === "target")
     .map((r) => r.refId);
-  const allotments = targetIds.length
+  const allotments = allotmentIds.length
     ? await (await teamTasksCol())
-        .find({ _id: { $in: targetIds } })
+        .find({ _id: { $in: allotmentIds } })
         .toArray()
     : [];
   const allotmentMap = new Map(
@@ -887,12 +887,12 @@ async function decorateApprovals(
         refId: String(row.refId),
         teamId: row.teamId,
         crewName: crewMap.get(row.teamId)?.name ?? row.teamId,
-        title: task?.title ?? "Target",
+        title: task?.title ?? "Task",
         description: task?.description ?? "",
         points: allotment?.points ?? task?.points ?? 0,
         money: allotment?.money ?? task?.money ?? 0,
         round: allotment?.round ?? task?.round ?? 0,
-        kindLabel: "Target",
+        kindLabel: "Task",
         note: row.note,
         status: row.status,
         requestedAt: row.requestedAt,
@@ -976,7 +976,7 @@ export async function dismissApproval(
 }
 
 /**
- * Signs off a request: the target is marked complete or the Dexter mission is
+ * Signs off a request: the task is marked complete or the Dexter mission is
  * credited, and the payout lands on the crew.
  */
 export async function approveRequest(
@@ -1016,7 +1016,7 @@ export async function approveRequest(
   return { ok: true, message: result.message };
 }
 
-/** Closes any live request for a target/mission once it has been signed off. */
+/** Closes any live request for a task/mission once it has been signed off. */
 async function closeRequestsFor(
   kind: ApprovalKind,
   refId: ObjectId,
@@ -1054,9 +1054,9 @@ function shuffle<T>(items: T[]): T[] {
  * Physical tasks are shared by every team; technical tasks are handed out
  * one-to-one so a technical task is never given to two teams.
  *
- * Teams that already hold targets for the round are skipped, so the function
+ * Teams that already hold tasks for the round are skipped, so the function
  * can be called repeatedly (late registrations, manual re-allocation) without
- * handing anybody the same target twice.
+ * handing anybody the same task twice.
  */
 export async function assignRoundTasks(
   round: number,
@@ -1108,7 +1108,7 @@ export async function assignRoundTasks(
     }
   }
 
-  // Deal technical targets one at a time so no target is ever shared.
+  // Deal technical tasks one at a time so no task is ever shared.
   const perTeam = eligible.length
     ? Math.min(
         state.technicalPerRound,
@@ -1128,7 +1128,7 @@ export async function assignRoundTasks(
     }
   }
   if (perTeam === 0) {
-    // Not enough targets to give everybody one — hand them out one each to as
+    // Not enough tasks to give everybody one — hand them out one each to as
     // many crews as possible and report the rest.
     for (const teamId of eligible) {
       const task = technical[cursor];

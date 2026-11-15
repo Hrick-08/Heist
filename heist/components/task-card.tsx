@@ -89,7 +89,7 @@ export function TaskCard({
           kind="target"
           refId={String(allotment._id)}
           requested={requested}
-          label="Done at the desk? Request approval"
+          label="Task completed? Request sign-off"
         />
       )}
 

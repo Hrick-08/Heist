@@ -30,7 +30,7 @@ async function Approvals() {
         <h1 className="headline mt-2 text-4xl text-white">Approvals</h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/45">
           Crews raise a request from their board when they have finished a
-          target or pulled off a Dexter mission. Approving signs it off and pays
+          task or pulled off a Dexter mission. Approving signs it off and pays
           the points and cash. Dismissing closes it without a payout.
         </p>
       </header>
@@ -42,7 +42,7 @@ async function Approvals() {
           hint="Approvals queued by crews"
           tone="pink"
         />
-        <StatCard label="Target requests" value={targetCount} tone="cyan" />
+        <StatCard label="Task requests" value={targetCount} tone="cyan" />
         <StatCard label="Dexter requests" value={dexterCount} tone="violet" />
       </section>
 

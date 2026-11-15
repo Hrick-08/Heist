@@ -452,7 +452,7 @@ export async function allocateRoundAction(
   revalidatePath("/dashboard");
   return {
     ok: true,
-    message: `Round ${state.currentRound}: ${result.assigned} crew(s) got a technical target, ${result.unassigned} went without one, ${result.skipped} already had a board.`,
+    message: `Round ${state.currentRound}: ${result.assigned} crew(s) got a technical task, ${result.unassigned} went without one, ${result.skipped} already had a board.`,
   };
 }
 

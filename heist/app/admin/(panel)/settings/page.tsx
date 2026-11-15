@@ -24,7 +24,7 @@ async function Settings() {
         <p className="eyebrow">Event configuration</p>
         <h1 className="headline mt-2 text-4xl text-white">Settings</h1>
         <p className="mt-2 text-sm text-white/45">
-          Tune the slots, the economy and the target counts.
+          Tune the slots, the economy and the task counts.
         </p>
       </header>
 
@@ -36,7 +36,7 @@ async function Settings() {
           tone="pink"
         />
         <StatCard
-          label="Targets per round"
+          label="Tasks per round"
           value={`${state.physicalPerRound} + ${state.technicalPerRound}`}
           hint="Physical (shared) + technical (unique)"
           tone="cyan"
@@ -94,7 +94,7 @@ async function Settings() {
               </div>
               <div>
                 <label className="field-label" htmlFor="physicalPerRound">
-                  Physical targets per round
+                  Physical tasks per round
                 </label>
                 <input
                   id="physicalPerRound"
@@ -107,7 +107,7 @@ async function Settings() {
               </div>
               <div>
                 <label className="field-label" htmlFor="technicalPerRound">
-                  Technical targets per round
+                  Technical tasks per round
                 </label>
                 <input
                   id="technicalPerRound"
@@ -177,13 +177,13 @@ async function Settings() {
       <Panel>
         <PanelHeader
           title="Maintenance"
-          subtitle="Seed the starter target pool and Dexter missions (only fills what is empty)."
+          subtitle="Seed the starter task pool and Dexter missions (only fills what is empty)."
           accent="amber"
         />
         <div className="space-y-3 p-5">
           <ActionForm
             action={seedAction}
-            submitLabel="Seed target pool"
+            submitLabel="Seed task pool"
             submitClassName="btn-ghost"
           />
           <p className="text-[11px] leading-relaxed text-white/35">

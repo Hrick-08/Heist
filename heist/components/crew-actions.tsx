@@ -137,7 +137,7 @@ function RequestSubmit({ label }: { label: string }) {
 }
 
 /**
- * Lets a crew put a target or a Dexter mission in front of the control room.
+ * Lets a crew put a task or a Dexter mission in front of the control room.
  * An admin approves it from the approvals queue, which is what pays out.
  */
 export function RequestApproval({

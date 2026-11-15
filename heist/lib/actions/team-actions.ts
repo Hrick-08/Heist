@@ -51,7 +51,7 @@ export async function unlockEndgameAction(
 }
 
 /**
- * A crew asks the control room to sign off a target or a Dexter mission.
+ * A crew asks the control room to sign off a task or a Dexter mission.
  */
 export async function requestApprovalAction(
   _prev: TeamActionResult,

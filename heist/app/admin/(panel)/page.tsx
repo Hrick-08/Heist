@@ -155,14 +155,14 @@ async function Overview() {
 
             <ActionForm
               action={allocateRoundAction}
-              submitLabel={`Allocate round ${state.currentRound} targets`}
+              submitLabel={`Allocate round ${state.currentRound} tasks`}
               submitClassName="btn-violet w-full"
               className="space-y-3"
             >
               <p className="text-xs leading-relaxed text-white/45">
                 Hands this round&apos;s board to every crew that does not have one
-                yet. Physical targets are shared, technical targets are dealt
-                one to one crew.
+                yet. Physical tasks are shared, technical tasks are dealt one to
+                one crew.
               </p>
             </ActionForm>
 
@@ -182,8 +182,8 @@ async function Overview() {
               className="space-y-3"
             >
               <p className="text-xs leading-relaxed text-white/45">
-                Ranking by points, then targets cleared. The bottom half of the
-                board is eliminated and the next round&apos;s targets are
+                Ranking by points, then tasks cleared. The bottom half of the
+                board is eliminated and the next round&apos;s tasks are
                 allocated to the survivors.
               </p>
             </ActionForm>
@@ -205,13 +205,13 @@ async function Overview() {
         <Panel>
           <PanelHeader
             title="Desk activity"
-            subtitle="Targets verified at the desk."
+            subtitle="Tasks verified at the desk."
             accent="cyan"
           />
           {feed.length === 0 ? (
             <EmptyState
               title="Nothing verified yet"
-              description="As crews reach the desk and you mark their targets, the activity shows up here."
+              description="As crews reach the desk and you mark their tasks, the activity shows up here."
             />
           ) : (
             <ul className="divide-y divide-white/6">

@@ -13,12 +13,12 @@ const BRIEFING = [
   {
     step: "02",
     title: "Crack the board",
-    body: "Four rounds. Physical targets are shared by every crew, technical targets are yours alone. Complete them in any order — the admin desk marks each one.",
+    body: "Four rounds. Physical tasks are shared by every crew, technical tasks are yours alone. Complete them in any order — send each one to the admin desk for sign-off.",
   },
   {
     step: "03",
     title: "Stack the cash",
-    body: "Every target pays points (for the leaderboard) and cash (for clues, bribes and the endgame). Points decide who survives. Cash keeps you alive.",
+    body: "Every task pays points (for the leaderboard) and cash (for clues, bribes and the endgame). Points decide who survives. Cash keeps you alive.",
   },
   {
     step: "04",
@@ -51,7 +51,7 @@ export default function HomePage() {
         </h1>
         <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/55 sm:text-lg">
           A GTA VI themed campus showdown. Forty crews, four rounds, one vault.
-          Finish every target, buy what you need, and be the last crew standing
+          Finish every task, buy what you need, and be the last crew standing
           when the lights go out.
         </p>
 
