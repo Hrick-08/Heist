@@ -1,12 +1,14 @@
 import type { TeamTaskView } from "@/lib/game";
-import { TaskActions } from "@/components/crew-actions";
+import { RequestApproval, TaskActions } from "@/components/crew-actions";
 
 export function TaskCard({
   allotment,
   canAfford,
+  requested = false,
 }: {
   allotment: TeamTaskView;
   canAfford: boolean;
+  requested?: boolean;
 }) {
   const { task } = allotment;
   const done = allotment.status === "completed";
@@ -81,6 +83,15 @@ export function TaskCard({
           canAfford={canAfford}
         />
       ) : null}
+
+      {!done && (
+        <RequestApproval
+          kind="target"
+          refId={String(allotment._id)}
+          requested={requested}
+          label="Done at the desk? Request approval"
+        />
+      )}
 
       {done && allotment.completedAt && (
         <p className="mt-3 text-[11px] text-white/40">

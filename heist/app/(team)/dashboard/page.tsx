@@ -14,6 +14,7 @@ import {
   getTeamTasks,
   getVisibleMissions,
   getWantedTeams,
+  listApprovalsForTeam,
 } from "@/lib/game";
 import { requireTeam } from "@/lib/session";
 
@@ -48,12 +49,15 @@ function DashboardSkeleton() {
 async function Dashboard() {
   const { team } = await requireTeam();
   const state = await getEventState();
-  const [allTasks, missions, wanted, board] = await Promise.all([
+  const [allTasks, missions, wanted, board, approvals] = await Promise.all([
     getTeamTasks(team.teamId),
     getVisibleMissions(team.teamId, state.currentRound),
     getWantedTeams(),
     getLeaderboard(),
+    listApprovalsForTeam(team.teamId),
   ]);
+
+  const pendingRefs = new Set(approvals.map((a) => String(a.refId)));
 
   const completed = allTasks.filter((t) => t.status === "completed");
   const rank = board.findIndex((row) => row.teamId === team.teamId) + 1;
@@ -142,6 +146,7 @@ async function Dashboard() {
               key={String(mission._id)}
               mission={mission}
               completed={false}
+              requested={pendingRefs.has(String(mission._id))}
             />
           ))}
           {pendingMissions.length === 0 && (
@@ -187,6 +192,7 @@ async function Dashboard() {
                 key={String(task._id)}
                 allotment={task}
                 canAfford={team.money >= task.task.hintCost}
+                requested={pendingRefs.has(String(task._id))}
               />
             ))}
           </div>

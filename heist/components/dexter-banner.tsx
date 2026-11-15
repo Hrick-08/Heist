@@ -1,11 +1,14 @@
+import { RequestApproval } from "@/components/crew-actions";
 import type { DexterMission } from "@/lib/types";
 
 export function DexterBanner({
   mission,
   completed,
+  requested = false,
 }: {
   mission: DexterMission;
   completed: boolean;
+  requested?: boolean;
 }) {
   return (
     <section
@@ -57,6 +60,15 @@ export function DexterBanner({
                 : "Report to the admin desk to close this out."}
             </span>
           </div>
+
+          {!completed && (
+            <RequestApproval
+              kind="dexter"
+              refId={String(mission._id)}
+              requested={requested}
+              label="Dexter mission done? Request sign-off"
+            />
+          )}
         </div>
       </div>
     </section>

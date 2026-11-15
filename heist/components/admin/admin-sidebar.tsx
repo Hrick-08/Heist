@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const LINKS = [
   { href: "/admin", label: "Overview", icon: "◈" },
+  { href: "/admin/approvals", label: "Approvals", icon: "✓" },
   { href: "/admin/teams", label: "Crews", icon: "▣" },
   { href: "/admin/tasks", label: "Task pool", icon: "⌘" },
   { href: "/admin/dexter", label: "Dexter", icon: "◐" },
@@ -12,7 +13,7 @@ const LINKS = [
   { href: "/admin/settings", label: "Settings", icon: "⚙" },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ pendingCount = 0 }: { pendingCount?: number }) {
   const pathname = usePathname();
 
   return (
@@ -24,6 +25,7 @@ export function AdminSidebar() {
             link.href === "/admin"
               ? pathname === "/admin"
               : pathname === link.href || pathname.startsWith(`${link.href}/`);
+          const badge = link.href === "/admin/approvals" ? pendingCount : 0;
           return (
             <li key={link.href} className="shrink-0">
               <Link
@@ -38,6 +40,11 @@ export function AdminSidebar() {
                   {link.icon}
                 </span>
                 {link.label}
+                {badge > 0 && (
+                  <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-pink px-1.5 font-mono-display text-[10px] text-white">
+                    {badge}
+                  </span>
+                )}
               </Link>
             </li>
           );

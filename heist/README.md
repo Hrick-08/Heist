@@ -67,9 +67,23 @@ Crews that register late get the current round's board automatically.
 
 ### 3. Verify targets at the desk
 
-Crews come to the desk and show their work. Open the crew
-(**Control room → Crews → Verify**) and hit **Mark complete**. Points and cash
-land immediately. **Revert** takes a target back and removes the reward.
+Crews come to the desk and show their work. Two ways to sign it off:
+
+- **Direct** — open the crew (**Control room → Crews → Verify**) and hit
+  **Mark complete**. Points and cash land immediately. **Revert** takes a target
+  back and removes the reward.
+- **Via a request** — the crew taps **“Done at the desk? Request approval”** on
+  the target (or **“Dexter mission done? Request sign-off”** on a Dexter
+  mission) and it lands in **Control room → Approvals**. The queue shows the
+  crew, the target and the reward, with **Approve & pay** and **Dismiss**.
+
+Approving is what pays out, and it is recorded against the operator who
+approved it. Dismissing closes the request without a reward — the crew can
+raise it again. Signing a target off directly also closes any request the crew
+had queued for it, so the queue never goes stale.
+
+The sidebar shows a live count of requests waiting, and the overview links
+straight to the queue.
 
 ### 4. Push Dexter missions
 
@@ -113,6 +127,7 @@ When the final round is done, hit **Crown the champion**.
 | `/leaderboard` | everyone | Public standings (points only) |
 | `/admin/login` | operator | Control-room sign-in |
 | `/admin` | operator | Overview, round control, desk activity |
+| `/admin/approvals` | operator | Approve or dismiss mission/target requests |
 | `/admin/teams` | operator | Register crews, search, post wanted posters |
 | `/admin/teams/[teamId]` | operator | Crew record, verification desk, Dexter payouts |
 | `/admin/tasks` | operator | Target pool CRUD |
@@ -154,6 +169,7 @@ proxy.ts                      route guards for /dashboard, /tasks, /endgame, /ad
 | `tasks` | Target pool — type (`physical` / `technical`), round, points, cash, hint and hint price, endgame flag |
 | `teamTasks` | Allotments — one row per crew per target, with completion and payout state |
 | `dexterMissions` | Dexter missions — reward, round, difficulty, target crews, completions |
+| `approvals` | Crew requests waiting on the desk, with who approved or dismissed them |
 | `eventState` | Current round, slot count, prices, target counts, live/closed flag, champion |
 | `admins` | Control-room operators |
 

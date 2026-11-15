@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { ActionForm } from "@/components/admin/action-form";
+import { ApprovalQueue } from "@/components/admin/approval-queue";
 import { EmptyState, Panel, PanelHeader, StatCard } from "@/components/ui";
 import {
   adjustScoreAction,
@@ -17,6 +18,7 @@ import {
   getEventState,
   getTeam,
   getTeamTasks,
+  listApprovalsForTeam,
   listMissions,
 } from "@/lib/game";
 
@@ -39,10 +41,11 @@ async function TeamDetail({ params }: { params: Promise<{ teamId: string }> }) {
   const team = await getTeam(teamId);
   if (!team) notFound();
 
-  const [state, tasks, missions] = await Promise.all([
+  const [state, tasks, missions, approvals] = await Promise.all([
     getEventState(),
     getTeamTasks(team.teamId),
     listMissions(),
+    listApprovalsForTeam(team.teamId),
   ]);
 
   const completed = tasks.filter((t) => t.status === "completed").length;
@@ -233,6 +236,21 @@ async function TeamDetail({ params }: { params: Promise<{ teamId: string }> }) {
           </div>
         </Panel>
       </div>
+
+      {/* Approvals */}
+      <Panel>
+        <PanelHeader
+          title="Waiting on the desk"
+          subtitle="Requests this crew has raised. Approving signs them off and pays out."
+          accent="amber"
+          action={
+            <Link href="/admin/approvals" className="btn-ghost btn-sm">
+              Full queue
+            </Link>
+          }
+        />
+        <ApprovalQueue approvals={approvals} showCrew={false} />
+      </Panel>
 
       {/* Targets */}
       <Panel>

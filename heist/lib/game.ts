@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 
 import {
   adminsCol,
+  approvalsCol,
   missionsCol,
   stateCol,
   tasksCol,
@@ -13,6 +14,9 @@ import {
 } from "./collections";
 import { hashPassword } from "./auth";
 import type {
+  ApprovalKind,
+  ApprovalRequest,
+  ApprovalView,
   DexterMission,
   EventState,
   LeaderboardRow,
@@ -318,6 +322,7 @@ export async function markTaskComplete(
     },
   );
   await adjustTeamScore(teamId, allotment.points, allotment.money);
+  await closeRequestsFor("target", id, adminName);
   return {
     ok: true,
     message: `Task completed. +${allotment.points} pts, +$${allotment.money}.`,
@@ -762,10 +767,272 @@ export async function completeMission(
     dexterCompleted: [...team.dexterCompleted, String(id)],
   });
   await adjustTeamScore(teamId, mission.points, mission.money);
+  await closeRequestsFor("dexter", id, adminName);
   return {
     ok: true,
     message: `Dexter mission logged by ${adminName}. +${mission.points} pts, +$${mission.money}.`,
   };
+}
+
+/* ------------------------------------------------------------------ */
+/* Approval requests                                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A crew asks the desk to sign off on a target or a Dexter mission.
+ * Only one live request may exist per crew + target.
+ */
+export async function requestApproval(
+  kind: ApprovalKind,
+  teamId: string,
+  refId: string,
+  note = "",
+): Promise<{ ok: boolean; message: string }> {
+  if (!ObjectId.isValid(refId)) {
+    return { ok: false, message: "Invalid request reference." };
+  }
+  const id = new ObjectId(refId);
+  const col = await approvalsCol();
+
+  const existing = await col.findOne({ teamId, refId: id, status: "pending" });
+  if (existing) {
+    return { ok: false, message: "Already queued for the desk." };
+  }
+
+  if (kind === "target") {
+    const allotment = await (await teamTasksCol()).findOne({
+      _id: id,
+      teamId,
+    });
+    if (!allotment) return { ok: false, message: "Target not found." };
+    if (allotment.status === "completed") {
+      return { ok: false, message: "This target is already verified." };
+    }
+  } else {
+    const mission = await (await missionsCol()).findOne({ _id: id });
+    if (!mission) return { ok: false, message: "Mission not found." };
+    const team = await getTeam(teamId);
+    if (team?.dexterCompleted.includes(String(id))) {
+      return { ok: false, message: "This mission is already signed off." };
+    }
+  }
+
+  await col.insertOne({
+    kind,
+    refId: id,
+    teamId,
+    status: "pending",
+    note: note.slice(0, 300),
+    requestedAt: new Date(),
+    resolvedAt: null,
+    resolvedBy: null,
+  });
+
+  return {
+    ok: true,
+    message:
+      kind === "target"
+        ? "Queued for the desk — an admin will verify your target."
+        : "Queued for the desk — an admin will sign off your Dexter mission.",
+  };
+}
+
+async function decorateApprovals(
+  rows: ApprovalRequest[],
+): Promise<ApprovalView[]> {
+  if (rows.length === 0) return [];
+
+  const crewIds = [...new Set(rows.map((r) => r.teamId))];
+  const teams = await (await teamsCol())
+    .find({ teamId: { $in: crewIds } })
+    .toArray();
+  const crewMap = new Map(teams.map((t) => [t.teamId, t]));
+
+  const targetIds = rows
+    .filter((r) => r.kind === "target")
+    .map((r) => r.refId);
+  const allotments = targetIds.length
+    ? await (await teamTasksCol())
+        .find({ _id: { $in: targetIds } })
+        .toArray()
+    : [];
+  const allotmentMap = new Map(
+    allotments.map((a) => [String(a._id), a] as const),
+  );
+
+  const pool = await tasksCol();
+  const taskIds = allotments.map((a) => a.taskId);
+  const tasks = taskIds.length
+    ? await pool.find({ _id: { $in: taskIds } }).toArray()
+    : [];
+  const taskMap = new Map(tasks.map((t) => [String(t._id), t] as const));
+
+  const missionIds = rows
+    .filter((r) => r.kind === "dexter")
+    .map((r) => r.refId);
+  const missions = missionIds.length
+    ? await (await missionsCol())
+        .find({ _id: { $in: missionIds } })
+        .toArray()
+    : [];
+  const missionMap = new Map(missions.map((m) => [String(m._id), m] as const));
+
+  return rows.map((row) => {
+    if (row.kind === "target") {
+      const allotment = allotmentMap.get(String(row.refId));
+      const task = allotment ? taskMap.get(String(allotment.taskId)) : undefined;
+      return {
+        id: String(row._id),
+        kind: row.kind,
+        refId: String(row.refId),
+        teamId: row.teamId,
+        crewName: crewMap.get(row.teamId)?.name ?? row.teamId,
+        title: task?.title ?? "Target",
+        description: task?.description ?? "",
+        points: allotment?.points ?? task?.points ?? 0,
+        money: allotment?.money ?? task?.money ?? 0,
+        round: allotment?.round ?? task?.round ?? 0,
+        kindLabel: "Target",
+        note: row.note,
+        status: row.status,
+        requestedAt: row.requestedAt,
+        resolvedAt: row.resolvedAt,
+        resolvedBy: row.resolvedBy,
+      };
+    }
+
+    const mission = missionMap.get(String(row.refId));
+    return {
+      id: String(row._id),
+      kind: row.kind,
+      refId: String(row.refId),
+      teamId: row.teamId,
+      crewName: crewMap.get(row.teamId)?.name ?? row.teamId,
+      title: mission?.title ?? "Dexter mission",
+      description: mission?.description ?? "",
+      points: mission?.points ?? 0,
+      money: mission?.money ?? 0,
+      round: mission?.round ?? 0,
+      kindLabel: "Dexter",
+      note: row.note,
+      status: row.status,
+      requestedAt: row.requestedAt,
+      resolvedAt: row.resolvedAt,
+      resolvedBy: row.resolvedBy,
+    };
+  });
+}
+
+export async function listPendingApprovals(): Promise<ApprovalView[]> {
+  const col = await approvalsCol();
+  const rows = await col
+    .find({ status: "pending" })
+    .sort({ requestedAt: 1 })
+    .toArray();
+  return decorateApprovals(rows);
+}
+
+export async function listApprovalsForTeam(
+  teamId: string,
+): Promise<ApprovalView[]> {
+  const col = await approvalsCol();
+  const rows = await col
+    .find({ teamId, status: "pending" })
+    .sort({ requestedAt: 1 })
+    .toArray();
+  return decorateApprovals(rows);
+}
+
+export async function countPendingApprovals(): Promise<number> {
+  const col = await approvalsCol();
+  return col.countDocuments({ status: "pending" });
+}
+
+/** Closes a request without paying it out. */
+export async function dismissApproval(
+  id: string,
+  adminName: string,
+): Promise<{ ok: boolean; message: string }> {
+  if (!ObjectId.isValid(id)) {
+    return { ok: false, message: "Invalid request." };
+  }
+  const col = await approvalsCol();
+  const request = await col.findOne({ _id: new ObjectId(id) });
+  if (!request) return { ok: false, message: "Request not found." };
+  if (request.status !== "pending") {
+    return { ok: false, message: "Request already closed." };
+  }
+  await col.updateOne(
+    { _id: new ObjectId(id) },
+    {
+      $set: {
+        status: "dismissed",
+        resolvedAt: new Date(),
+        resolvedBy: adminName,
+      },
+    },
+  );
+  return { ok: true, message: "Request dismissed — nothing was paid out." };
+}
+
+/**
+ * Signs off a request: the target is marked complete or the Dexter mission is
+ * credited, and the payout lands on the crew.
+ */
+export async function approveRequest(
+  id: string,
+  adminName: string,
+): Promise<{ ok: boolean; message: string }> {
+  if (!ObjectId.isValid(id)) {
+    return { ok: false, message: "Invalid request." };
+  }
+  const col = await approvalsCol();
+  const request = await col.findOne({ _id: new ObjectId(id) });
+  if (!request) return { ok: false, message: "Request not found." };
+  if (request.status !== "pending") {
+    return { ok: false, message: "Request already closed." };
+  }
+
+  const result =
+    request.kind === "target"
+      ? await markTaskComplete(request.teamId, String(request.refId), adminName)
+      : await completeMission(String(request.refId), request.teamId, adminName);
+
+  if (!result.ok) {
+    return result;
+  }
+
+  await col.updateOne(
+    { _id: new ObjectId(id) },
+    {
+      $set: {
+        status: "approved",
+        resolvedAt: new Date(),
+        resolvedBy: adminName,
+      },
+    },
+  );
+
+  return { ok: true, message: result.message };
+}
+
+/** Closes any live request for a target/mission once it has been signed off. */
+async function closeRequestsFor(
+  kind: ApprovalKind,
+  refId: ObjectId,
+  adminName: string,
+): Promise<void> {
+  const col = await approvalsCol();
+  await col.updateMany(
+    { kind, refId, status: "pending" },
+    {
+      $set: {
+        status: "approved",
+        resolvedAt: new Date(),
+        resolvedBy: adminName,
+      },
+    },
+  );
 }
 
 /* ------------------------------------------------------------------ */

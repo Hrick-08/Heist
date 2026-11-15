@@ -77,7 +77,7 @@ export function StatCard({
 }: {
   label: string;
   value: ReactNode;
-  hint?: string;
+  hint?: ReactNode;
   tone?: "white" | "pink" | "cyan" | "amber" | "lime" | "violet";
   icon?: ReactNode;
 }) {

@@ -131,6 +131,46 @@ export interface TeamWithTasks extends Team {
   tasks: TeamTask[];
 }
 
+/** What a crew is asking the desk to approve. */
+export type ApprovalKind = "target" | "dexter";
+
+export interface ApprovalRequest {
+  _id?: ObjectId;
+  /** "target" for a task allotment, "dexter" for a Dexter mission. */
+  kind: ApprovalKind;
+  /** teamTasks._id for a target, dexterMissions._id for a Dexter mission. */
+  refId: ObjectId;
+  teamId: string;
+  status: "pending" | "approved" | "dismissed";
+  /** Optional note the crew left for the desk. */
+  note: string;
+  requestedAt: Date;
+  resolvedAt: Date | null;
+  resolvedBy: string | null;
+}
+
+/** A pending request joined with the crew and the target/mission it refers to.
+ *  Plain and serialisable so it can cross the server/client boundary. */
+export interface ApprovalView {
+  id: string;
+  kind: ApprovalKind;
+  /** teamTasks id for a target, dexterMissions id for a Dexter mission. */
+  refId: string;
+  teamId: string;
+  crewName: string;
+  title: string;
+  description: string;
+  points: number;
+  money: number;
+  round: number;
+  kindLabel: string;
+  note: string;
+  status: "pending" | "approved" | "dismissed";
+  requestedAt: Date;
+  resolvedAt: Date | null;
+  resolvedBy: string | null;
+}
+
 /** Serializable projection of a team, safe to pass into client components. */
 /** Serializable projection of a task, safe to pass into client components. */
 export interface TaskRow {

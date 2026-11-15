@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { TaskCard } from "@/components/task-card";
 import { EmptyState, Panel, PanelHeader } from "@/components/ui";
-import { getEventState, getTeamTasks } from "@/lib/game";
+import { getEventState, getTeamTasks, listApprovalsForTeam } from "@/lib/game";
 import { requireTeam } from "@/lib/session";
 
 export const instant = false;
@@ -18,10 +18,13 @@ export default function TasksPage() {
 
 async function Tasks() {
   const { team } = await requireTeam();
-  const [state, tasks] = await Promise.all([
+  const [state, tasks, approvals] = await Promise.all([
     getEventState(),
     getTeamTasks(team.teamId),
+    listApprovalsForTeam(team.teamId),
   ]);
+
+  const pendingRefs = new Set(approvals.map((a) => String(a.refId)));
 
   const rounds = [...new Set(tasks.map((t) => t.round))].sort((a, b) => a - b);
 
@@ -68,6 +71,7 @@ async function Tasks() {
                     key={String(task._id)}
                     allotment={task}
                     canAfford={team.money >= task.task.hintCost}
+                    requested={pendingRefs.has(String(task._id))}
                   />
                 ))}
               </div>

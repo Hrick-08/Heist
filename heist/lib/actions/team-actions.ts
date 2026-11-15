@@ -2,7 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 
-import { purchaseHint, removeWanted, unlockEndgame } from "@/lib/game";
+import {
+  purchaseHint,
+  removeWanted,
+  requestApproval,
+  unlockEndgame,
+} from "@/lib/game";
 import { requireTeam } from "@/lib/session";
 
 export interface TeamActionResult {
@@ -41,6 +46,28 @@ export async function unlockEndgameAction(
   const result = await unlockEndgame(team.teamId);
   revalidatePath("/dashboard");
   revalidatePath("/endgame");
+  revalidatePath("/tasks");
+  return result;
+}
+
+/**
+ * A crew asks the control room to sign off a target or a Dexter mission.
+ */
+export async function requestApprovalAction(
+  _prev: TeamActionResult,
+  formData: FormData,
+): Promise<TeamActionResult> {
+  const { team } = await requireTeam();
+  const kind = String(formData.get("kind") ?? "target");
+  const refId = String(formData.get("refId") ?? "");
+  const note = String(formData.get("note") ?? "");
+  const result = await requestApproval(
+    kind === "dexter" ? "dexter" : "target",
+    team.teamId,
+    refId,
+    note,
+  );
+  revalidatePath("/dashboard");
   revalidatePath("/tasks");
   return result;
 }

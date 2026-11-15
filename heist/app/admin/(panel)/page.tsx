@@ -17,6 +17,7 @@ import {
   getRecentCompletions,
   getTotals,
   listMissions,
+  listPendingApprovals,
   listTeams,
 } from "@/lib/game";
 
@@ -31,14 +32,16 @@ export default function AdminOverviewPage() {
 }
 
 async function Overview() {
-  const [state, totals, teams, board, missions, feed] = await Promise.all([
-    getEventState(),
-    getTotals(),
-    listTeams(),
-    getLeaderboard(),
-    listMissions(),
-    getRecentCompletions(10),
-  ]);
+  const [state, totals, teams, board, missions, feed, approvals] =
+    await Promise.all([
+      getEventState(),
+      getTotals(),
+      listTeams(),
+      getLeaderboard(),
+      listMissions(),
+      getRecentCompletions(10),
+      listPendingApprovals(),
+    ]);
 
   const selected = teams.filter((t) => t.status === "selected").length;
   const eliminated = teams.filter((t) => t.status === "eliminated").length;
@@ -81,12 +84,26 @@ async function Overview() {
         </section>
       )}
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard
           label="Crews registered"
           value={teams.length}
           hint={`${selected} in play · ${eliminated} out · ${waitlisted} waiting`}
           tone="pink"
+        />
+        <StatCard
+          label="Waiting on the desk"
+          value={approvals.length}
+          hint={
+            approvals.length > 0 ? (
+              <Link href="/admin/approvals" className="text-cyan hover:underline">
+                Review approvals →
+              </Link>
+            ) : (
+              "No approvals queued"
+            )
+          }
+          tone="amber"
         />
         <StatCard
           label="Points on the board"
@@ -98,7 +115,7 @@ async function Overview() {
           label="Cash in play"
           value={"$" + totals.money.toLocaleString("en-IN")}
           hint="Clues, bribes, endgame"
-          tone="amber"
+          tone="lime"
         />
         <StatCard
           label="Dexter missions live"

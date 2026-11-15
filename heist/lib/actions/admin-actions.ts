@@ -6,6 +6,7 @@ import { generatePassword, hashPassword } from "@/lib/auth";
 import {
   adjustTeamScore,
   advanceRound,
+  approveRequest,
   assignRoundTasks,
   completeMission,
   createMission,
@@ -13,6 +14,7 @@ import {
   crownChampion,
   deleteMission,
   deleteTask,
+  dismissApproval,
   getEventState,
   listSelectedTeams,
   markTaskComplete,
@@ -377,7 +379,40 @@ export async function completeMissionAction(
   const teamId = text(formData, "teamId");
   const result = await completeMission(missionId, teamId, session.name);
   revalidatePath("/admin/dexter");
+  revalidatePath("/admin/approvals");
   revalidatePath(`/admin/teams/${teamId}`);
+  revalidatePath("/dashboard");
+  return { ok: result.ok, message: result.message };
+}
+
+/* ------------------------------------------------------------------ */
+/* Approval queue                                                      */
+/* ------------------------------------------------------------------ */
+
+export async function approveRequestAction(
+  _prev: AdminActionResult,
+  formData: FormData,
+): Promise<AdminActionResult> {
+  const session = await requireAdmin();
+  const id = text(formData, "requestId");
+  const result = await approveRequest(id, session.name);
+  revalidatePath("/admin/approvals");
+  revalidatePath("/admin");
+  revalidatePath("/admin/teams");
+  revalidatePath("/dashboard");
+  revalidatePath("/tasks");
+  return { ok: result.ok, message: result.message };
+}
+
+export async function dismissRequestAction(
+  _prev: AdminActionResult,
+  formData: FormData,
+): Promise<AdminActionResult> {
+  const session = await requireAdmin();
+  const id = text(formData, "requestId");
+  const result = await dismissApproval(id, session.name);
+  revalidatePath("/admin/approvals");
+  revalidatePath("/admin");
   revalidatePath("/dashboard");
   return { ok: result.ok, message: result.message };
 }

@@ -4,6 +4,7 @@ import type { Collection } from "mongodb";
 
 import { getDb } from "./db";
 import type {
+  ApprovalRequest,
   DexterMission,
   EventState,
   Task,
@@ -41,4 +42,8 @@ export async function adminsCol(): Promise<Collection<AdminUser>> {
 
 export async function stateCol(): Promise<Collection<EventState>> {
   return (await getDb()).collection<EventState>("eventState");
+}
+
+export async function approvalsCol(): Promise<Collection<ApprovalRequest>> {
+  return (await getDb()).collection<ApprovalRequest>("approvals");
 }
