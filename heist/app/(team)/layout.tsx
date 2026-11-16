@@ -1,6 +1,23 @@
-import { TeamHeader } from "@/components/team-header";
-import { getEventState } from "@/lib/game";
+import { Barlow_Semi_Condensed, Bowlby_One } from "next/font/google";
+import { Suspense } from "react";
+
+import { PlayerNav } from "@/components/player/nav";
+import { TopBar } from "@/components/player/top-bar";
+import { getShellData } from "@/lib/player";
 import { requireTeam } from "@/lib/session";
+
+import "./player.css";
+
+const display = Bowlby_One({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-pl-display",
+});
+const body = Barlow_Semi_Condensed({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-pl-body",
+});
 
 export const instant = false;
 
@@ -12,18 +29,25 @@ export default async function TeamLayout({
   // The guard lives in the layout (not inside a Suspense boundary) so an
   // unauthenticated request is redirected instead of rendering a half shell.
   const { team } = await requireTeam();
-  const state = await getEventState();
+  const { state, ledger, pointsLedger } = await getShellData(team);
 
   return (
-    <div className="flex min-h-full flex-col">
-      <TeamHeader team={team} state={state} />
-      <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-8">{children}</main>
-      <footer className="border-t border-white/8 px-5 py-6 text-center">
-        <p className="eyebrow">
-          The Last Heist · GDG Campus Chitkara · Cash never touches the
-          leaderboard
-        </p>
-      </footer>
+    <div className={`pl ${display.variable} ${body.variable}`}>
+      <TopBar
+        teamId={team.teamId}
+        name={team.name}
+        hasPhoto={Boolean(team.leader.photo)}
+        points={team.points}
+        cash={team.money}
+        round={state.currentRound}
+        totalRounds={state.totalRounds}
+        ledger={ledger}
+        pointsLedger={pointsLedger}
+      />
+      <Suspense fallback={null}>
+        <PlayerNav />
+      </Suspense>
+      <main className="app">{children}</main>
     </div>
   );
 }
