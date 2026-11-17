@@ -5,6 +5,7 @@ import {
   getEventState,
   getLeaderboard,
   getTeamTasks,
+  getVisibleMissions,
   listApprovalsForTeam,
   listTeams,
   type TeamTaskView,
@@ -13,6 +14,7 @@ import type {
   ApprovalView,
   EventState,
   LedgerEntry,
+  NotifySnap,
   PlayerTask,
   RankedCrew,
   Team,
@@ -311,7 +313,7 @@ export async function getRankedCrews(): Promise<RankedCrew[]> {
       ...row,
       leaderName: team?.leader.name ?? "",
       membersCount: team ? team.members.length + 1 : 0,
-      wantedSince: team?.wanted ? formatDay(team.wantedAt) : "",
+      wantedSince: team?.wanted ? formatTime(team.wantedAt) : "",
       stars: wantedStars(row.isWanted, row.rank),
       hasPhoto: Boolean(team?.leader.photo),
       bounty: row.points,
@@ -343,12 +345,57 @@ export function getFunnel(state: EventState, survivors: number): FunnelStep[] {
   return steps;
 }
 
-/** Everything the player shell (top bar, banner) needs on every page. */
+/** What the notification centre diffs between refreshes. Plain and serialisable. */
+export async function getNotifySnapshot(
+  team: Team,
+  state: EventState,
+): Promise<NotifySnap> {
+  const [board, allotments, approvals, missions] = await Promise.all([
+    getLeaderboard(),
+    getTeamTasks(team.teamId),
+    listApprovalsForTeam(team.teamId),
+    getVisibleMissions(team.teamId, state.currentRound),
+  ]);
+  const pending = new Set(approvals.map((a) => String(a.refId)));
+  const rank = board.findIndex((row) => row.teamId === team.teamId) + 1;
+
+  return {
+    rank,
+    round: state.currentRound,
+    totalRounds: state.totalRounds,
+    wanted: team.wanted,
+    endgameUnlocked: team.endgameUnlocked,
+    status: team.status,
+    tasks: allotments
+      .filter((v) => v.task)
+      .map((v) => ({
+        id: String(v._id),
+        title: v.task!.title,
+        points: v.points,
+        money: v.money,
+        done: v.status === "completed",
+        requested: pending.has(String(v._id)),
+        clue: v.hintPurchased,
+        endgame: v.isEndgame,
+      })),
+    dexter: missions.map((m) => ({
+      id: String(m._id),
+      title: m.title,
+      points: m.points,
+      money: m.money,
+      done: team.dexterCompleted.includes(String(m._id)),
+      requested: pending.has(String(m._id)),
+    })),
+  };
+}
+
+/** Everything the player shell (top bar, notifications) needs on every page. */
 export async function getShellData(team: Team) {
   const state = await getEventState();
-  const [ledger, pointsLedger] = await Promise.all([
+  const [ledger, pointsLedger, snap] = await Promise.all([
     getTeamLedger(team, state),
     getTeamPointsLedger(team),
+    getNotifySnapshot(team, state),
   ]);
-  return { state, ledger, pointsLedger };
+  return { state, ledger, pointsLedger, snap };
 }

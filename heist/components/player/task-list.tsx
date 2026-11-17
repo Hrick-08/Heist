@@ -76,11 +76,11 @@ export function TaskList({
 
       <div className="fchips" aria-label="Filter tasks">
         <button className={f === "all" ? "fchip on" : "fchip"} onClick={() => setF("all")}>
-          All tasks
+          All tasks <i>{regular.length}</i>
         </button>
         {kinds.map((k) => (
           <button key={k} className={f === k ? "fchip on" : "fchip"} onClick={() => setF(k)}>
-            {KIND[k].label}
+            {KIND[k].label} <i>{regular.filter((t) => t.type === k).length}</i>
           </button>
         ))}
       </div>
@@ -135,11 +135,11 @@ function TaskCard({
           <span className="mute small">{t.station}</span>
           <div className="rewards" style={{ margin: 0 }}>
             <span className={done ? "reward ok" : "reward"}>
-              <Bolt size={13} />
+              <Bolt size={20} />
               {done ? `Done, +${t.points} pts` : `+${t.points} pts`}
             </span>
             <span className={done ? "reward ok" : "reward"}>
-              <Coin size={13} />+{money(t.money)}
+              <Coin size={20} />+{money(t.money)}
             </span>
           </div>
         </div>

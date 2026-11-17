@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { BlockSkeleton } from "@/components/player/skeleton";
+
 import { ClueButton, SignoffButton } from "@/components/player/actions";
 import { count, money } from "@/components/player/format";
 import { getEventState, listApprovalsForTeam } from "@/lib/game";
@@ -16,7 +18,7 @@ export default function TaskDetailPage({
   params: Promise<{ id: string }>;
 }) {
   return (
-    <Suspense fallback={<div className="card" style={{ height: 240 }} />}>
+    <Suspense fallback={<BlockSkeleton />}>
       <TaskDetail params={params} />
     </Suspense>
   );
@@ -35,7 +37,7 @@ async function TaskDetail({ params }: { params: Promise<{ id: string }> }) {
   const kind = task.isEndgame ? "Endgame" : task.type === "physical" ? "Physical" : "Technical";
 
   return (
-    <div style={{ ["--c" as string]: color }}>
+    <div className={task.isEndgame ? "dtint etint" : undefined} style={{ ["--c" as string]: color }}>
       <Link href="/dashboard" className="back">Back to home</Link>
       <div className="chiprow">
         <span className="tag">{kind}</span>

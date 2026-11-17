@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 
 import { logoutAction } from "@/lib/actions/auth-actions";
-import type { LedgerEntry } from "@/lib/types";
+import type { LedgerEntry, NotifySnap } from "@/lib/types";
 import { TeamAvatar } from "./avatar";
 import { money, count } from "./format";
 import { Bolt, Caret, Coin } from "./icons";
+import { Notifications } from "./notifications";
 
 export function TopBar({
   teamId,
@@ -18,6 +19,7 @@ export function TopBar({
   totalRounds,
   ledger,
   pointsLedger,
+  snap,
 }: {
   teamId: string;
   name: string;
@@ -28,15 +30,21 @@ export function TopBar({
   totalRounds: number;
   ledger: LedgerEntry[];
   pointsLedger: LedgerEntry[];
+  snap: NotifySnap;
 }) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"cash" | "points">("cash");
 
   useEffect(() => {
     if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const k = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     window.addEventListener("keydown", k);
-    return () => window.removeEventListener("keydown", k);
+    return () => {
+      window.removeEventListener("keydown", k);
+      document.body.style.overflow = prevOverflow;
+    };
   }, [open]);
 
   const entries = tab === "cash" ? ledger : pointsLedger;
@@ -67,7 +75,7 @@ export function TopBar({
             aria-label={`Cash ${money(cash)}. Open history`}
           >
             <Coin size={18} />
-            {money(cash)}
+            <span key={cash} className="bump">{money(cash)}</span>
             <Caret />
           </button>
           <button
@@ -81,13 +89,14 @@ export function TopBar({
             aria-label={`${points} points. Open history`}
           >
             <Bolt size={16} />
-            {count(points)}
+            <span key={points} className="bump">{count(points)}</span>
             <Caret />
           </button>
           <span className="pill rd" aria-label={`Round ${round} of ${totalRounds}`}>
             <span className="mute">Round&nbsp;</span>
             {round}/{totalRounds}
           </span>
+          <Notifications teamId={teamId} snap={snap} />
           <form action={logoutAction} className="so-d">
             <button type="submit" className="pill">Sign out</button>
           </form>

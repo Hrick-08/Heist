@@ -285,3 +285,31 @@ export interface RankedCrew extends LeaderboardRow {
   hasPhoto: boolean;
   bounty: number;
 }
+
+/** Compact picture of a crew's situation, diffed in the browser to raise notifications. */
+export interface NotifySnap {
+  rank: number;
+  round: number;
+  totalRounds: number;
+  wanted: boolean;
+  endgameUnlocked: boolean;
+  status: TeamStatus;
+  tasks: {
+    id: string;
+    title: string;
+    points: number;
+    money: number;
+    done: boolean;
+    requested: boolean;
+    clue: boolean;
+    endgame: boolean;
+  }[];
+  dexter: {
+    id: string;
+    title: string;
+    points: number;
+    money: number;
+    done: boolean;
+    requested: boolean;
+  }[];
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import {
@@ -23,19 +23,61 @@ function Feedback({ state }: { state: TeamActionResult }) {
   );
 }
 
-function Submit({
+/**
+ * Two-tap submit for anything that spends cash or cannot be undone: the first tap
+ * arms the button ("Tap again to confirm"), the second sends the form. It disarms
+ * itself after a few seconds so a stray tap never costs anything.
+ */
+function ConfirmSubmit({
   className,
   idle,
+  confirm,
   busy,
+  skipConfirm = false,
 }: {
   className: string;
   idle: string;
+  confirm: string;
   busy: string;
+  skipConfirm?: boolean;
 }) {
   const { pending } = useFormStatus();
+  const [armed, setArmed] = useState(false);
+  const timer = useRef<number | null>(null);
+
+  useEffect(() => () => {
+    if (timer.current) window.clearTimeout(timer.current);
+  }, []);
+
+  // Once the request is on its way (or came back), start from a fresh, unarmed button.
+  useEffect(() => {
+    if (pending) setArmed(false);
+  }, [pending]);
+
+  if (pending) {
+    return (
+      <button type="submit" className={className} disabled>
+        {busy}
+      </button>
+    );
+  }
+  if (skipConfirm || armed) {
+    return (
+      <button type="submit" className={armed ? `${className} armed` : className}>
+        {armed ? confirm : idle}
+      </button>
+    );
+  }
   return (
-    <button type="submit" className={className} disabled={pending}>
-      {pending ? busy : idle}
+    <button
+      type="button"
+      className={className}
+      onClick={() => {
+        setArmed(true);
+        timer.current = window.setTimeout(() => setArmed(false), 4000);
+      }}
+    >
+      {idle}
     </button>
   );
 }
@@ -55,10 +97,12 @@ export function ClueButton({
     <>
       <form action={formAction}>
         <input type="hidden" name="teamTaskId" value={teamTaskId} />
-        <Submit
+        <ConfirmSubmit
           className="pbtn clue"
           idle={canAfford ? `Buy clue ${money(cost)}` : `Need ${money(cost)}`}
+          confirm={`Tap again to pay ${money(cost)}`}
           busy="Decrypting…"
+          skipConfirm={!canAfford}
         />
       </form>
       <Feedback state={state} />
@@ -94,7 +138,12 @@ export function SignoffButton({
       <form action={formAction}>
         <input type="hidden" name="kind" value={kind} />
         <input type="hidden" name="refId" value={refId} />
-        <Submit className="pbtn ghost so" idle={label} busy="Sending to the desk…" />
+        <ConfirmSubmit
+          className="pbtn ghost so"
+          idle={label}
+          confirm="Tap again to send to the desk"
+          busy="Sending to the desk…"
+        />
       </form>
       <Feedback state={state} />
     </>
@@ -106,7 +155,12 @@ export function BribeButton({ cost }: { cost: number }) {
   return (
     <>
       <form action={formAction}>
-        <Submit className="pbtn" idle="Pay the bribe" busy="Sliding the cash…" />
+        <ConfirmSubmit
+          className="pbtn"
+          idle="Pay the bribe"
+          confirm={`Tap again to pay ${money(cost)}`}
+          busy="Sliding the cash…"
+        />
       </form>
       <Feedback state={state} />
       <p className="mute small" style={{ marginTop: 10 }}>
@@ -127,10 +181,12 @@ export function FundHeistButton({
   return (
     <>
       <form action={formAction}>
-        <Submit
+        <ConfirmSubmit
           className="pbtn"
           idle={canAfford ? `Fund the heist ${money(cost)}` : `Need ${money(cost)}`}
+          confirm={`Tap again to pay ${money(cost)}`}
           busy="Opening the vault…"
+          skipConfirm={!canAfford}
         />
       </form>
       <Feedback state={state} />

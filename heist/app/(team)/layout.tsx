@@ -1,23 +1,14 @@
-import { Barlow_Semi_Condensed, Bowlby_One } from "next/font/google";
 import { Suspense } from "react";
 
+import { LiveSync } from "@/components/player/live-sync";
 import { PlayerNav } from "@/components/player/nav";
+import { SignOutFooter } from "@/components/player/signout-footer";
 import { TopBar } from "@/components/player/top-bar";
 import { getShellData } from "@/lib/player";
+import { fontVars } from "@/lib/fonts";
 import { requireTeam } from "@/lib/session";
 
 import "./player.css";
-
-const display = Bowlby_One({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-pl-display",
-});
-const body = Barlow_Semi_Condensed({
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-  variable: "--font-pl-body",
-});
 
 export const instant = false;
 
@@ -29,10 +20,10 @@ export default async function TeamLayout({
   // The guard lives in the layout (not inside a Suspense boundary) so an
   // unauthenticated request is redirected instead of rendering a half shell.
   const { team } = await requireTeam();
-  const { state, ledger, pointsLedger } = await getShellData(team);
+  const { state, ledger, pointsLedger, snap } = await getShellData(team);
 
   return (
-    <div className={`pl ${display.variable} ${body.variable}`}>
+    <div className={`pl ${fontVars}`}>
       <TopBar
         teamId={team.teamId}
         name={team.name}
@@ -43,11 +34,16 @@ export default async function TeamLayout({
         totalRounds={state.totalRounds}
         ledger={ledger}
         pointsLedger={pointsLedger}
+        snap={snap}
       />
+      <LiveSync />
       <Suspense fallback={null}>
         <PlayerNav />
       </Suspense>
-      <main className="app">{children}</main>
+      <main className="app">
+        {children}
+        <SignOutFooter />
+      </main>
     </div>
   );
 }

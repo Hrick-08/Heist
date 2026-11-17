@@ -4,7 +4,8 @@ import { DexterMissions } from "@/components/player/dexter-missions";
 import { Funnel } from "@/components/player/funnel";
 import { money } from "@/components/player/format";
 import { Hero } from "@/components/player/hero";
-import { Coin } from "@/components/player/icons";
+import { HomeSkeleton } from "@/components/player/skeleton";
+import { Bolt } from "@/components/player/icons";
 import { PosterCard } from "@/components/player/poster-card";
 import { Stars } from "@/components/player/stars";
 import { TaskList } from "@/components/player/task-list";
@@ -14,26 +15,18 @@ import {
   getVisibleMissions,
   listApprovalsForTeam,
 } from "@/lib/game";
-import { getFunnel, getPlayerTasks, wantedStars } from "@/lib/player";
+import { formatTime, getFunnel, getPlayerTasks, wantedStars } from "@/lib/player";
 import { requireTeam } from "@/lib/session";
 
 export const instant = false;
 
+export const metadata = { title: "Home" };
+
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<DashboardSkeleton />}>
+    <Suspense fallback={<HomeSkeleton />}>
       <Dashboard />
     </Suspense>
-  );
-}
-
-function DashboardSkeleton() {
-  return (
-    <div className="home">
-      <div className="card" style={{ height: 220 }} />
-      <div className="card" style={{ height: 120 }} />
-      <div className="card" style={{ height: 240 }} />
-    </div>
   );
 }
 
@@ -109,8 +102,8 @@ async function Dashboard() {
         </div>
         <div className="card">
           <span className="mute small">Bounty</span>
-          <b className="cash bnt">
-            <Coin size={16} />
+          <b className="c-pts bnt">
+            <Bolt size={20} color="#dcab3c" />
             {(team.wanted ? team.points : 0).toLocaleString("en-IN")}
           </b>
         </div>
@@ -181,7 +174,13 @@ async function Dashboard() {
       </section>
 
       <div className="a-poster">
-        <PosterCard team={team} stars={stars} bribeCost={state.wantedRemovalCost} />
+        <PosterCard
+          team={team}
+          stars={stars}
+          bribeCost={state.wantedRemovalCost}
+          bounty={team.wanted ? team.points : 0}
+          since={formatTime(team.wantedAt)}
+        />
       </div>
     </div>
   );

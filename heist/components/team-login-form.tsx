@@ -1,64 +1,57 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
+import { PasswordField } from "@/components/auth/password-field";
 import { teamLoginAction } from "@/lib/actions/auth-actions";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" className="btn-pink w-full" disabled={pending}>
+    <button type="submit" className="au-btn" disabled={pending}>
       {pending ? "Verifying credentials…" : "Breach in"}
+      {!pending && <span aria-hidden>→</span>}
     </button>
   );
 }
 
 export function TeamLoginForm() {
   const [state, formAction] = useActionState(teamLoginAction, {});
+  // Controlled so a wrong passcode does not wipe the Team ID.
+  const [teamId, setTeamId] = useState("");
 
   return (
-    <form action={formAction} className="space-y-4">
-      <div>
-        <label className="field-label" htmlFor="teamId">
-          Team ID
-        </label>
+    <form action={formAction} className="au-form">
+      <div className="au-field">
+        <label htmlFor="teamId">Team ID</label>
         <input
           id="teamId"
           name="teamId"
-          className="field font-mono-display uppercase tracking-[0.2em]"
+          className="au-input mono"
           placeholder="TLH-01"
           autoComplete="off"
+          autoCapitalize="characters"
+          spellCheck={false}
+          autoFocus
           required
+          value={teamId}
+          onChange={(e) => setTeamId(e.target.value.toUpperCase())}
         />
       </div>
 
-      <div>
-        <label className="field-label" htmlFor="password">
-          Passcode
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          className="field"
-          placeholder="••••••••"
-          autoComplete="current-password"
-          required
-        />
-      </div>
+      <PasswordField />
 
       {state.error && (
-        <p className="rounded-xl border border-blood/40 bg-blood/10 px-4 py-3 text-sm text-blood">
+        <p key={state.error} className="au-err" role="alert">
           {state.error}
         </p>
       )}
 
       <SubmitButton />
 
-      <p className="text-center text-[11px] leading-relaxed text-white/35">
-        Only the team leader can sign in. Credentials are mailed to the leader
-        after registration.
+      <p className="au-fine">
+        Only the team leader can sign in. Credentials are mailed to the leader after registration.
       </p>
     </form>
   );

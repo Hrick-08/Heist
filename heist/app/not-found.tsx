@@ -1,16 +1,55 @@
 import Link from "next/link";
 
+import { TeamAvatar } from "@/components/player/avatar";
+import { WantedTitle } from "@/components/player/wanted-title";
+import { PublicFooter, PublicHeader, PublicShell } from "@/components/public/shell";
+
 export default function NotFound() {
   return (
-    <main className="flex min-h-full flex-col items-center justify-center px-5 py-20 text-center">
-      <p className="headline text-7xl text-white/10">404</p>
-      <h1 className="headline mt-2 text-3xl text-white">Nothing to rob here</h1>
-      <p className="mt-3 max-w-md text-sm text-white/45">
-        That record does not exist, or it was moved off the board.
-      </p>
-      <Link href="/" className="btn-pink mt-7">
-        Back to the briefing
-      </Link>
-    </main>
+    <PublicShell>
+      <PublicHeader />
+      <main className="pu-center">
+        <div className="pu-miss">
+          <div>
+            <span className="pu-eyebrow">Error 404</span>
+            <h1>Nothing to rob here</h1>
+            <p>
+              That page does not exist, or it was moved off the board. Check the link, or head back
+              to somewhere with actual loot.
+            </p>
+            <div className="pu-ctas">
+              <Link href="/" className="pbtn">
+                Back to the briefing
+              </Link>
+              <Link href="/login" className="pbtn line">
+                Team login
+              </Link>
+            </div>
+          </div>
+
+          <div className="pu-poster" aria-hidden>
+            <div className="wp-wrap">
+              <div className="wp clear">
+                <i className="tape t1" />
+                <i className="tape t2" />
+                <div className="wp-in">
+                  <span className="wp-code">No. 404</span>
+                  <WantedTitle />
+                  <p className="wp-sub">This page</p>
+                  <div className="wp-mug">
+                    <TeamAvatar teamId="404" name="Missing page" hasPhoto={false} size={120} square />
+                  </div>
+                  <b className="wp-name">Page not found</b>
+                  <span className="wp-lead">Last seen: nowhere</span>
+                  <p className="wp-fine">If found, please return to the homepage.</p>
+                </div>
+                <span className="wp-stamp">Missing</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <PublicFooter />
+    </PublicShell>
   );
 }

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { BlockSkeleton } from "@/components/player/skeleton";
+
 import { SignoffButton } from "@/components/player/actions";
 import { count, money } from "@/components/player/format";
 import { getEventState, getMission, listApprovalsForTeam } from "@/lib/game";
@@ -17,7 +19,7 @@ export default function MissionDetailPage({
   params: Promise<{ id: string }>;
 }) {
   return (
-    <Suspense fallback={<div className="card" style={{ height: 240 }} />}>
+    <Suspense fallback={<BlockSkeleton />}>
       <MissionDetail params={params} />
     </Suspense>
   );

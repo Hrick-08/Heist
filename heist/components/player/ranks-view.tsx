@@ -1,7 +1,7 @@
 import type { RankedCrew } from "@/lib/types";
 import { TeamAvatar } from "./avatar";
 import { count, money } from "./format";
-import { Coin, Crown } from "./icons";
+import { Bolt, Crown } from "./icons";
 import { Stars } from "./stars";
 
 const statusClass = (s: RankedCrew["status"]) =>
@@ -54,6 +54,10 @@ export function RanksView({ crews, meId }: { crews: RankedCrew[]; meId: string }
         </div>
       )}
 
+      <div className="secdiv" role="separator">
+        <span>Global wanted posters</span>
+      </div>
+
       <div className="podium">
         {podium.map(({ c, rank }) => (
           <div key={c.teamId} className={`poster p${rank}${c.teamId === meId ? " me" : ""}`}>
@@ -74,7 +78,7 @@ export function RanksView({ crews, meId }: { crews: RankedCrew[]; meId: string }
             <div className="pmeta">{c.leaderName}</div>
             {c.isWanted && (
               <div className="bounty">
-                <Coin size={rank === 1 ? 20 : 16} />
+                <Bolt size={rank === 1 ? 24 : 19} color="#8a5a14" />
                 {count(c.bounty)}
               </div>
             )}

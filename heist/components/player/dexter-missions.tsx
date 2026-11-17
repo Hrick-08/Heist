@@ -36,8 +36,8 @@ export function DexterMissions({
                     <h3>{d.title}</h3>
                     <p className="mute">{d.description}</p>
                     <div className="rewards">
-                      <span className="reward"><Bolt size={13} />+{d.points} pts</span>
-                      <span className="reward"><Coin size={13} />+{money(d.money)}</span>
+                      <span className="reward"><Bolt size={20} />+{d.points} pts</span>
+                      <span className="reward"><Coin size={20} />+{money(d.money)}</span>
                     </div>
                     <span className="openhint">Open mission →</span>
                   </Link>
