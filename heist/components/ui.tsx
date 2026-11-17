@@ -23,13 +23,19 @@ export function Logo({ compact = false }: { compact?: boolean }) {
 export function Panel({
   children,
   className = "",
+  id,
   as: Tag = "section",
 }: {
   children: ReactNode;
   className?: string;
+  id?: string;
   as?: "section" | "div" | "article" | "aside";
 }) {
-  return <Tag className={`panel ${className}`}>{children}</Tag>;
+  return (
+    <Tag id={id} className={`panel ${className}`}>
+      {children}
+    </Tag>
+  );
 }
 
 export function PanelHeader({

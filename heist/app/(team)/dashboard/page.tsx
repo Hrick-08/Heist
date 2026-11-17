@@ -263,7 +263,7 @@ async function Dashboard() {
           </div>
         </Panel>
 
-        <Panel>
+        <Panel id="wanted-poster" className="scroll-mt-28">
           <PanelHeader title="Your poster" accent="pink" />
           <div className="p-5">
             {team.wanted ? (

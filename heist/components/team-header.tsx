@@ -1,9 +1,8 @@
-import Link from "next/link";
-
 import { logoutAction } from "@/lib/actions/auth-actions";
 import type { EventState, Team } from "@/lib/types";
 import { Logo } from "@/components/ui";
 import { TeamNav } from "@/components/team-nav";
+import { PosterLink } from "@/components/poster-link";
 
 export function TeamHeader({
   team,
@@ -56,12 +55,9 @@ export function TeamHeader({
               Your crew is on the city&apos;s most wanted list. Visit the
               dashboard to pay the bribe and go dark.
             </span>
-            <Link
-              href="/dashboard"
-              className="ml-auto font-semibold text-pink underline underline-offset-4"
-            >
+            <PosterLink className="ml-auto font-semibold text-pink underline underline-offset-4">
               View poster
-            </Link>
+            </PosterLink>
           </div>
         </div>
       )}
