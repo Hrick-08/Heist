@@ -546,6 +546,8 @@ export function toTeamRow(team: Team): TeamRow {
     membersCount: team.members.length + 1,
     eliminatedInRound: team.eliminatedInRound,
     createdAt: team.createdAt,
+    hasPhoto: Boolean(team.leader.photo),
+    finalPoints: team.finalPoints ?? null,
   };
 }
 

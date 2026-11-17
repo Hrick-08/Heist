@@ -60,8 +60,7 @@ function multipart(fields) {
 async function main() {
   const cookie = `tlh_session=${await token("admin", "admin", "Event Control")}`;
   const client = new MongoClient(
-    process.env.DATABASE ||
-      "mongodb+srv://hritabratadas8_db_user:6gfeRpZs3sk5RZMn@cluster0.nsqnhev.mongodb.net/",
+    process.env.DATABASE,
   );
   await client.connect();
   const db = client.db(process.env.DATABASE_NAME || "last-heist");

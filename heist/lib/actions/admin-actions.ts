@@ -37,6 +37,8 @@ import type { MissionScope, TaskType, TeamStatus } from "@/lib/types";
 export interface AdminActionResult {
   ok: boolean;
   message: string;
+  /** Extra fields for screens that show more than a toast (e.g. new credentials). */
+  data?: Record<string, string>;
 }
 
 function text(formData: FormData, key: string): string {
@@ -119,6 +121,13 @@ export async function registerTeamAction(
   return {
     ok: true,
     message: `${team.name} registered as ${team.teamId} (${team.status}). Passcode: ${password}`,
+    data: {
+      name: team.name,
+      teamId: team.teamId,
+      status: team.status,
+      passcode: password,
+      loginEmail: email,
+    },
   };
 }
 
@@ -191,7 +200,11 @@ export async function resetPasswordAction(
   const password = text(formData, "password") || generatePassword(10);
   await updateTeam(teamId, { passwordHash: await hashPassword(password) });
   revalidatePath(`/admin/teams/${teamId}`);
-  return { ok: true, message: `New passcode for ${teamId}: ${password}` };
+  return {
+    ok: true,
+    message: `New passcode for ${teamId}: ${password}`,
+    data: { teamId, passcode: password },
+  };
 }
 
 /* ------------------------------------------------------------------ */

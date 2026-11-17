@@ -224,6 +224,9 @@ export interface TeamRow {
   membersCount: number;
   eliminatedInRound: number | null;
   createdAt: Date;
+  /** True when the leader has a photo on file (served from /api/photo/[teamId]). */
+  hasPhoto: boolean;
+  finalPoints: number | null;
 }
 
 export interface LeaderboardRow {
@@ -312,4 +315,22 @@ export interface NotifySnap {
     done: boolean;
     requested: boolean;
   }[];
+}
+
+/** Compact picture of the desk, diffed in the browser to raise admin notifications. */
+export interface AdminSnap {
+  pending: {
+    id: string;
+    teamId: string;
+    crew: string;
+    title: string;
+    kind: "target" | "dexter";
+    at: number;
+  }[];
+  crews: number;
+  waitlisted: number;
+  latest: { teamId: string; name: string; status: TeamStatus } | null;
+  round: number;
+  totalRounds: number;
+  ended: boolean;
 }
