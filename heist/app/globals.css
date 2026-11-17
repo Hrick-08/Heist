@@ -239,8 +239,8 @@
 @keyframes heist-poster-flash {
   0%,
   100% {
- Thornton: 0;
     border-color: rgba(255, 46, 136, 0.3);
+    box-shadow: 0 0 0 0 transparent;
   }
   45% {
     border-color: var(--color-pink);
