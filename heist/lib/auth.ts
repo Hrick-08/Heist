@@ -35,6 +35,11 @@ export async function verifyPassword(
   return timingSafeEqual(candidate, expected);
 }
 
+/** Spends the same time as a real check, so an unknown account is not faster to reject. */
+export async function burnPasswordCheck(password: string): Promise<void> {
+  await scrypt(password, "0".repeat(32), 64);
+}
+
 export function generatePassword(length = 10): string {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
   const bytes = randomBytes(length);

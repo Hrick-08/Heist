@@ -9,9 +9,9 @@ export const SESSION_MAX_AGE = 60 * 60 * 12; // 12 hours
 
 function secret(): Uint8Array {
   const value = process.env.AUTH_SECRET;
-  if (!value || value.length < 16) {
+  if (!value || value.length < 32) {
     throw new Error(
-      "AUTH_SECRET env var is missing or too short (use at least 16 characters).",
+      "AUTH_SECRET env var is missing or too short (use at least 32 random characters).",
     );
   }
   return new TextEncoder().encode(value);
@@ -31,7 +31,7 @@ export async function verifySession(
 ): Promise<SessionPayload | null> {
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, secret());
+    const { payload } = await jwtVerify(token, secret(), { algorithms: ["HS256"] });
     const role = payload.role;
     if (role !== "team" && role !== "admin") return null;
     if (typeof payload.sub !== "string") return null;
@@ -39,6 +39,7 @@ export async function verifySession(
       role,
       sub: payload.sub,
       name: typeof payload.name === "string" ? payload.name : payload.sub,
+      iat: payload.iat,
     };
   } catch {
     return null;

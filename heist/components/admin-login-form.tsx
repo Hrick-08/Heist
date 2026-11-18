@@ -1,60 +1,55 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
+import { PasswordField } from "@/components/auth/password-field";
 import { adminLoginAction } from "@/lib/actions/auth-actions";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" className="btn-cyan w-full" disabled={pending}>
+    <button type="submit" className="au-btn" disabled={pending}>
       {pending ? "Authorising…" : "Enter control room"}
+      {!pending && <span aria-hidden>→</span>}
     </button>
   );
 }
 
 export function AdminLoginForm() {
   const [state, formAction] = useActionState(adminLoginAction, {});
+  const [username, setUsername] = useState("");
 
   return (
-    <form action={formAction} className="space-y-4">
-      <div>
-        <label className="field-label" htmlFor="username">
-          Operator
-        </label>
+    <form action={formAction} className="au-form">
+      <div className="au-field">
+        <label htmlFor="username">Operator</label>
         <input
           id="username"
           name="username"
-          className="field"
-          placeholder="admin"
+          className="au-input"
+          placeholder="Operator username"
           autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
+          autoFocus
           required
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
         />
       </div>
 
-      <div>
-        <label className="field-label" htmlFor="password">
-          Passcode
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          className="field"
-          placeholder="••••••••"
-          autoComplete="current-password"
-          required
-        />
-      </div>
+      <PasswordField />
 
       {state.error && (
-        <p className="rounded-xl border border-blood/40 bg-blood/10 px-4 py-3 text-sm text-blood">
+        <p key={state.error} className="au-err" role="alert">
           {state.error}
         </p>
       )}
 
       <SubmitButton />
+
+      <p className="au-fine">Authorised operators only.</p>
     </form>
   );
 }

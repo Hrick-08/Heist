@@ -43,6 +43,8 @@ export interface Team {
   endgameUnlocked: boolean;
   /** Dexter mission ids already completed by this team. */
   dexterCompleted: string[];
+  /** Sessions issued before this moment are rejected (set when a passcode is reset). */
+  passwordChangedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -61,6 +63,15 @@ export interface Task {
   /** Endgame tasks are only allotted when a team unlocks the final heist. */
   isEndgame: boolean;
   active: boolean;
+  /*
+   * Optional extras shown on the player's task page. They are read-only on the
+   * player side and optional, so existing tasks and the admin forms keep
+   * working without any database change.
+   */
+  station?: string;
+  minutes?: number;
+  materials?: string[];
+  judging?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -120,6 +131,8 @@ export interface SessionPayload {
   /** Team id for team sessions, admin id for admin sessions. */
   sub: string;
   name: string;
+  /** Issued-at, in seconds. */
+  iat?: number;
 }
 
 export interface AuthState {
@@ -215,6 +228,9 @@ export interface TeamRow {
   membersCount: number;
   eliminatedInRound: number | null;
   createdAt: Date;
+  /** True when the leader has a photo on file (served from /api/photo/[teamId]). */
+  hasPhoto: boolean;
+  finalPoints: number | null;
 }
 
 export interface LeaderboardRow {
@@ -225,4 +241,100 @@ export interface LeaderboardRow {
   completed: number;
   status: TeamStatus;
   isWanted: boolean;
+}
+
+/* ------------------------------------------------------------------ */
+/* Player UI view models (read-only projections, no new collections)    */
+/* ------------------------------------------------------------------ */
+
+/** One line of the cash history sheet. Positive = cash in, negative = out. */
+export interface LedgerEntry {
+  label: string;
+  /** Empty when the original action left no timestamp behind. */
+  time: string;
+  amount: number;
+}
+
+/** A task allotment as the player sees it. Safe to pass to client components. */
+export interface PlayerTask {
+  /** teamTasks._id */
+  id: string;
+  title: string;
+  description: string;
+  type: TaskType;
+  round: number;
+  points: number;
+  money: number;
+  status: TaskStatus;
+  isEndgame: boolean;
+  /** What the clue costs this crew right now (base price x event multiplier). */
+  clueCost: number;
+  hintPurchased: boolean;
+  /** Only filled after the clue has been bought. */
+  hint: string;
+  /** True while a sign-off request is waiting at the desk. */
+  requested: boolean;
+  completedLabel: string;
+  completedBy: string | null;
+  station: string;
+  minutes: number | null;
+  materials: string[];
+  judging: string[];
+}
+
+/** A leaderboard row enriched for the Ranks tab. */
+export interface RankedCrew extends LeaderboardRow {
+  leaderName: string;
+  membersCount: number;
+  wantedSince: string;
+  /** Police stars, 0 when not wanted. */
+  stars: number;
+  hasPhoto: boolean;
+  bounty: number;
+}
+
+/** Compact picture of a crew's situation, diffed in the browser to raise notifications. */
+export interface NotifySnap {
+  rank: number;
+  round: number;
+  totalRounds: number;
+  wanted: boolean;
+  endgameUnlocked: boolean;
+  status: TeamStatus;
+  tasks: {
+    id: string;
+    title: string;
+    points: number;
+    money: number;
+    done: boolean;
+    requested: boolean;
+    clue: boolean;
+    endgame: boolean;
+  }[];
+  dexter: {
+    id: string;
+    title: string;
+    points: number;
+    money: number;
+    done: boolean;
+    requested: boolean;
+  }[];
+}
+
+/** Compact picture of the desk, diffed in the browser to raise admin notifications. */
+export interface AdminSnap {
+  pending: {
+    id: string;
+    teamId: string;
+    crew: string;
+    title: string;
+    kind: "target" | "dexter";
+    at: number;
+  }[];
+  crews: number;
+  waitlisted: number;
+  latest: { teamId: string; name: string; status: TeamStatus } | null;
+  round: number;
+  totalRounds: number;
+  ended: boolean;
 }

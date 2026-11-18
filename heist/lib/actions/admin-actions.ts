@@ -17,6 +17,7 @@ import {
   dismissApproval,
   getEventState,
   listSelectedTeams,
+  logAudit,
   markTaskComplete,
   registerTeam,
   setTeamStatus,
@@ -37,15 +38,40 @@ import type { MissionScope, TaskType, TeamStatus } from "@/lib/types";
 export interface AdminActionResult {
   ok: boolean;
   message: string;
+  /** Extra fields for screens that show more than a toast (e.g. new credentials). */
+  data?: Record<string, string>;
 }
 
-function text(formData: FormData, key: string): string {
-  return String(formData.get(key) ?? "").trim();
+function text(formData: FormData, key: string, max = 600): string {
+  return String(formData.get(key) ?? "").trim().slice(0, max);
 }
 
-function num(formData: FormData, key: string, fallback = 0): number {
-  const parsed = Number(text(formData, key));
-  return Number.isFinite(parsed) ? parsed : fallback;
+/** A finite whole number kept inside sane bounds, so one typo cannot wreck the scoreboard. */
+function num(formData: FormData, key: string, fallback = 0, limit = 1_000_000): number {
+  const parsed = Math.round(Number(text(formData, key, 24)));
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(-limit, Math.min(limit, parsed));
+}
+
+function oneOf<T extends string>(value: string, allowed: readonly T[], fallback: T): T {
+  return (allowed as readonly string[]).includes(value) ? (value as T) : fallback;
+}
+
+const TEAM_STATUSES = ["registered", "selected", "waitlisted", "eliminated", "champion"] as const;
+const TASK_TYPES = ["physical", "technical"] as const;
+const SCOPES = ["all", "selected"] as const;
+const DIFFICULTIES = ["easy", "medium", "hard"] as const;
+const TEAM_ID = /^TLH-\d{1,4}$/;
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_PASSCODE = 8;
+
+/** Leader photos: a small raster data URL or an https link, nothing else. */
+function photo(value: string): string {
+  if (/^https:\/\/\S+$/i.test(value) && value.length <= 2000) return value;
+  if (/^data:image\/(?:png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/i.test(value) && value.length <= 600_000) {
+    return value;
+  }
+  return "";
 }
 
 function bool(formData: FormData, key: string): boolean {
@@ -62,21 +88,27 @@ export async function registerTeamAction(
 ): Promise<AdminActionResult> {
   await requireAdmin();
 
-  const name = text(formData, "name");
-  const email = text(formData, "email").toLowerCase();
-  const leaderName = text(formData, "leaderName");
-  const leaderEmail = text(formData, "leaderEmail").toLowerCase() || email;
-  const leaderPhone = text(formData, "leaderPhone");
-  const leaderPhoto = text(formData, "leaderPhoto");
-  const password = text(formData, "password") || generatePassword(10);
+  const name = text(formData, "name", 80);
+  const email = text(formData, "email", 200).toLowerCase();
+  const leaderName = text(formData, "leaderName", 80);
+  const leaderEmail = text(formData, "leaderEmail", 200).toLowerCase() || email;
+  const leaderPhone = text(formData, "leaderPhone", 24);
+  const leaderPhoto = photo(String(formData.get("leaderPhoto") ?? "").trim());
+  const password = text(formData, "password", 128) || generatePassword(10);
 
   if (!name || !email || !leaderName) {
     return { ok: false, message: "Crew name, leader email and leader name are required." };
   }
+  if (!EMAIL.test(email) || !EMAIL.test(leaderEmail)) {
+    return { ok: false, message: "Enter a valid email address." };
+  }
+  if (password.length < MIN_PASSCODE) {
+    return { ok: false, message: `Passcodes need at least ${MIN_PASSCODE} characters.` };
+  }
 
-  const memberNames = formData.getAll("memberName").map((v) => String(v).trim());
-  const memberEmails = formData.getAll("memberEmail").map((v) => String(v).trim());
-  const memberPhones = formData.getAll("memberPhone").map((v) => String(v).trim());
+  const memberNames = formData.getAll("memberName").map((v) => String(v).trim().slice(0, 80));
+  const memberEmails = formData.getAll("memberEmail").map((v) => String(v).trim().slice(0, 200));
+  const memberPhones = formData.getAll("memberPhone").map((v) => String(v).trim().slice(0, 24));
   const members = memberNames
     .map((memberName, index) => ({
       name: memberName,
@@ -84,7 +116,8 @@ export async function registerTeamAction(
       phone: memberPhones[index] ?? "",
       role: "Member",
     }))
-    .filter((m) => m.name.length > 0);
+    .filter((m) => m.name.length > 0)
+    .slice(0, 12);
 
   if (members.length < 3) {
     return {
@@ -119,6 +152,13 @@ export async function registerTeamAction(
   return {
     ok: true,
     message: `${team.name} registered as ${team.teamId} (${team.status}). Passcode: ${password}`,
+    data: {
+      name: team.name,
+      teamId: team.teamId,
+      status: team.status,
+      passcode: password,
+      loginEmail: email,
+    },
   };
 }
 
@@ -127,7 +167,8 @@ export async function setWantedAction(
   formData: FormData,
 ): Promise<AdminActionResult> {
   await requireAdmin();
-  const teamId = text(formData, "teamId");
+  const teamId = text(formData, "teamId", 16);
+  if (!TEAM_ID.test(teamId)) return { ok: false, message: "Unknown crew." };
   const wanted = bool(formData, "wanted");
   await setWanted(teamId, wanted);
   revalidatePath("/admin/teams");
@@ -155,11 +196,14 @@ export async function adjustScoreAction(
   _prev: AdminActionResult,
   formData: FormData,
 ): Promise<AdminActionResult> {
-  await requireAdmin();
-  const teamId = text(formData, "teamId");
-  const points = num(formData, "points", 0);
-  const money = num(formData, "money", 0);
+  const session = await requireAdmin();
+  const teamId = text(formData, "teamId", 16);
+  if (!TEAM_ID.test(teamId)) return { ok: false, message: "Unknown crew." };
+  const points = num(formData, "points", 0, 100_000);
+  const money = num(formData, "money", 0, 10_000_000);
+  if (!points && !money) return { ok: false, message: "Enter points, cash or both." };
   await adjustTeamScore(teamId, points, money);
+  await logAudit(session.name, "adjust-score", teamId, `${points} pts, $${money}`);
   revalidatePath("/admin/teams");
   revalidatePath(`/admin/teams/${teamId}`);
   revalidatePath("/dashboard");
@@ -173,10 +217,13 @@ export async function setTeamStatusAction(
   _prev: AdminActionResult,
   formData: FormData,
 ): Promise<AdminActionResult> {
-  await requireAdmin();
-  const teamId = text(formData, "teamId");
-  const status = text(formData, "status") as TeamStatus;
+  const session = await requireAdmin();
+  const teamId = text(formData, "teamId", 16);
+  if (!TEAM_ID.test(teamId)) return { ok: false, message: "Unknown crew." };
+  const status = oneOf<TeamStatus>(text(formData, "status", 16), TEAM_STATUSES, "registered");
+  if (status !== text(formData, "status", 16)) return { ok: false, message: "Unknown status." };
   await setTeamStatus(teamId, status);
+  await logAudit(session.name, "set-status", teamId, status);
   revalidatePath("/admin/teams");
   revalidatePath(`/admin/teams/${teamId}`);
   return { ok: true, message: `${teamId} status set to ${status}.` };
@@ -186,12 +233,24 @@ export async function resetPasswordAction(
   _prev: AdminActionResult,
   formData: FormData,
 ): Promise<AdminActionResult> {
-  await requireAdmin();
-  const teamId = text(formData, "teamId");
-  const password = text(formData, "password") || generatePassword(10);
-  await updateTeam(teamId, { passwordHash: await hashPassword(password) });
+  const session = await requireAdmin();
+  const teamId = text(formData, "teamId", 16);
+  if (!TEAM_ID.test(teamId)) return { ok: false, message: "Unknown crew." };
+  const password = text(formData, "password", 128) || generatePassword(10);
+  if (password.length < MIN_PASSCODE) {
+    return { ok: false, message: `Passcodes need at least ${MIN_PASSCODE} characters.` };
+  }
+  await updateTeam(teamId, {
+    passwordHash: await hashPassword(password),
+    passwordChangedAt: new Date(),
+  });
+  await logAudit(session.name, "reset-passcode", teamId, "passcode replaced, old sessions ended");
   revalidatePath(`/admin/teams/${teamId}`);
-  return { ok: true, message: `New passcode for ${teamId}: ${password}` };
+  return {
+    ok: true,
+    message: `New passcode for ${teamId}: ${password}`,
+    data: { teamId, passcode: password },
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -217,10 +276,10 @@ export async function unmarkTaskAction(
   _prev: AdminActionResult,
   formData: FormData,
 ): Promise<AdminActionResult> {
-  await requireAdmin();
-  const teamId = text(formData, "teamId");
-  const teamTaskId = text(formData, "teamTaskId");
-  const result = await unmarkTask(teamId, teamTaskId);
+  const session = await requireAdmin();
+  const teamId = text(formData, "teamId", 16);
+  const teamTaskId = text(formData, "teamTaskId", 40);
+  const result = await unmarkTask(teamId, teamTaskId, session.name);
   revalidatePath(`/admin/teams/${teamId}`);
   revalidatePath("/admin");
   revalidatePath("/dashboard");
@@ -233,14 +292,14 @@ export async function unmarkTaskAction(
 
 function taskPayload(formData: FormData) {
   return {
-    title: text(formData, "title"),
-    description: text(formData, "description"),
-    type: text(formData, "type") as TaskType,
-    round: num(formData, "round", 1),
-    points: num(formData, "points", 100),
-    money: num(formData, "money", 500),
-    hint: text(formData, "hint"),
-    hintCost: num(formData, "hintCost", 300),
+    title: text(formData, "title", 120),
+    description: text(formData, "description", 1200),
+    type: oneOf<TaskType>(text(formData, "type", 16), TASK_TYPES, "physical"),
+    round: num(formData, "round", 1, 12),
+    points: Math.max(0, num(formData, "points", 100, 100_000)),
+    money: Math.max(0, num(formData, "money", 500, 10_000_000)),
+    hint: text(formData, "hint", 600),
+    hintCost: Math.max(0, num(formData, "hintCost", 300, 10_000_000)),
     isEndgame: bool(formData, "isEndgame"),
     active: bool(formData, "active"),
   };
@@ -297,22 +356,20 @@ export async function toggleTaskAction(
 /* ------------------------------------------------------------------ */
 
 function missionPayload(formData: FormData) {
-  const scope = text(formData, "scope") as MissionScope;
+  const scope = oneOf<MissionScope>(text(formData, "scope", 16), SCOPES, "all");
   return {
-    title: text(formData, "title"),
-    description: text(formData, "description"),
-    round: num(formData, "round", 1),
-    difficulty: (text(formData, "difficulty") || "medium") as
-      | "easy"
-      | "medium"
-      | "hard",
-    points: num(formData, "points", 200),
-    money: num(formData, "money", 1500),
+    title: text(formData, "title", 120),
+    description: text(formData, "description", 1200),
+    round: num(formData, "round", 1, 12),
+    difficulty: oneOf(text(formData, "difficulty", 16), DIFFICULTIES, "medium"),
+    points: Math.max(0, num(formData, "points", 200, 100_000)),
+    money: Math.max(0, num(formData, "money", 1500, 10_000_000)),
     scope,
     teamIds: formData
       .getAll("teamIds")
-      .map((v) => String(v))
-      .filter(Boolean),
+      .map((v) => String(v).trim())
+      .filter((v) => TEAM_ID.test(v))
+      .slice(0, 200),
     active: bool(formData, "active"),
   };
 }
@@ -476,14 +533,14 @@ export async function updateSettingsAction(
 ): Promise<AdminActionResult> {
   await requireAdmin();
   await updateEventState({
-    maxTeams: num(formData, "maxTeams", 40),
-    physicalPerRound: num(formData, "physicalPerRound", 3),
-    technicalPerRound: num(formData, "technicalPerRound", 1),
-    hintCostMultiplier: num(formData, "hintCostMultiplier", 1),
-    wantedRemovalCost: num(formData, "wantedRemovalCost", 2500),
-    endgameCost: num(formData, "endgameCost", 5000),
+    maxTeams: Math.max(1, num(formData, "maxTeams", 40, 1000)),
+    physicalPerRound: Math.max(0, num(formData, "physicalPerRound", 3, 50)),
+    technicalPerRound: Math.max(0, num(formData, "technicalPerRound", 1, 50)),
+    hintCostMultiplier: Math.max(0, num(formData, "hintCostMultiplier", 1, 20)),
+    wantedRemovalCost: Math.max(0, num(formData, "wantedRemovalCost", 2500, 10_000_000)),
+    endgameCost: Math.max(0, num(formData, "endgameCost", 5000, 10_000_000)),
     eventLive: bool(formData, "eventLive"),
-    totalRounds: num(formData, "totalRounds", 4),
+    totalRounds: Math.max(1, num(formData, "totalRounds", 4, 12)),
   });
   revalidatePath("/admin/settings");
   revalidatePath("/admin");

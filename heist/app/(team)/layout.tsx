@@ -1,6 +1,14 @@
-import { TeamHeader } from "@/components/team-header";
-import { getEventState } from "@/lib/game";
+import { Suspense } from "react";
+
+import { LiveSync } from "@/components/player/live-sync";
+import { PlayerNav } from "@/components/player/nav";
+import { SignOutFooter } from "@/components/player/signout-footer";
+import { TopBar } from "@/components/player/top-bar";
+import { getShellData } from "@/lib/player";
+import { fontVars } from "@/lib/fonts";
 import { requireTeam } from "@/lib/session";
+
+import "./player.css";
 
 export const instant = false;
 
@@ -12,18 +20,30 @@ export default async function TeamLayout({
   // The guard lives in the layout (not inside a Suspense boundary) so an
   // unauthenticated request is redirected instead of rendering a half shell.
   const { team } = await requireTeam();
-  const state = await getEventState();
+  const { state, ledger, pointsLedger, snap } = await getShellData(team);
 
   return (
-    <div className="flex min-h-full flex-col">
-      <TeamHeader team={team} state={state} />
-      <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-8">{children}</main>
-      <footer className="border-t border-white/8 px-5 py-6 text-center">
-        <p className="eyebrow">
-          The Last Heist · GDG Campus Chitkara · Cash never touches the
-          leaderboard
-        </p>
-      </footer>
+    <div className={`pl ${fontVars}`}>
+      <TopBar
+        teamId={team.teamId}
+        name={team.name}
+        hasPhoto={Boolean(team.leader.photo)}
+        points={team.points}
+        cash={team.money}
+        round={state.currentRound}
+        totalRounds={state.totalRounds}
+        ledger={ledger}
+        pointsLedger={pointsLedger}
+        snap={snap}
+      />
+      <LiveSync />
+      <Suspense fallback={null}>
+        <PlayerNav />
+      </Suspense>
+      <main className="app">
+        {children}
+        <SignOutFooter />
+      </main>
     </div>
   );
 }

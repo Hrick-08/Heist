@@ -40,6 +40,19 @@ export async function adminsCol(): Promise<Collection<AdminUser>> {
   return (await getDb()).collection<AdminUser>("admins");
 }
 
+export interface AuditEntry {
+  _id?: unknown;
+  actor: string;
+  action: string;
+  teamId: string;
+  detail: string;
+  at: Date;
+}
+
+export async function auditCol(): Promise<Collection<AuditEntry>> {
+  return (await getDb()).collection<AuditEntry>("auditLog");
+}
+
 export async function stateCol(): Promise<Collection<EventState>> {
   return (await getDb()).collection<EventState>("eventState");
 }
