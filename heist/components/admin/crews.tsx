@@ -12,7 +12,8 @@ import { PlusIcon, SearchIcon } from "./icons";
 import { useAdmin } from "./provider";
 import { Empty, PageHead, Panel, Stat } from "./ui";
 
-const COLS = "minmax(160px,1.2fr) minmax(130px,1fr) 120px 56px 80px 90px 90px 190px";
+// Fits the 1240px app width beside the sidebar; narrower screens switch to the compact row layout (see admin.css).
+const COLS = "minmax(140px,1.1fr) minmax(110px,1fr) 112px 48px 68px 76px 72px minmax(150px,auto)";
 
 export function CrewsView({
   rows,
@@ -85,7 +86,7 @@ export function CrewsView({
         {list.length === 0 ? (
           <Empty title="No crews found">Try a different search, or register a new crew.</Empty>
         ) : (
-          <div className="tbl" style={{ ["--cols" as string]: COLS }}>
+          <div className="tbl crews" style={{ ["--cols" as string]: COLS }}>
             <div className="tr th">
               <span>Team</span>
               <span>Leader</span>

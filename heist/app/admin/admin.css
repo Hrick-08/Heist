@@ -275,7 +275,7 @@
 .ad .icobtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--mute);display:inline-grid;place-items:center;cursor:pointer}
 .ad .icobtn:hover{color:var(--text);border-color:var(--mute)}
 .ad .icobtn.del:hover{color:#e07a68;border-color:#6b3a33;background:#34231f}
-.ad .rowacts{display:flex;gap:6px;justify-content:flex-end}
+.ad .rowacts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
 .ad .pager{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 20px;border-top:1px solid var(--line)}
 .ad .dot{width:8px;height:8px;border-radius:50%;background:var(--cash);display:inline-block}
 .ad .posters{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
@@ -405,3 +405,11 @@
 .ad .poster .bounty{color:#7a4e12}
 .ad .btn:disabled::after{opacity:0}
 .ad .sheet .btn:disabled::after{opacity:1}
+
+/* Crews table: below 1200px the sidebar leaves too little room for eight columns, so use the compact rows. */
+@media (min-width:900px) and (max-width:1199px){
+.ad .crews .tr.th{display:none}
+.ad .crews .tr.body{grid-template-columns:auto minmax(0,1fr) auto!important;grid-auto-flow:row;gap:8px 12px}
+.ad .crews .tr.body>.hide-m{display:none}
+.ad .crews .tr.body .t-main span{white-space:normal}
+.ad .crews .rowacts{grid-column:1/-1;justify-content:flex-start}}
