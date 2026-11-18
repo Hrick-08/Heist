@@ -624,3 +624,39 @@
 /* offline note: sits above the bottom nav on phones, centred on desktop */
 .pl .offline{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:70;max-width:calc(100% - 32px);padding:9px 16px;border-radius:99px;background:#2d211e;border:1px solid #6b3a33;color:var(--text);font:700 14px var(--body);text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.45)}
 .pl.pu .offline{bottom:calc(16px + env(safe-area-inset-bottom))}
+
+/* ---- purple CTAs read as buttons, not a flat swatch on the card ---- */
+/* light border + hard bottom edge + drop shadow lifts them off the dark card */
+.pl .pbtn.clue:not(.armed),
+.pl .mcard.sealed .pbtn:not(.armed){
+  background:linear-gradient(180deg,#bfabe2,#a68acb 58%,#9a7cc0);
+  color:#1b1624;
+  border:1px solid #d4c6ef;
+  box-shadow:0 1px 0 rgba(255,255,255,.3) inset,0 3px 0 #6a5590,0 8px 18px rgba(0,0,0,.32);
+}
+.pl .pbtn.clue:not(.armed):hover:not(:disabled),
+.pl .mcard.sealed .pbtn:not(.armed):hover:not(:disabled){
+  background:linear-gradient(180deg,#cbb9ea,#b197d5 58%,#a98dd1);
+  border-color:#e2d7f6;
+}
+.pl .pbtn.clue:not(.armed):active:not(:disabled),
+.pl .mcard.sealed .pbtn:not(.armed):active:not(:disabled){
+  box-shadow:0 1px 0 rgba(255,255,255,.22) inset,0 1px 0 #6a5590,0 4px 10px rgba(0,0,0,.3);
+}
+.pl .pbtn.clue:disabled,.pl .mcard.sealed .pbtn:disabled{
+  opacity:.8;
+  box-shadow:0 2px 0 #6a5590;
+}
+/* first tap arms it in gold - keep the same edge so the button never jumps */
+.pl .pbtn.clue.armed:not(:disabled),
+.pl .mcard.sealed .pbtn.armed:not(:disabled){
+  background:var(--gold);
+  color:var(--ink);
+  border:1px solid #efc96a;
+  box-shadow:0 3px 0 #8a6a1f,0 8px 18px rgba(0,0,0,.32);
+}
+
+/* sign-off sits right under it: give it a real edge so it is not card-coloured */
+.pl .pbtn.so{border-color:#5b6066;background:#222527;color:var(--text)}
+.pl .pbtn.so:hover:not(:disabled){background:#2b2f32;border-color:#6d7278}
+.pl .pbtn.so:active:not(:disabled){background:#1d2022;border-color:#6d7278}
