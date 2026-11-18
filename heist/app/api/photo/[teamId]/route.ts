@@ -20,17 +20,21 @@ export async function GET(
   const photo = team?.leader.photo;
   if (!photo) return new Response("No photo.", { status: 404 });
 
-  if (/^https?:\/\//i.test(photo)) {
+  if (/^https:\/\//i.test(photo)) {
     return Response.redirect(photo, 302);
   }
 
-  const match = /^data:(image\/[a-z0-9.+-]+);base64,([\s\S]+)$/i.exec(photo);
+  // Raster formats only: an SVG served from this origin could carry script.
+  const match = /^data:(image\/(?:png|jpeg|webp|gif));base64,([A-Za-z0-9+/=]+)$/i.exec(photo);
   if (!match) return new Response("Unsupported photo.", { status: 415 });
 
   return new Response(Buffer.from(match[2], "base64"), {
     headers: {
-      "Content-Type": match[1],
+      "Content-Type": match[1].toLowerCase(),
       "Cache-Control": "private, max-age=3600",
+      "X-Content-Type-Options": "nosniff",
+      "Content-Security-Policy": "default-src 'none'; sandbox",
+      Vary: "Cookie",
     },
   });
 }

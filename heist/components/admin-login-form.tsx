@@ -28,7 +28,7 @@ export function AdminLoginForm() {
           id="username"
           name="username"
           className="au-input"
-          placeholder="admin"
+          placeholder="Operator username"
           autoComplete="username"
           autoCapitalize="none"
           spellCheck={false}

@@ -4,6 +4,14 @@ import { count, money } from "./format";
 import { Bolt, Crown } from "./icons";
 import { Stars } from "./stars";
 
+const STATUS_LABEL: Record<RankedCrew["status"], string> = {
+  registered: "Registered",
+  selected: "In play",
+  waitlisted: "Waitlisted",
+  eliminated: "Eliminated",
+  champion: "Champion",
+};
+
 const statusClass = (s: RankedCrew["status"]) =>
   s === "champion" ? "badge gold tiny" : s === "eliminated" ? "badge mutebadge tiny" : "badge cyan tiny";
 
@@ -113,7 +121,7 @@ export function RanksView({ crews, meId }: { crews: RankedCrew[]; meId: string }
                   </div>
                 </div>
                 <div className="r">
-                  <span className={statusClass(c.status)}>{c.status}</span>
+                  <span className={statusClass(c.status)}>{STATUS_LABEL[c.status]}</span>
                   {c.isWanted && <Stars n={c.stars} size={12} />}
                 </div>
               </li>

@@ -1,6 +1,7 @@
 import "server-only";
 
-import { tasksCol, missionsCol, stateCol as stateColRef } from "./collections";
+import { hashPassword, verifyPassword } from "./auth";
+import { adminsCol, tasksCol, missionsCol, stateCol as stateColRef } from "./collections";
 import { DEFAULT_STATE, ensureAdmin } from "./game";
 import type { Task, TaskType } from "./types";
 
@@ -246,6 +247,33 @@ export async function seedTaskPool(): Promise<{ tasks: number; missions: number 
   return { tasks: taskCount, missions: missionCount };
 }
 
+/**
+ * Keeps the control-room account in step with ADMIN_USERNAME / ADMIN_PASSWORD:
+ * it is created if missing, and its passcode follows the env value, so changing
+ * the variable and redeploying is how the passcode is changed. There is no
+ * built-in default login.
+ */
+export async function bootstrapAdmin(): Promise<void> {
+  const col = await adminsCol();
+  const username = process.env.ADMIN_USERNAME?.trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD;
+  if (!username || !password || password.length < 12) {
+    if ((await col.estimatedDocumentCount()) > 0) return;
+    // No operator exists and none can be created: refuse loudly instead of running open or with a default.
+    throw new Error(
+      "No control-room account exists. Set ADMIN_USERNAME and ADMIN_PASSWORD (12+ characters) and redeploy.",
+    );
+  }
+  const existing = await col.findOne({ username });
+  if (!existing) {
+    await ensureAdmin(username, password, "Event Control");
+    return;
+  }
+  if (!(await verifyPassword(password, existing.passwordHash))) {
+    await col.updateOne({ username }, { $set: { passwordHash: await hashPassword(password) } });
+  }
+}
+
 export async function seedEverything(): Promise<{
   tasks: number;
   missions: number;
@@ -256,8 +284,6 @@ export async function seedEverything(): Promise<{
     { $setOnInsert: { ...DEFAULT_STATE, _id: "state", updatedAt: new Date() } },
     { upsert: true },
   );
-  const username = process.env.ADMIN_USERNAME || "admin";
-  const password = process.env.ADMIN_PASSWORD || "heist-control";
-  await ensureAdmin(username, password, "Event Control");
+  await bootstrapAdmin();
   return seedTaskPool();
 }

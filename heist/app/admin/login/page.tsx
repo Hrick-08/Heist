@@ -5,6 +5,7 @@ import { AuthShell } from "@/components/auth/auth-shell";
 
 export const metadata: Metadata = {
   title: "Control Room Login",
+  robots: { index: false, follow: false },
 };
 
 export default function AdminLoginPage() {

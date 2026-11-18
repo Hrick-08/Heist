@@ -110,6 +110,7 @@ export function AdminProvider({
   const pathname = usePathname();
   const [sync, startSync] = useTransition();
   const [busyCount, setBusyCount] = useState(0);
+  const inflight = useRef(new Map<unknown, Set<string>>());
   const [toastMsg, setToastMsg] = useState<{ text: string; tone: "ok" | "err" } | null>(null);
   const toastTimer = useRef<number | null>(null);
   const [confirm, setConfirm] = useState<ConfirmOpts | null>(null);
@@ -122,7 +123,7 @@ export function AdminProvider({
   const [sound, setSoundState] = useState(true);
   const [popups, setPopups] = useState<AdminNote[]>([]);
   const audio = useRef<AudioContext | null>(null);
-  const [every] = useState(() => 8000 + Math.floor(Math.random() * 2000));
+  const [every] = useState(() => 10000 + Math.floor(Math.random() * 2000));
 
   const toast = useCallback((text: string, tone: "ok" | "err" = "ok") => {
     setToastMsg({ text, tone });
@@ -132,6 +133,12 @@ export function AdminProvider({
 
   const run = useCallback<Ctx["run"]>(
     async (action, payload, opts) => {
+      // A second tap on the same action with the same data while it is still running is ignored.
+      const key = JSON.stringify(payload);
+      const live = inflight.current.get(action) ?? new Set<string>();
+      if (live.has(key)) return { ok: false, message: "Already working on that." };
+      live.add(key);
+      inflight.current.set(action, live);
       setBusyCount((c) => c + 1);
       try {
         const res = await action({ ok: true, message: "" }, toFormData(payload));
@@ -142,6 +149,7 @@ export function AdminProvider({
         toast("Something went wrong. Try again.", "err");
         return { ok: false, message: "Something went wrong." };
       } finally {
+        live.delete(key);
         setBusyCount((c) => c - 1);
       }
     },
@@ -150,8 +158,10 @@ export function AdminProvider({
 
   /* ---------------- live refresh ---------------- */
   useEffect(() => {
-    const tick = () => startSync(() => router.refresh());
-    // Visible tab: every ~8s. Hidden tab: slower, so a minimised desk still hears about new requests.
+    const tick = () => {
+      if (navigator.onLine) startSync(() => router.refresh());
+    };
+    // Visible tab: every ~10s. Hidden tab: slower, so a minimised desk still hears about new requests.
     let id = 0;
     const schedule = () => {
       window.clearInterval(id);

@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 import {
   adminsCol,
   approvalsCol,
+  auditCol,
   missionsCol,
   stateCol,
   tasksCol,
@@ -106,12 +107,9 @@ export async function countTeams(): Promise<number> {
 
 export async function nextTeamId(): Promise<string> {
   const col = await teamsCol();
-  const last = await col
-    .find({}, { projection: { teamId: 1 } })
-    .sort({ teamId: -1 })
-    .limit(1)
-    .toArray();
-  const highest = last.reduce((max, doc) => {
+  const rows = await col.find({}, { projection: { teamId: 1 } }).toArray();
+  // Numeric, not alphabetical: TLH-100 must come after TLH-99.
+  const highest = rows.reduce((max, doc) => {
     const num = Number(doc.teamId.split("-")[1] ?? "0");
     return Number.isFinite(num) && num > max ? num : max;
   }, 0);
@@ -131,42 +129,53 @@ export async function registerTeam(
 ): Promise<{ team: Team; created: boolean }> {
   const col = await teamsCol();
   const state = await getEventState();
-  const teamId = await nextTeamId();
-  const existing = await col.findOne({ email: input.email.toLowerCase() });
-  if (existing) {
-    return { team: existing, created: false };
+  const email = input.email.toLowerCase();
+  const passwordHash = await hashPassword(input.password);
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const existing = await col.findOne({ email });
+    if (existing) return { team: existing, created: false };
+
+    const teamId = await nextTeamId();
+    const selectedCount = await col.countDocuments({ status: "selected" });
+    const status: TeamStatus =
+      selectedCount < state.maxTeams ? "selected" : "waitlisted";
+    const now = new Date();
+    const team: Team = {
+      teamId,
+      name: input.name,
+      email,
+      passwordHash,
+      leader: input.leader,
+      members: input.members,
+      status,
+      points: 0,
+      money: 0,
+      wanted: false,
+      wantedAt: null,
+      round: state.currentRound,
+      eliminatedInRound: null,
+      finalPoints: null,
+      hintsUsed: 0,
+      endgameUnlocked: false,
+      dexterCompleted: [],
+      createdAt: now,
+      updatedAt: now,
+    };
+    try {
+      await col.insertOne(team);
+    } catch (error) {
+      // Unique index hit: another registration took this ID or email a moment ago.
+      if ((error as { code?: number }).code === 11000) continue;
+      throw error;
+    }
+    if (status === "selected") {
+      // Late arrivals still get this round's board.
+      await assignRoundTasks(state.currentRound, [teamId]);
+    }
+    return { team, created: true };
   }
-  const selectedCount = await col.countDocuments({ status: "selected" });
-  const status: TeamStatus =
-    selectedCount < state.maxTeams ? "selected" : "waitlisted";
-  const now = new Date();
-  const team: Team = {
-    teamId,
-    name: input.name,
-    email: input.email.toLowerCase(),
-    passwordHash: await hashPassword(input.password),
-    leader: input.leader,
-    members: input.members,
-    status,
-    points: 0,
-    money: 0,
-    wanted: false,
-    wantedAt: null,
-    round: state.currentRound,
-    eliminatedInRound: null,
-    finalPoints: null,
-    hintsUsed: 0,
-    endgameUnlocked: false,
-    dexterCompleted: [],
-    createdAt: now,
-    updatedAt: now,
-  };
-  await col.insertOne(team);
-  if (status === "selected") {
-    // Late arrivals still get this round's board.
-    await assignRoundTasks(state.currentRound, [teamId]);
-  }
-  return { team, created: true };
+  throw new Error("Could not allocate a Team ID. Try again.");
 }
 
 export async function updateTeam(
@@ -178,6 +187,28 @@ export async function updateTeam(
     { teamId },
     { $set: { ...patch, updatedAt: new Date() } },
   );
+}
+
+/** Why a crew cannot spend or submit right now, or null when play is open. */
+function playBlocker(state: EventState, team: Team | null): string | null {
+  if (!team) return "Team not found.";
+  if (state.eventEnded) return "The event has ended. Scores are locked.";
+  if (!state.eventLive) return "The event is paused. Try again in a moment.";
+  if (team.status !== "selected" && team.status !== "champion") {
+    return "Your crew is not in play.";
+  }
+  return null;
+}
+
+/** Append-only record of every manual change an operator makes. */
+export async function logAudit(
+  actor: string,
+  action: string,
+  teamId: string,
+  detail: string,
+): Promise<void> {
+  const col = await auditCol();
+  await col.insertOne({ actor, action, teamId, detail, at: new Date() });
 }
 
 export async function adjustTeamScore(
@@ -306,54 +337,55 @@ export async function markTaskComplete(
     return { ok: false, message: "Invalid task reference." };
   }
   const id = new ObjectId(teamTaskId);
-  const allotment = await tt.findOne({ _id: id, teamId });
-  if (!allotment) return { ok: false, message: "Task not found for this team." };
-  if (allotment.status === "completed") {
-    return { ok: false, message: "Task already completed." };
-  }
-  await tt.updateOne(
-    { _id: id },
-    {
-      $set: {
-        status: "completed",
-        completedAt: new Date(),
-        completedBy: adminName,
-      },
-    },
+  // One atomic claim: only the first caller flips the task, so points are paid once.
+  const claimed = await tt.findOneAndUpdate(
+    { _id: id, teamId, status: { $ne: "completed" } },
+    { $set: { status: "completed", completedAt: new Date(), completedBy: adminName } },
+    { returnDocument: "before" },
   );
-  await adjustTeamScore(teamId, allotment.points, allotment.money);
+  if (!claimed) {
+    const exists = await tt.findOne({ _id: id, teamId });
+    return {
+      ok: false,
+      message: exists ? "Task already completed." : "Task not found for this team.",
+    };
+  }
+  await adjustTeamScore(teamId, claimed.points, claimed.money);
   await closeRequestsFor("target", id, adminName);
   return {
     ok: true,
-    message: `Task completed. +${allotment.points} pts, +$${allotment.money}.`,
+    message: `Task completed. +${claimed.points} pts, +$${claimed.money}.`,
   };
 }
 
 export async function unmarkTask(
   teamId: string,
   teamTaskId: string,
+  adminName = "operator",
 ): Promise<{ ok: boolean; message: string }> {
   const tt = await teamTasksCol();
   if (!ObjectId.isValid(teamTaskId)) {
     return { ok: false, message: "Invalid task reference." };
   }
   const id = new ObjectId(teamTaskId);
-  const allotment = await tt.findOne({ _id: id, teamId });
-  if (!allotment) return { ok: false, message: "Task not found for this team." };
-  if (allotment.status !== "completed") {
-    return { ok: false, message: "Task is not completed." };
-  }
-  await tt.updateOne(
-    { _id: id },
-    {
-      $set: {
-        status: "pending",
-        completedAt: null,
-        completedBy: null,
-      },
-    },
+  const claimed = await tt.findOneAndUpdate(
+    { _id: id, teamId, status: "completed" },
+    { $set: { status: "pending", completedAt: null, completedBy: null } },
+    { returnDocument: "before" },
   );
-  await adjustTeamScore(teamId, -allotment.points, -allotment.money);
+  if (!claimed) {
+    const exists = await tt.findOne({ _id: id, teamId });
+    return {
+      ok: false,
+      message: exists ? "Task is not completed." : "Task not found for this team.",
+    };
+  }
+  await adjustTeamScore(teamId, -claimed.points, -claimed.money);
+  // Cash already spent on clues can make the reversal dip below zero; floor it there.
+  const teams = await teamsCol();
+  await teams.updateOne({ teamId, points: { $lt: 0 } }, { $set: { points: 0 } });
+  await teams.updateOne({ teamId, money: { $lt: 0 } }, { $set: { money: 0 } });
+  await logAudit(adminName, "unmark-task", teamId, `-${claimed.points} pts, -$${claimed.money}`);
   return { ok: true, message: "Task reverted to pending." };
 }
 
@@ -361,32 +393,48 @@ export async function purchaseHint(
   teamId: string,
   teamTaskId: string,
 ): Promise<{ ok: boolean; message: string }> {
-  const tt = await teamTasksCol();
   if (!ObjectId.isValid(teamTaskId)) {
     return { ok: false, message: "Invalid task reference." };
   }
   const id = new ObjectId(teamTaskId);
+  const state = await getEventState();
+  const team = await getTeam(teamId);
+  const blocked = playBlocker(state, team);
+  if (blocked) return { ok: false, message: blocked };
+
+  const tt = await teamTasksCol();
   const allotment = await tt.findOne({ _id: id, teamId });
   if (!allotment) return { ok: false, message: "Task not found." };
+  if (allotment.status === "completed") {
+    return { ok: false, message: "This task is already verified." };
+  }
   if (allotment.hintPurchased) {
     return { ok: false, message: "Hint already unlocked." };
   }
   const pool = await tasksCol();
   const task = await pool.findOne({ _id: allotment.taskId });
   if (!task) return { ok: false, message: "Task missing." };
-  const state = await getEventState();
   const cost = Math.max(0, Math.round(task.hintCost * state.hintCostMultiplier));
-  const team = await getTeam(teamId);
-  if (!team) return { ok: false, message: "Team not found." };
-  if (team.money < cost) {
+
+  // Claim the clue first, then debit with a balance guard. If the debit misses, hand the clue back.
+  const claimed = await tt.findOneAndUpdate(
+    { _id: id, teamId, hintPurchased: false, status: { $ne: "completed" } },
+    { $set: { hintPurchased: true } },
+  );
+  if (!claimed) return { ok: false, message: "Hint already unlocked." };
+
+  const teams = await teamsCol();
+  const paid = await teams.findOneAndUpdate(
+    { teamId, money: { $gte: cost } },
+    { $inc: { money: -cost, hintsUsed: 1 }, $set: { updatedAt: new Date() } },
+  );
+  if (!paid) {
+    await tt.updateOne({ _id: id }, { $set: { hintPurchased: false } });
     return {
       ok: false,
       message: `Not enough cash. You need $${cost} to buy this clue.`,
     };
   }
-  await tt.updateOne({ _id: id }, { $set: { hintPurchased: true } });
-  await adjustTeamScore(teamId, 0, -cost);
-  await updateTeam(teamId, { hintsUsed: team.hintsUsed + 1 });
   return { ok: true, message: `Clue unlocked for $${cost}.` };
 }
 
@@ -424,48 +472,70 @@ export async function assignEndgameTask(
 export async function unlockEndgame(
   teamId: string,
 ): Promise<{ ok: boolean; message: string }> {
+  const state = await getEventState();
   const team = await getTeam(teamId);
-  if (!team) return { ok: false, message: "Team not found." };
+  const blocked = playBlocker(state, team);
+  if (blocked || !team) return { ok: false, message: blocked ?? "Team not found." };
   if (team.endgameUnlocked) {
     return { ok: false, message: "Endgame already unlocked." };
   }
-  const state = await getEventState();
   if (team.money < state.endgameCost) {
     return {
       ok: false,
       message: `You need $${state.endgameCost} to fund the endgame heist.`,
     };
   }
-  await adjustTeamScore(teamId, 0, -state.endgameCost);
-  await updateTeam(teamId, { endgameUnlocked: true });
+  const pool = await tasksCol();
+  if ((await pool.countDocuments({ isEndgame: true, active: true })) === 0) {
+    return { ok: false, message: "The vault is not ready yet. Nothing was charged." };
+  }
+
+  // Charge and flag in one guarded step, so a double tap cannot pay twice.
+  const teams = await teamsCol();
+  const paid = await teams.findOneAndUpdate(
+    { teamId, endgameUnlocked: false, money: { $gte: state.endgameCost } },
+    { $inc: { money: -state.endgameCost }, $set: { endgameUnlocked: true, updatedAt: new Date() } },
+  );
+  if (!paid) return { ok: false, message: "Endgame already unlocked." };
+
   const assigned = await assignEndgameTask(teamId);
-  return {
-    ok: true,
-    message: assigned.ok
-      ? `Endgame unlocked for $${state.endgameCost}.`
-      : `Endgame unlocked for $${state.endgameCost}.`,
-  };
+  if (!assigned.ok) {
+    // Never keep the cash without giving the vault: put everything back.
+    await teams.updateOne(
+      { teamId },
+      { $inc: { money: state.endgameCost }, $set: { endgameUnlocked: false, updatedAt: new Date() } },
+    );
+    return { ok: false, message: `${assigned.message} Nothing was charged.` };
+  }
+  return { ok: true, message: `Endgame unlocked for $${state.endgameCost}.` };
 }
 
 export async function removeWanted(
   teamId: string,
 ): Promise<{ ok: boolean; message: string }> {
-  const team = await getTeam(teamId);
-  if (!team) return { ok: false, message: "Team not found." };
-  if (!team.wanted) return { ok: false, message: "Your crew is not wanted." };
   const state = await getEventState();
-  if (team.money < state.wantedRemovalCost) {
+  const team = await getTeam(teamId);
+  const blocked = playBlocker(state, team);
+  if (blocked || !team) return { ok: false, message: blocked ?? "Team not found." };
+  if (!team.wanted) return { ok: false, message: "Your crew is not wanted." };
+
+  const teams = await teamsCol();
+  const paid = await teams.findOneAndUpdate(
+    { teamId, wanted: true, money: { $gte: state.wantedRemovalCost } },
+    {
+      $inc: { money: -state.wantedRemovalCost },
+      $set: { wanted: false, wantedAt: null, updatedAt: new Date() },
+    },
+  );
+  if (!paid) {
+    const fresh = await getTeam(teamId);
+    if (fresh && !fresh.wanted) return { ok: false, message: "Your crew is not wanted." };
     return {
       ok: false,
-      message: `Bribing the cops costs $${state.wantedRemovalCost}. You have $${team.money}.`,
+      message: `Bribing the cops costs $${state.wantedRemovalCost}. You have $${fresh?.money ?? 0}.`,
     };
   }
-  await adjustTeamScore(teamId, 0, -state.wantedRemovalCost);
-  await updateTeam(teamId, { wanted: false, wantedAt: null });
-  return {
-    ok: true,
-    message: `Bribe paid. You are off the wanted list.`,
-  };
+  return { ok: true, message: "Bribe paid. You are off the wanted list." };
 }
 
 /* ------------------------------------------------------------------ */
@@ -756,18 +826,22 @@ export async function completeMission(
   const id = new ObjectId(missionId);
   const mission = await col.findOne({ _id: id });
   if (!mission) return { ok: false, message: "Mission not found." };
-  const team = await getTeam(teamId);
-  if (!team) return { ok: false, message: "Team not found." };
-  if (team.dexterCompleted.includes(String(id))) {
+  const teams = await teamsCol();
+  if (!(await teams.findOne({ teamId }, { projection: { _id: 1 } }))) {
+    return { ok: false, message: "Team not found." };
+  }
+  // $addToSet behind a "not yet in the list" guard: concurrent sign-offs cannot overwrite each other.
+  const claimed = await teams.findOneAndUpdate(
+    { teamId, dexterCompleted: { $ne: String(id) } },
+    { $addToSet: { dexterCompleted: String(id) }, $set: { updatedAt: new Date() } },
+  );
+  if (!claimed) {
     return { ok: false, message: "Mission already completed by this team." };
   }
   await col.updateOne(
     { _id: id },
     { $inc: { completions: 1 }, $set: { updatedAt: new Date() } },
   );
-  await updateTeam(teamId, {
-    dexterCompleted: [...team.dexterCompleted, String(id)],
-  });
   await adjustTeamScore(teamId, mission.points, mission.money);
   await closeRequestsFor("dexter", id, adminName);
   return {
@@ -794,6 +868,8 @@ export async function requestApproval(
     return { ok: false, message: "Invalid request reference." };
   }
   const id = new ObjectId(refId);
+  const blocked = playBlocker(await getEventState(), await getTeam(teamId));
+  if (blocked) return { ok: false, message: blocked };
   const col = await approvalsCol();
 
   const existing = await col.findOne({ teamId, refId: id, status: "pending" });
@@ -819,16 +895,24 @@ export async function requestApproval(
     }
   }
 
-  await col.insertOne({
-    kind,
-    refId: id,
-    teamId,
-    status: "pending",
-    note: note.slice(0, 300),
-    requestedAt: new Date(),
-    resolvedAt: null,
-    resolvedBy: null,
-  });
+  try {
+    await col.insertOne({
+      kind,
+      refId: id,
+      teamId,
+      status: "pending",
+      note: note.slice(0, 300),
+      requestedAt: new Date(),
+      resolvedAt: null,
+      resolvedBy: null,
+    });
+  } catch (error) {
+    // The unique "one live request per crew + task" index caught a double tap.
+    if ((error as { code?: number }).code === 11000) {
+      return { ok: false, message: "Already queued for the desk." };
+    }
+    throw error;
+  }
 
   return {
     ok: true,
@@ -959,21 +1043,11 @@ export async function dismissApproval(
     return { ok: false, message: "Invalid request." };
   }
   const col = await approvalsCol();
-  const request = await col.findOne({ _id: new ObjectId(id) });
-  if (!request) return { ok: false, message: "Request not found." };
-  if (request.status !== "pending") {
-    return { ok: false, message: "Request already closed." };
-  }
-  await col.updateOne(
-    { _id: new ObjectId(id) },
-    {
-      $set: {
-        status: "dismissed",
-        resolvedAt: new Date(),
-        resolvedBy: adminName,
-      },
-    },
+  const closed = await col.findOneAndUpdate(
+    { _id: new ObjectId(id), status: "pending" },
+    { $set: { status: "dismissed", resolvedAt: new Date(), resolvedBy: adminName } },
   );
+  if (!closed) return { ok: false, message: "Request already closed." };
   return { ok: true, message: "Request dismissed — nothing was paid out." };
 }
 
@@ -989,10 +1063,19 @@ export async function approveRequest(
     return { ok: false, message: "Invalid request." };
   }
   const col = await approvalsCol();
-  const request = await col.findOne({ _id: new ObjectId(id) });
-  if (!request) return { ok: false, message: "Request not found." };
-  if (request.status !== "pending") {
-    return { ok: false, message: "Request already closed." };
+  const oid = new ObjectId(id);
+  // Claim the request so two operators (or two clicks) cannot both pay it out.
+  const request = await col.findOneAndUpdate(
+    { _id: oid, status: "pending" },
+    { $set: { status: "approved", resolvedAt: new Date(), resolvedBy: adminName } },
+    { returnDocument: "before" },
+  );
+  if (!request) {
+    const exists = await col.findOne({ _id: oid });
+    return {
+      ok: false,
+      message: exists ? "Request already closed." : "Request not found.",
+    };
   }
 
   const result =
@@ -1001,20 +1084,13 @@ export async function approveRequest(
       : await completeMission(String(request.refId), request.teamId, adminName);
 
   if (!result.ok) {
+    // Nothing was paid, so put the request back in the queue.
+    await col.updateOne(
+      { _id: oid },
+      { $set: { status: "pending", resolvedAt: null, resolvedBy: null } },
+    );
     return result;
   }
-
-  await col.updateOne(
-    { _id: new ObjectId(id) },
-    {
-      $set: {
-        status: "approved",
-        resolvedAt: new Date(),
-        resolvedBy: adminName,
-      },
-    },
-  );
-
   return { ok: true, message: result.message };
 }
 

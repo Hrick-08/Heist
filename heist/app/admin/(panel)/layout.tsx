@@ -9,6 +9,7 @@ export const instant = false;
 
 export const metadata = {
   title: { default: "Control room", template: "%s · Control room" },
+  robots: { index: false, follow: false },
 };
 
 export default async function AdminLayout({

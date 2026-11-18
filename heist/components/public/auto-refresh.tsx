@@ -3,15 +3,18 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
-/** Keeps a public page live: refetches every ~15s while visible, and on focus. */
-export function AutoRefresh({ intervalMs = 15000 }: { intervalMs?: number }) {
+import { useOnline } from "@/components/use-online";
+
+/** Keeps a public page live: refetches every ~20s while visible and online, and on focus. */
+export function AutoRefresh({ intervalMs = 20000 }: { intervalMs?: number }) {
   const router = useRouter();
+  const online = useOnline();
   const [pending, start] = useTransition();
   const [every] = useState(() => intervalMs + Math.floor(Math.random() * 4000));
 
   useEffect(() => {
     const go = () => {
-      if (document.visibilityState === "visible") start(() => router.refresh());
+      if (document.visibilityState === "visible" && navigator.onLine) start(() => router.refresh());
     };
     const id = window.setInterval(go, every);
     document.addEventListener("visibilitychange", go);
@@ -23,5 +26,14 @@ export function AutoRefresh({ intervalMs = 15000 }: { intervalMs?: number }) {
     };
   }, [router, every]);
 
-  return <div className={pending ? "syncbar on" : "syncbar"} aria-hidden />;
+  return (
+    <>
+      <div className={pending ? "syncbar on" : "syncbar"} aria-hidden />
+      {!online && (
+        <div className="offline" role="status">
+          You are offline. The board will update when you reconnect.
+        </div>
+      )}
+    </>
+  );
 }

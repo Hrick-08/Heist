@@ -4,7 +4,7 @@
  * Class names that clash with globals.css utilities were renamed:
  * .btn -> .pbtn, .chip -> .fchip, .eyebrow -> .p-eyebrow.
  */
-.pl{--bg:#1c1e20;--panel:#272a2d;--line:#3b3f43;--paper:#e5d9bb;--ink:#231f17;--cash:#79b073;--gold:#dcab3c;--red:#c8503e;--text:#ebe6da;--mute:#a09d92;
+.pl{--bg:#1c1e20;--panel:#272a2d;--line:#3b3f43;--paper:#e5d9bb;--ink:#231f17;--cash:#79b073;--gold:#dcab3c;--red:#c8503e;--red-text:#e2705d;--text:#ebe6da;--mute:#a09d92;
 --display:var(--font-pl-display),Impact,sans-serif;--body:var(--font-pl-body),system-ui,sans-serif}
 :where(.pl) *{box-sizing:border-box;margin:0;padding:0}
 .pl{background:var(--bg);color:var(--text);font:500 16px/1.4 var(--body);-webkit-tap-highlight-color:transparent}
@@ -20,7 +20,7 @@
 .pl .cash{color:var(--cash);font-weight:700}
 .pl .row{display:flex;align-items:center;gap:10px}.pl .sp{justify-content:space-between}
 .pl .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:10px}
-.pl .stars{display:inline-flex;gap:2px;color:#454a4f}.pl .stars .on{color:var(--gold)}
+.pl .stars{display:inline-flex;gap:2px;color:#6f767e}.pl .stars .on{color:var(--gold)}
 .pl :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
 .pl .pbtn{display:inline-block;margin-top:10px;padding:12px 18px;border:0;border-radius:8px;background:var(--gold);color:var(--ink);font:700 16px var(--body);cursor:pointer}
@@ -135,9 +135,9 @@
 .pl .grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
 .pl .led{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
 .pl .led:last-child{border:0}
-.pl .led .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#1f2224;font-weight:700;color:var(--red)}
+.pl .led .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#1f2224;font-weight:700;color:var(--red-text)}
 .pl .led .t{flex:1;min-width:0}
-.pl .amt{font-weight:700;font-variant-numeric:tabular-nums}.pl .amt.in{color:var(--cash)}.pl .amt.out{color:var(--red)}
+.pl .amt{font-weight:700;font-variant-numeric:tabular-nums}.pl .amt.in{color:var(--cash)}.pl .amt.out{color:var(--red-text)}
 @media (prefers-reduced-motion:no-preference){.pl .sheet{animation:pl-up .22s ease-out}@keyframes pl-up{from{transform:translateY(24px);opacity:0}}}
 
 .pl .card,.pl .stats .card,.pl .mcard,.pl .lb,.pl .meta div{border-radius:18px}
@@ -161,7 +161,7 @@
 .pl .reward.ok{color:var(--cash);border-color:#35503a}
 .pl .heat.hot{background:radial-gradient(120% 90% at 0% 0%,#4a2b25,var(--panel) 65%)}
 .pl .bar{height:10px}.pl .bar,.pl .bar i{border-radius:99px}
-.pl .mcard:active,.pl .lb:active{transform:scale(.99)}
+.pl .mcard:active{transform:scale(.99)}
 .pl .mcard.open:hover{border-color:var(--c)}
 
 /* ---- v5: overflow fix, crown, position card ---- */
@@ -185,7 +185,7 @@
 }
 
 /* ---- v7: backend parity (round pill, banner, hero, stats, funnel, dexter missions, clues, poster) ---- */
-.pl .nm small{font:600 11px var(--body);letter-spacing:.06em}
+.pl .nm small{font:600 12px var(--body);letter-spacing:.06em}
 .pl .brand{display:none}
 .pl .pill.rd{padding:5px 11px;font-variant-numeric:tabular-nums;cursor:default}
 .pl .pill.rd .short{display:none}
@@ -194,11 +194,11 @@
 
 .pl .wbanner{background:#2d211e;border-bottom:1px solid #6b3a33;color:var(--text)}
 .pl .wb-in{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;max-width:480px;margin:0 auto;padding:10px 16px;font-size:14px}
-.pl .wb-in b{font:400 13px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--red)}
+.pl .wb-in b{font:400 13px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--red-text)}
 .pl .wb-link{margin-left:auto;color:var(--gold);font-weight:700;text-decoration:underline}
 
 .pl .badge{display:inline-block;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:#1f2224;color:var(--text);font:700 12px var(--body);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
-.pl .badge.tiny{padding:2px 9px;font-size:11px}
+.pl .badge.tiny{padding:2px 9px;font-size:12px}
 .pl .badge.red{color:#e2705d;border-color:#6b3a33;background:#2d211e}
 .pl .badge.gold{color:var(--gold);border-color:#6b5a26;background:#2a2517}
 .pl .badge.purple{color:#a58bc9;border-color:#4d4163;background:#241f2d}
@@ -239,7 +239,7 @@
 .pl .pbtn.so.sent{color:var(--cash);border-color:#35503a;cursor:default}
 .pl .warnnote{background:#2d211e;color:#e2705d;border:1px solid #6b3a33;margin:0 0 12px}
 
-.pl .poster .pcode{font:600 11px var(--body);letter-spacing:.08em;color:#5a513f}
+.pl .poster .pcode{font:600 12px var(--body);letter-spacing:.08em;color:#5a513f}
 .pl .poster .pmeta{font-size:10.5px;line-height:1.25;color:#5a513f;overflow-wrap:anywhere;max-width:100%;padding:0 4px}
 .pl .so-m{width:100%}
 
@@ -272,7 +272,7 @@
 .pl .herohead h1{margin:6px 0 4px}
 .pl .crewnames{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
 .pl .nmchip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;background:#1f2224;border:1px solid var(--line);font-weight:600;font-size:14px}
-.pl .nmchip small{font:700 10px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.pl .nmchip small{font:700 12px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
 .pl .nmchip.lead{border-color:#6b5a26}
 
 /* feedback from server actions + revealed clue */
@@ -343,7 +343,7 @@
 .pl .crewlist{margin-top:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px 14px}
 .pl .crewlist li{font-size:14px;font-weight:600;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pl .crewlist li.lead{color:var(--text)}
-.pl .crewlist small{font:700 10px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-left:4px}
+.pl .crewlist small{font:700 12px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-left:4px}
 
 /* 4) cash / points history sheet */
 .pl .seg{display:inline-flex;padding:3px;border-radius:99px;background:#1f2224;border:1px solid var(--line)}
@@ -352,7 +352,7 @@
 
 /* 5) pinned endgame card with effects */
 .pl .pinned{margin:14px 0 4px}
-.pl .pintag{display:inline-flex;align-items:center;gap:6px;margin:0 0 8px 4px;font:700 11px var(--body);letter-spacing:.14em;text-transform:uppercase;color:#a58bc9}
+.pl .pintag{display:inline-flex;align-items:center;gap:6px;margin:0 0 8px 4px;font:700 12px var(--body);letter-spacing:.14em;text-transform:uppercase;color:#a58bc9}
 .pl .pinned .mcard{position:relative;border:1px solid #6b5a97;border-left:5px solid #a58bc9;background:radial-gradient(120% 90% at 0% 0%,#352a4a,var(--panel) 65%);box-shadow:0 0 0 1px rgba(165,139,201,.25),0 10px 30px rgba(120,80,200,.28);overflow:hidden}
 .pl .pinned .mcard::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.09) 50%,transparent 65%);transform:translateX(-120%)}
 @media (prefers-reduced-motion:no-preference){
@@ -368,7 +368,7 @@
 .pl .dmis .mlink{cursor:pointer}
 .pl .dmis.open:hover{border-color:var(--red)}
 .pl .openhint{display:inline-block;margin-top:6px;font-weight:700;font-size:14px;color:#e2705d}
-.pl .dtint .tag{color:var(--red)}
+.pl .dtint .tag{color:var(--red-text)}
 
 /* 8) "See poster" in the star section, smooth scroll + highlight */
 @media (prefers-reduced-motion:no-preference){html:has(.pl){scroll-behavior:smooth}}
@@ -481,7 +481,7 @@
 @media (min-width:900px){.pl .wp-wrap{max-width:420px;margin:0 auto}}
 
 /* small polish */
-.pl .mcard.open:active,.pl .lb:active{transform:scale(.985)}
+.pl .mcard.open:active{transform:scale(.985)}
 .pl .pbtn{min-height:46px}
 .pl a.pbtn{display:inline-flex;align-items:center;justify-content:center;text-align:center}
 .pl .seeposter{display:inline-flex;align-items:center;min-height:36px}
@@ -517,20 +517,24 @@
 .pl .stats .card.paper .c-pts{color:#7a4e12}
 
 /* rank cards: same paper, double border and gradient as the wanted poster */
-.pl .poster,.pl .lb,.pl .you2{position:relative;color:#2a2215;border:0;
+.pl .poster,.pl .lb.me,.pl .you2{position:relative;color:#2a2215;border:0;
   background:radial-gradient(120% 80% at 50% 0%,rgba(255,255,255,.32),transparent 60%),repeating-linear-gradient(0deg,rgba(120,90,40,.05) 0 2px,transparent 2px 5px),#e6d8b2}
 .pl .poster,.pl .poster.p1,.pl .poster.me{box-shadow:inset 0 0 40px rgba(130,95,40,.35),0 6px 0 #0e0f10}
-.pl .lb,.pl .you2{box-shadow:inset 0 0 34px rgba(130,95,40,.32),0 4px 0 #0e0f10}
-.pl .poster::after,.pl .lb::after,.pl .you2::after{content:"";position:absolute;inset:5px;border:2px double rgba(42,34,21,.5);border-radius:12px;pointer-events:none}
+.pl .lb.me,.pl .you2{box-shadow:inset 0 0 34px rgba(130,95,40,.32),0 4px 0 #0e0f10}
+.pl .poster::after,.pl .lb.me::after,.pl .you2::after{content:"";position:absolute;inset:5px;border:2px double rgba(42,34,21,.5);border-radius:12px;pointer-events:none}
 .pl .poster.p1{outline:0}
 .pl .poster.p1::after{border-color:rgba(138,90,20,.75);border-width:3px}
 .pl .lb.me,.pl .you2{background:radial-gradient(120% 80% at 50% 0%,rgba(255,255,255,.4),transparent 60%),repeating-linear-gradient(0deg,rgba(120,90,40,.05) 0 2px,transparent 2px 5px),#ecd9a0}
 .pl .lb.me{box-shadow:inset 0 0 34px rgba(168,116,26,.4),0 0 0 3px var(--gold),0 4px 0 #0e0f10}
-.pl .lb b,.pl .you2 b,.pl .lb .n,.pl .you2 .rankbig{color:#2a2215}
-.pl .lb .mute,.pl .you2 .mute{color:#6a5a3a}
-.pl .lb .stars,.pl .you2 .stars{color:#c5b78f}.pl .lb .stars .on,.pl .you2 .stars .on{color:#a8741a}
+.pl .lb.me b,.pl .you2 b,.pl .lb.me .n,.pl .you2 .rankbig{color:#2a2215}
+.pl .lb.me .mute,.pl .you2 .mute{color:#6a5a3a}
+.pl .lb.me .stars,.pl .you2 .stars{color:#c5b78f}.pl .lb.me .stars .on,.pl .you2 .stars .on{color:#a8741a}
 .pl .you2 .bar{background:rgba(42,34,21,.18)}.pl .you2 .bar i{background:#8a5a14}
-.pl .poster .mug .av,.pl .lb .av{filter:grayscale(1) sepia(.5) contrast(1.1)}
+.pl .poster .mug .av,.pl .lb.me .av{filter:grayscale(1) sepia(.5) contrast(1.1)}
+/* other crews on the board stay on the normal dark panel; only your own row is paper */
+.pl .lb:not(.me){color:var(--text);box-shadow:0 3px 0 #0e0f10}
+.pl .lb:not(.me) b{color:var(--text)}
+.pl .lb:not(.me) .av{filter:grayscale(1) contrast(1.05)}
 .pl .poster .rk{z-index:2}
 .pl .lb{margin-bottom:12px}
 
@@ -591,13 +595,13 @@
   @keyframes pl-ring{0%,100%{transform:rotate(0)}15%{transform:rotate(-20deg)}30%{transform:rotate(16deg)}45%{transform:rotate(-11deg)}60%{transform:rotate(7deg)}}
   .pl .bdot{animation:pl-pop .35s cubic-bezier(.2,1.7,.4,1) both}
   @keyframes pl-pop{from{transform:scale(0)}}
-  .pl .pbtn,.pl .mcard,.pl .lb,.pl .fchip{transition:transform .15s,background .15s,border-color .15s,color .15s}
+  .pl .pbtn,.pl .mcard,.pl .fchip{transition:transform .15s,background .15s,border-color .15s,color .15s}
   .pl .pbtn:active{transform:translateY(1px) scale(.99)}
   .pl .pbtn.armed:not(:disabled){animation:pl-armed 1s ease-in-out infinite}
   @keyframes pl-armed{50%{box-shadow:0 0 0 5px rgba(220,171,60,.35)}}
   .pl .wp-act{animation:pl-up .5s cubic-bezier(.2,.8,.2,1) both}
 }
-@media (hover:hover){.pl .mcard.open:hover{transform:translateY(-2px)}.pl .lb:hover{transform:translateY(-1px)}}
+@media (hover:hover){.pl .mcard.open:hover{transform:translateY(-2px)}}
 
 /* ---- v5 tweaks ---- */
 /* stats: paper tone only as a quiet accent on the dark cards */
@@ -616,3 +620,7 @@
 .pl .secdiv{display:flex;align-items:center;gap:14px;margin:30px 0 4px;color:var(--mute);font:700 12px var(--body);letter-spacing:.22em;text-transform:uppercase}
 .pl .secdiv::before,.pl .secdiv::after{content:"";flex:1;height:0;border-top:2px dashed var(--line)}
 .pl .podium{margin-top:20px}
+
+/* offline note: sits above the bottom nav on phones, centred on desktop */
+.pl .offline{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:70;max-width:calc(100% - 32px);padding:9px 16px;border-radius:99px;background:#2d211e;border:1px solid #6b3a33;color:var(--text);font:700 14px var(--body);text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.pl.pu .offline{bottom:calc(16px + env(safe-area-inset-bottom))}

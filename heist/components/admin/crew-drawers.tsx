@@ -133,11 +133,11 @@ export function RegisterDrawer({
           {full && <div className="full note">All {slots} slots are filled. This crew will be waitlisted.</div>}
           <label className="field">
             <span>Crew name</span>
-            <input type="text" placeholder="The Ninth Street Crew" value={f.name} onChange={set("name")} autoFocus />
+            <input type="text" placeholder="Crew name" value={f.name} onChange={set("name")} autoFocus />
           </label>
           <label className="field">
             <span>Leader login email</span>
-            <input type="text" inputMode="email" placeholder="leader@team.com" value={f.email} onChange={set("email")} />
+            <input type="text" inputMode="email" placeholder="Leader email" value={f.email} onChange={set("email")} />
           </label>
           <label className="field">
             <span>Leader name</span>

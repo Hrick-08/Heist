@@ -5,6 +5,7 @@ import { TeamLoginForm } from "@/components/team-login-form";
 
 export const metadata: Metadata = {
   title: "Team Login",
+  robots: { index: false, follow: false },
 };
 
 export default function TeamLoginPage() {

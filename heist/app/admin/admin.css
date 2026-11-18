@@ -1,5 +1,5 @@
 /* Control room. Scoped under .ad so nothing leaks into the player or public pages. */
-.ad{--bg:#1c1e20;--panel:#272a2d;--panel2:#1f2224;--line:#3b3f43;--paper:#e5d9bb;--ink:#231f17;--cash:#79b073;--gold:#dcab3c;--red:#c8503e;--blue:#6c93cf;--purple:#a58bc9;--text:#ebe6da;--mute:#a09d92;
+.ad{--bg:#1c1e20;--panel:#272a2d;--panel2:#1f2224;--line:#3b3f43;--paper:#e5d9bb;--ink:#231f17;--cash:#79b073;--gold:#dcab3c;--red:#c8503e;--red-text:#e2705d;--blue:#6c93cf;--purple:#a58bc9;--text:#ebe6da;--mute:#a09d92;
 --display:var(--font-pl-display),"Bowlby One",Impact,sans-serif;--body:var(--font-pl-body),"Barlow Semi Condensed",system-ui,sans-serif}
 :where(.ad) *{box-sizing:border-box;margin:0;padding:0}
 .ad{overflow-x:clip}
@@ -57,7 +57,7 @@
 .ad .stat.hot{border-color:#6b3a33;background:radial-gradient(120% 90% at 0% 0%,#4a2b25,var(--panel) 65%)}
 .ad .t-gold{color:var(--gold)}
 .ad .t-cash{color:var(--cash)}
-.ad .t-red{color:var(--red)}
+.ad .t-red{color:var(--red-text)}
 .ad .t-blue{color:var(--blue)}
 .ad .t-purple{color:var(--purple)}
 .ad .panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;overflow:hidden}
@@ -104,14 +104,14 @@
 .ad .reward{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font-size:13px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 .ad .reward.pts{color:var(--blue)}
 .ad .reward.cashr{color:var(--gold)}
-.ad .stars{display:inline-flex;gap:2px;color:#454a4f}
+.ad .stars{display:inline-flex;gap:2px;color:#6f767e}
 .ad .stars .on{color:var(--gold)}
 .ad .field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .ad .field>span{font:600 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
 .ad input[type=text],.ad input[type=number],.ad input[type=time],.ad select,.ad textarea{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);color:var(--text);outline:none}
 .ad textarea{resize:vertical;min-height:84px}
-.ad input:focus,.ad select:focus,.ad textarea:focus{border-color:var(--gold)}
-.ad input::placeholder,.ad textarea::placeholder{color:#6d6b63}
+.ad input:focus-visible,.ad select:focus-visible,.ad textarea:focus-visible{border-color:var(--gold);outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 0 4px rgba(220,171,60,.25)}
+.ad input::placeholder,.ad textarea::placeholder{color:#8d8a80}
 .ad select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6' fill='none' stroke='%23a09d92' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
 .ad .form{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
 .ad .form .full{grid-column:1/-1}
@@ -286,10 +286,10 @@
 .ad .poster .stars .on{color:#a8741a}
 .ad .poster .pts{color:#5a513f;font-weight:700}
 .ad .ticket{background:var(--paper);color:var(--ink);border-radius:16px;padding:18px;box-shadow:0 5px 0 #0e0f10;display:grid;gap:10px}
-.ad .ticket .k{font:600 11px var(--body);letter-spacing:.18em;text-transform:uppercase;color:#5a513f}
+.ad .ticket .k{font:600 12px var(--body);letter-spacing:.18em;text-transform:uppercase;color:#5a513f}
 .ad .ticket .v{font:400 26px var(--display);letter-spacing:.04em}
 .ad .photo{display:flex;align-items:center;gap:16px}
-.ad .photo .ph{width:72px;height:72px;border-radius:50%;border:1px dashed var(--mute);display:grid;place-items:center;color:var(--mute);font:700 11px var(--body);letter-spacing:.1em;overflow:hidden;flex:none}
+.ad .photo .ph{width:72px;height:72px;border-radius:50%;border:1px dashed var(--mute);display:grid;place-items:center;color:var(--mute);font:700 12px var(--body);letter-spacing:.1em;overflow:hidden;flex:none}
 .ad input[type=file]{padding:9px 12px;font-size:14px}
 .ad input[type=file]::file-selector-button{margin-right:12px;padding:6px 12px;border:0;border-radius:10px;background:var(--gold);color:var(--ink);font:700 14px var(--body);cursor:pointer}
 .ad .section-t{font:600 12px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin:6px 0 -2px}

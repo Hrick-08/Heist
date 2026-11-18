@@ -43,6 +43,8 @@ export interface Team {
   endgameUnlocked: boolean;
   /** Dexter mission ids already completed by this team. */
   dexterCompleted: string[];
+  /** Sessions issued before this moment are rejected (set when a passcode is reset). */
+  passwordChangedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -129,6 +131,8 @@ export interface SessionPayload {
   /** Team id for team sessions, admin id for admin sessions. */
   sub: string;
   name: string;
+  /** Issued-at, in seconds. */
+  iat?: number;
 }
 
 export interface AuthState {

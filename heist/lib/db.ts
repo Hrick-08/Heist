@@ -16,12 +16,37 @@ declare global {
   var __heistMongo: Promise<MongoClient> | undefined;
 }
 
+/** Uniqueness the application relies on, enforced by the database itself. */
+async function ensureIndexes(db: Db): Promise<void> {
+  try {
+    await Promise.all([
+      db.collection("teams").createIndex({ teamId: 1 }, { unique: true }),
+      db.collection("teams").createIndex({ email: 1 }, { unique: true }),
+      db.collection("teams").createIndex({ status: 1, points: -1 }),
+      db.collection("admins").createIndex({ username: 1 }, { unique: true }),
+      db.collection("teamTasks").createIndex({ teamId: 1, round: 1 }),
+      db.collection("approvals").createIndex({ status: 1, requestedAt: 1 }),
+      db.collection("approvals").createIndex(
+        { teamId: 1, refId: 1 },
+        { unique: true, partialFilterExpression: { status: "pending" } },
+      ),
+      db.collection("auditLog").createIndex({ at: -1 }),
+    ]);
+  } catch (error) {
+    // Most likely pre-existing duplicate rows; the app keeps running and the log says why.
+    console.error("[db] index setup skipped:", (error as Error).message);
+  }
+}
+
 function connect(): Promise<MongoClient> {
   if (!globalThis.__heistMongo) {
     const client = new MongoClient(URI as string, {
       serverSelectionTimeoutMS: 10_000,
     });
-    globalThis.__heistMongo = client.connect();
+    globalThis.__heistMongo = client.connect().then(async (c) => {
+      await ensureIndexes(c.db(DB_NAME));
+      return c;
+    });
   }
   return globalThis.__heistMongo;
 }

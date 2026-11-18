@@ -100,7 +100,10 @@
 .pu-miss .wp-mug .av{background:#cdbf9b}
 @media (min-width:800px){.pu-miss{grid-template-columns:1fr 340px}.pu-miss .pu-poster{order:2}}
 .pu-err{max-width:480px;width:100%;text-align:center;padding:30px 22px;border-radius:24px;background:var(--panel);border:1px solid var(--line)}
-.pu-err .big404{font:400 64px/1 var(--display);color:var(--red);margin-bottom:6px}
+.pu-err .big404{font:400 64px/1 var(--display);color:var(--red-text);margin-bottom:6px}
 .pu-err h1{font-size:28px;text-transform:uppercase;margin:6px 0 10px}
 .pu-err p{color:var(--mute);margin-bottom:20px}
 .pu-err .pu-ctas{justify-content:center}
+
+/* keyboard focus on the public header and footer */
+.pu-link:focus-visible,.pu-logo:focus-visible,.pu-foot a:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:12px}

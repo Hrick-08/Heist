@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { logoutAction } from "@/lib/actions/auth-actions";
+import { adminLogoutAction } from "@/lib/actions/auth-actions";
 import { useAdmin } from "./provider";
 import {
   BellIcon,
@@ -59,7 +59,7 @@ export function TopBar({ operator }: { operator: string }) {
           <BellIcon size={18} />
           {unread > 0 && <span className="bdot">{unread > 9 ? "9+" : unread}</span>}
         </button>
-        <form action={logoutAction}>
+        <form action={adminLogoutAction}>
           <button type="submit" className="btn ghost sm" aria-label="Sign out">
             <ExitIcon size={16} />
             <span className="so-label">Sign out</span>

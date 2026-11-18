@@ -29,7 +29,7 @@ export function TeamLoginForm() {
           id="teamId"
           name="teamId"
           className="au-input mono"
-          placeholder="TLH-01"
+          placeholder="TLH-00"
           autoComplete="off"
           autoCapitalize="characters"
           spellCheck={false}

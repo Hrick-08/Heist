@@ -13,7 +13,14 @@ export async function requireTeam(): Promise<{
   const session = await getSession();
   if (!session || session.role !== "team") redirect("/login");
   const team = await getTeam(session.sub);
-  if (!team) redirect("/login");
+  // Access follows the crew's current standing, not just a still-valid cookie.
+  if (!team || team.status === "waitlisted" || team.status === "eliminated") {
+    redirect("/login");
+  }
+  // A passcode reset ends every session issued before it.
+  if (team.passwordChangedAt && Math.floor(team.passwordChangedAt.getTime() / 1000) > (session.iat ?? 0)) {
+    redirect("/login");
+  }
   return { session, team };
 }
 
