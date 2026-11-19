@@ -89,7 +89,18 @@
 /* side column */
 .reg-aside{display:grid;gap:12px;align-content:start;position:sticky;top:calc(var(--mast-h) + 14px)}
 .reg-aside .crew-card{margin:0}
-.reg-aside .crew-card-top .qr svg{inline-size:64px;block-size:64px}
+.aside-photo-wrap{
+  inline-size:72px;block-size:72px;flex:0 0 auto;display:grid;place-items:center;overflow:hidden;
+  border:var(--frame) solid rgba(34,217,245,.55);border-radius:3px;
+  background:rgba(9,3,20,.8);box-shadow:var(--glow-cyan)
+}
+.aside-photo{inline-size:100%;block-size:100%;object-fit:cover}
+.aside-photo[hidden]{display:none}
+.aside-photo-ph{display:grid;place-items:center;gap:2px;color:var(--ink-45);text-align:center}
+.aside-photo-ph svg{inline-size:34px;block-size:34px;fill:rgba(244,236,255,.26)}
+.aside-photo-ph small{
+  font-family:var(--hud);font-size:8px;letter-spacing:.12em;text-transform:uppercase
+}
 .reg-aside .crew-id{font-size:clamp(15px,1.7vw,21px);line-height:1.1;overflow-wrap:anywhere}
 .reg-aside .crew-card-body{grid-template-columns:repeat(2,minmax(0,1fr))}
 .reg-aside-note{

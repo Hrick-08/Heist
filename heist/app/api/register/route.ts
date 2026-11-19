@@ -158,8 +158,10 @@ export async function POST(request: Request) {
         status: team.status,
         waitlisted,
         message: waitlisted
-          ? "Your crew is on the waitlist. Keep this passcode — you'll need it when a slot opens."
-          : "Crew registered. Save your Team ID and passcode — you need both to log in.",
+          ? "Your crew is on the waitlist. Keep this passcode — you'll need it if a slot opens " +
+            "and your crew is selected. Only selected crews can sign in on the Heist app."
+          : `Crew registered. Save your Team ID and passcode — you need both to log in. ` +
+            `You'll hear from us at ${email} — we'll be mailing the selected crews.`,
       },
       201,
     );

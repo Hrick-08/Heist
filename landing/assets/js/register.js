@@ -11,6 +11,8 @@
   var fileInput = document.getElementById("leaderPhoto");
   var photoName = document.getElementById("photoName");
   var photoPreview = document.getElementById("photoPreview");
+  var asidePhoto = document.getElementById("asidePhoto");
+  var asidePhotoPh = document.getElementById("asidePhotoPh");
   var asideCrewName = document.getElementById("asideCrewName");
 
   var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -19,6 +21,19 @@
   function setMsg(text, kind) {
     msg.textContent = text;
     msg.className = "if-msg" + (kind ? " is-" + kind : "");
+  }
+
+  /* Mirror the chosen leader photo into the crew-file card on the right. */
+  function showAsidePhoto(dataUrl) {
+    if (dataUrl) {
+      asidePhoto.src = dataUrl;
+      asidePhoto.hidden = false;
+      asidePhotoPh.hidden = true;
+    } else {
+      asidePhoto.hidden = true;
+      asidePhoto.removeAttribute("src");
+      asidePhotoPh.hidden = false;
+    }
   }
 
   /* Resize an uploaded photo to max 480px and return a JPEG data URL —
@@ -53,6 +68,7 @@
     photoDataUrl = "";
     photoPreview.hidden = true;
     photoPreview.removeAttribute("src");
+    showAsidePhoto("");
     if (!file) {
       photoName.textContent = "No file chosen · required";
       return;
@@ -66,6 +82,7 @@
     }
     photoPreview.src = photoDataUrl;
     photoPreview.hidden = false;
+    showAsidePhoto(photoDataUrl);
     photoName.textContent = file.name + " · 480px";
   });
 
@@ -220,6 +237,7 @@
     photoDataUrl = "";
     photoPreview.hidden = true;
     photoPreview.removeAttribute("src");
+    showAsidePhoto("");
     photoName.textContent = "No file chosen · required";
     asideCrewName.textContent = "YOUR CREW NAME";
     setMsg("One registration = one crew = one crew ID. Nothing is charged — entry is free.");

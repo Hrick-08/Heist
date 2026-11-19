@@ -48,8 +48,7 @@ export async function teamLoginAction(
 
   if (team.status === "waitlisted") {
     return {
-      error:
-        "Your crew is on the waitlist. You will be emailed the moment a slot opens.",
+      error: "Your crew is on the waitlist. Only selected crews can sign in.",
     };
   }
 

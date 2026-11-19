@@ -155,8 +155,12 @@
         <aside class="reg-aside">
           <div class="crew-card">
             <div class="crew-card-top">
-              <div class="qr" aria-hidden="true">
-                <svg viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fdf6ea"/><g fill="#150a20"><path d="M0 0h7v7H0zM2 2h3v3H2zM14 0h7v7h-7zM16 2h3v3h-3zM0 14h7v7H0zM2 16h3v3H2zM8 0h1v1H8zM10 1h1v1h-1zM8 3h2v1H8zM11 4h2v1h-2zM9 6h1v2H9zM12 8h2v1h-2zM8 9h1v2H8zM10 11h3v1h-3zM14 9h1v2h-1zM16 11h2v1h-2zM19 9h2v1h-2zM14 14h2v2h-2zM17 15h1v2h-1zM19 14h2v2h-2zM15 18h3v1h-3zM19 18h2v2h-2zM8 14h2v1H8zM9 16h2v1H9zM8 18h3v1H8zM0 9h2v1H0zM3 10h2v1H3zM1 12h3v1H1z"/></g></svg>
+              <div class="aside-photo-wrap">
+                <img id="asidePhoto" class="aside-photo" alt="Leader photo preview" hidden>
+                <span id="asidePhotoPh" class="aside-photo-ph" aria-hidden="true">
+                  <svg viewBox="0 0 64 64"><circle cx="32" cy="23" r="12"/><path d="M8 60c0-13 11-21 24-21s24 8 24 21z"/></svg>
+                  <small>leader photo</small>
+                </span>
               </div>
               <div>
                 <p class="crew-tag">Crew file · issued at check-in</p>
@@ -175,9 +179,9 @@
             <li>crew name + 4–5 members</li>
             <li>valid Chitkara IDs</li>
             <li>team leader named for the poster</li>
-            <li>photo opt-out if you want it</li>
+            <li>leader photo required with this form</li>
           </ul>
-          <p class="reg-aside-note">// crews past the slot limit are waitlisted automatically and emailed the moment a slot opens.</p>
+          <p class="reg-aside-note">// crews past the slot limit are waitlisted automatically until a slot opens. Only selected crews can sign in on the Heist app.</p>
         </aside>
       </div>
 
@@ -189,7 +193,7 @@
           <div><span>Team ID</span><b id="successTeamId">—</b></div>
           <div><span>Passcode</span><b id="successPasscode">—</b></div>
         </div>
-        <p class="reg-success-hint">Save these two values. Your crew logs in with the Team ID and this auto-generated passcode.</p>
+        <p class="reg-success-hint">Save these two values. Your crew logs in with the Team ID and this auto-generated passcode. You'll hear from us on the leader email you gave — we'll be mailing the selected crews.</p>
         <div class="if-actions">
           <a class="btn btn--go" id="successLogin" href="/login">Log in to your crew page →</a>
           <a class="btn btn--ghost" href="index.html">Back to the city</a>
