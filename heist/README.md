@@ -2,8 +2,9 @@
 
 A GTA VI themed campus heist event built by **GDG Campus Chitkara**.
 
-Forty crews register, get a **TEAM ID**, and are handed personal login
-credentials. The leader signs in, works a board of targets, buys clues with
+Crews register and get a **TEAM ID** and passcode, but nobody enters the heist
+automatically — control flips each crew's **In heist** switch and sends its
+login details. The leader signs in, works a board of targets, buys clues with
 cash, and survives four elimination rounds — **40 → 20 → 10 → 5** — before the
 last crew standing empties the vault.
 
@@ -51,9 +52,19 @@ existing records, so it is safe to run more than once.
 - 3–4 further members (4–5 people per crew including the leader),
 - an optional passcode — leave it blank and one is generated.
 
-The panel returns the generated **TEAM ID** and **passcode**. Mail those to the
-crew leader; only the leader signs in. The first 40 crews are selected; anyone
-after that lands on the waitlist and cannot sign in.
+The panel returns the generated **TEAM ID** and **passcode**. New crews start
+as **not in the heist** and cannot sign in yet — registration never enters a
+crew automatically.
+
+**Control room → Crews → In heist.** Flip the switch for every crew you want in
+the heist (up to the slot limit in Settings). Admitting a crew gives it the
+current round's board. Click **Login** on the same row to reveal its Team ID,
+login email and passcode, then **Copy** or **Email** to send them to the leader
+by hand — the control room does not send mail itself. Switching a crew off
+signs it out immediately but keeps its score and tasks. If a crew was created
+by mistake, **Delete** on the row removes it and returns its sign-up to pending
+so you can generate fresh credentials (crews in the heist must be switched out
+first).
 
 ### 2. Open round 1
 
@@ -63,7 +74,7 @@ after that lands on the waitlist and cannot sign in.
 - **Technical** targets are dealt **one crew at a time** and are never handed
   to two crews in the same round.
 
-Crews that register late get the current round's board automatically.
+Crews admitted later get the current round's board when their switch is turned on.
 
 ### 3. Verify targets at the desk
 
@@ -90,7 +101,9 @@ straight to the queue.
 **Control room → Dexter.** Push a mission, choose the round, the difficulty and
 whether it targets every crew or selected crews. It appears on the crew
 dashboards as a **“Dexter Spotted”** banner. Close it out from the crew page
-and the crew banks the extra points and cash.
+and the crew banks the extra points and cash. A mistaken sign-off can be
+**Revert**ed there too — that removes the claim, the payout and the mission's
+completion count.
 
 ### 5. Run the rounds
 
@@ -165,7 +178,7 @@ proxy.ts                      route guards for /dashboard, /tasks, /endgame, /ad
 
 | Collection | Contents |
 | --- | --- |
-| `teams` | Crew record, leader photo, status, points, cash, wanted flag, round, completed Dexter missions |
+| `teams` | Crew record, login email, passcode, leader photo, status (`registered` = not in the heist), points, cash, wanted flag, round, completed Dexter missions |
 | `tasks` | Target pool — type (`physical` / `technical`), round, points, cash, hint and hint price, endgame flag |
 | `teamTasks` | Allotments — one row per crew per target, with completion and payout state |
 | `dexterMissions` | Dexter missions — reward, round, difficulty, target crews, completions |

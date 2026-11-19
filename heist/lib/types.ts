@@ -32,6 +32,7 @@ export interface Team {
   passwordHash: string;
   leader: Member & { photo: string };
   members: Member[];
+  /** `registered` means credentials exist but the crew has NOT entered the heist yet. */
   status: TeamStatus;
   points: number;
   money: number;
@@ -45,7 +46,7 @@ export interface Team {
   endgameUnlocked: boolean;
   /** Dexter mission ids already completed by this team. */
   dexterCompleted: string[];
-  /** Sessions issued before this moment are rejected (set when a passcode is reset). */
+  /** Sessions issued before this moment are rejected (passcode reset or removed from the heist). */
   passwordChangedAt?: Date;
   createdAt: Date;
   updatedAt: Date;

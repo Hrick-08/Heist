@@ -50,6 +50,13 @@ export async function teamLoginAction(
     return { error: "Team ID or passcode is incorrect." };
   }
 
+  if (team.status === "registered") {
+    return {
+      error:
+        "Your crew is registered but has not been added to the heist yet. Event control will add you and send your login details.",
+    };
+  }
+
   if (team.status === "waitlisted") {
     return {
       error: "Your crew is on the waitlist. Only selected crews can sign in.",

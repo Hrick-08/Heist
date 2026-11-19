@@ -10,8 +10,9 @@ import type { Member } from "@/lib/types";
  * The landing site is not a Next.js app, so it posts here instead of calling a
  * server action. Everything is still written through the same `registerTeam`
  * helper the rest of the app uses, which means the crew lands in the very same
- * MongoDB `teams` collection the admin panel reads, gets the first-come /
- * waitlist status, and has its leader photo stored on the crew record.
+ * MongoDB `teams` collection the admin panel reads. A new crew starts with
+ * credentials but is NOT in the heist: event control admits it with the
+ * "In heist" switch on the Crews page.
  */
 
 const CORS_HEADERS: Record<string, string> = {
@@ -149,18 +150,16 @@ export async function POST(request: Request) {
     revalidatePath("/admin");
     revalidatePath("/leaderboard");
 
-    const waitlisted = team.status === "waitlisted";
     return json(
       {
         ok: true,
         teamId: team.teamId,
         passcode,
         status: team.status,
-        waitlisted,
-        message: waitlisted
-          ? "Your crew is on the waitlist. Only selected crews can sign in on the Heist app."
-          : `Crew registered. We'll email your Team ID and passcode to ${email} — ` +
-            "we'll be mailing the selected crews.",
+        waitlisted: false,
+        message:
+          `Crew registered. Keep your Team ID and passcode safe. Event control will add ` +
+          "your crew to the heist and send your login details; you can sign in once admitted.",
       },
       201,
     );

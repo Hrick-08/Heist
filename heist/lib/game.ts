@@ -7,6 +7,7 @@ import {
   approvalsCol,
   auditCol,
   missionsCol,
+  registrationsCol,
   stateCol,
   tasksCol,
   teamTasksCol,
@@ -139,9 +140,9 @@ export async function registerTeam(
     if (existing) return { team: existing, created: false };
 
     const teamId = await nextTeamId();
-    const selectedCount = await col.countDocuments({ status: "selected" });
-    const status: TeamStatus =
-      selectedCount < state.maxTeams ? "selected" : "waitlisted";
+    // Registration only creates the crew and its credentials. Nobody enters the
+    // heist automatically: an operator has to flip the crew's "In heist" toggle,
+    // which sets the status and deals the current round's board.
     const now = new Date();
     const team: Team = {
       teamId,
@@ -151,7 +152,7 @@ export async function registerTeam(
       passwordHash,
       leader: input.leader,
       members: input.members,
-      status,
+      status: "registered",
       points: 0,
       money: 0,
       wanted: false,
@@ -171,10 +172,6 @@ export async function registerTeam(
       // Unique index hit: another registration took this ID or email a moment ago.
       if ((error as { code?: number }).code === 11000) continue;
       throw error;
-    }
-    if (status === "selected") {
-      // Late arrivals still get this round's board.
-      await assignRoundTasks(state.currentRound, [teamId]);
     }
     return { team, created: true };
   }
@@ -238,6 +235,100 @@ export async function setTeamStatus(
     { teamId },
     { $set: { status, updatedAt: new Date() } },
   );
+}
+
+/**
+ * Deletes a crew that was created by mistake and puts its sign-up back in the
+ * review queue so control can generate fresh credentials. Callers must check
+ * that the crew is not in play first.
+ */
+export async function deleteCrew(teamId: string): Promise<boolean> {
+  const teams = await teamsCol();
+  const team = await teams.findOne({ teamId });
+  const removed = await teams.deleteOne({ teamId });
+  if (removed.deletedCount === 0) return false;
+
+  const [teamTasks, approvals, registrations, missions] = await Promise.all([
+    teamTasksCol(),
+    approvalsCol(),
+    registrationsCol(),
+    missionsCol(),
+  ]);
+  await Promise.all([
+    teamTasks.deleteMany({ teamId }),
+    approvals.deleteMany({ teamId }),
+    // A sign-up that produced this crew becomes pending again, ready to retry.
+    registrations.updateMany(
+      { teamId },
+      { $set: { status: "pending", teamId: null } },
+    ),
+  ]);
+
+  // Un-target the crew from any Dexter missions and drop its completion count.
+  const completed = new Set((team?.dexterCompleted ?? []).map(String));
+  const targeted = await missions.find({ teamIds: teamId }).toArray();
+  for (const mission of targeted) {
+    await missions.updateOne({ _id: mission._id }, { $pull: { teamIds: teamId } });
+    if (completed.has(String(mission._id))) {
+      await missions.updateOne(
+        { _id: mission._id, completions: { $gt: 0 } },
+        { $inc: { completions: -1 } },
+      );
+    }
+  }
+  return true;
+}
+
+export interface AdmissionResult {
+  ok: boolean;
+  message: string;
+}
+
+/**
+ * The control room's "In heist" switch. On: admit the crew, move it to the
+ * current round and deal that round's board. Off: park it back at `registered`
+ * and end any sessions it already has, so it cannot keep playing.
+ */
+export async function setTeamAdmission(
+  teamId: string,
+  admitted: boolean,
+): Promise<AdmissionResult> {
+  const team = await getTeam(teamId);
+  if (!team) return { ok: false, message: "That crew could not be found." };
+
+  if (admitted) {
+    if (team.status === "selected" || team.status === "champion") {
+      return { ok: true, message: `${team.name} is already in the heist.` };
+    }
+    const col = await teamsCol();
+    const state = await getEventState();
+    const occupied = await col.countDocuments({
+      teamId: { $ne: teamId },
+      status: { $in: ["selected", "champion"] },
+    });
+    if (occupied >= state.maxTeams) {
+      return {
+        ok: false,
+        message: `All ${state.maxTeams} slots are taken. Free a slot or raise the limit in Settings first.`,
+      };
+    }
+    await updateTeam(teamId, { status: "selected", round: state.currentRound });
+    await assignRoundTasks(state.currentRound, [teamId]);
+    return {
+      ok: true,
+      message: `${team.name} is in the heist. Share the Team ID and passcode with the leader so they can sign in.`,
+    };
+  }
+
+  if (team.status !== "selected") {
+    return { ok: true, message: `${team.name} was not in the heist.` };
+  }
+  // Clearing the timestamp signs out every session issued before this moment.
+  await updateTeam(teamId, { status: "registered", passwordChangedAt: new Date() });
+  return {
+    ok: true,
+    message: `${team.name} has been taken out of the heist and signed out.`,
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -850,6 +941,51 @@ export async function completeMission(
   return {
     ok: true,
     message: `Dexter mission logged by ${adminName}. +${mission.points} pts, +$${mission.money}.`,
+  };
+}
+
+/** Undoes a mistaken Dexter sign-off: removes the claim, its payout and the
+ *  mission's completion count. */
+export async function revertMission(
+  missionId: string,
+  teamId: string,
+  adminName: string,
+): Promise<{ ok: boolean; message: string }> {
+  const col = await missionsCol();
+  if (!ObjectId.isValid(missionId)) {
+    return { ok: false, message: "Invalid mission reference." };
+  }
+  const id = new ObjectId(missionId);
+  const mission = await col.findOne({ _id: id });
+  if (!mission) return { ok: false, message: "Mission not found." };
+
+  const teams = await teamsCol();
+  const unclaimed = await teams.findOneAndUpdate(
+    { teamId, dexterCompleted: String(id) },
+    {
+      $pull: { dexterCompleted: String(id) },
+      $set: { updatedAt: new Date() },
+    },
+  );
+  if (!unclaimed) {
+    return { ok: false, message: "This mission is not marked done for that crew." };
+  }
+
+  await col.updateOne(
+    { _id: id, completions: { $gt: 0 } },
+    { $inc: { completions: -1 }, $set: { updatedAt: new Date() } },
+  );
+  await adjustTeamScore(teamId, -mission.points, -mission.money);
+  await clampScore(teamId);
+  await logAudit(
+    adminName,
+    "revert-mission",
+    teamId,
+    `${mission.title}: -${mission.points} pts, -$${mission.money}`,
+  );
+  return {
+    ok: true,
+    message: `Dexter mission reverted. -${mission.points} pts, -$${mission.money}.`,
   };
 }
 

@@ -23,7 +23,12 @@ export async function requireTeam(): Promise<{
   }
   const team = await getTeam(session.sub);
   // Access follows the crew's current standing, not just a still-valid cookie.
-  if (!team || team.status === "waitlisted" || team.status === "eliminated") {
+  if (
+    !team ||
+    team.status === "registered" ||
+    team.status === "waitlisted" ||
+    team.status === "eliminated"
+  ) {
     redirect("/login");
   }
   // A passcode reset ends every session issued before it.

@@ -1,3 +1,4 @@
+import { io } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -32,6 +33,9 @@ async function TeamDetail({ params }: { params: Promise<{ teamId: string }> }) {
     listMissions(),
     listApprovalsForTeam(team.teamId),
   ]);
+
+  // dateTime() uses `new Date()` — keep it out of the prerender pass.
+  await io();
 
   return (
     <CrewDetail

@@ -88,7 +88,7 @@ export function RegisterDrawer({
       onClose={close}
       wide
       title={done ? "Crew registered" : "Register a crew"}
-      sub={done ? "Hand these over to the crew leader." : "First come first served. Crews past the slot limit are waitlisted automatically."}
+      sub={done ? "Hand these over to the crew leader, then switch them into the heist on the Crews page." : "New crews get credentials but only enter the heist when you switch them in."}
     >
       {done ? (
         <div className="stack">
@@ -97,7 +97,13 @@ export function RegisterDrawer({
               <Avatar teamId={done.teamId} hasPhoto={Boolean(photo)} size={56} label={done.name} />
               <div>
                 <div className="v">{done.name}</div>
-                <span className="k">{done.status === "waitlisted" ? "Waitlisted" : "In play"}</span>
+                <span className="k">
+                  {done.status === "waitlisted"
+                    ? "Waitlisted"
+                    : done.status === "registered"
+                      ? "Not in heist"
+                      : "In play"}
+                </span>
               </div>
             </div>
             <div>
@@ -130,7 +136,7 @@ export function RegisterDrawer({
         </div>
       ) : (
         <form className="form" onSubmit={submit}>
-          {full && <div className="full note">All {slots} slots are filled. This crew will be waitlisted.</div>}
+          {full && <div className="full note">All {slots} slots are filled. You can register the crew, but switch it into the heist once a slot opens.</div>}
           <label className="field">
             <span>Crew name</span>
             <input type="text" placeholder="Crew name" value={f.name} onChange={set("name")} autoFocus />

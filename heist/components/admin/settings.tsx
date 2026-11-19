@@ -31,7 +31,7 @@ const DEFAULTS: SettingsValues = {
 
 type NumKey = Exclude<keyof SettingsValues, "eventLive">;
 const FIELDS: { k: NumKey; label: string; step?: number; min?: number; max?: number; help?: string }[] = [
-  { k: "maxTeams", label: "Crew slots", min: 1, help: "Crews past this are waitlisted." },
+  { k: "maxTeams", label: "Crew slots", min: 1, help: "No more crews can be switched into the heist past this limit." },
   { k: "totalRounds", label: "Total rounds", min: 1, max: 8 },
   { k: "physicalPerRound", label: "Physical tasks per round", min: 0, help: "Shared by every crew." },
   { k: "technicalPerRound", label: "Technical tasks per round", min: 0, help: "Dealt one to one crew." },

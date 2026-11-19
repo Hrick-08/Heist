@@ -2,6 +2,7 @@
 
 import { Fragment, useState } from "react";
 
+import { deleteCrewAction } from "@/lib/actions/admin-actions";
 import {
   deleteRegistrationAction,
   getCrewLoginAction,
@@ -11,16 +12,26 @@ import {
 } from "@/lib/actions/registration-admin-actions";
 import type { RegistrationRow } from "@/lib/types";
 import { Avatar } from "./avatar";
-import { CopyIcon, KeyIcon } from "./icons";
+import { CopyIcon, KeyIcon, MailIcon } from "./icons";
 import { useAdmin } from "./provider";
 import { Empty, PageHead, Panel, Stat, Toggle } from "./ui";
 
-const COLS = "40px minmax(140px,1.2fr) minmax(160px,1.3fr) 110px 90px 130px";
+const COLS = "40px minmax(140px,1.2fr) minmax(160px,1.3fr) 110px 90px 190px";
 
 interface Login {
   teamId: string;
   email: string;
   passcode: string;
+}
+
+function mailto(login: Login): string {
+  const subject = "Your Last Heist login details";
+  const body =
+    `Team ID: ${login.teamId}\n` +
+    `Passcode: ${login.passcode}\n\n` +
+    "Open the Heist app, choose Team login and sign in with these details. " +
+    "Keep them safe — only the leader signs in.\n";
+  return `mailto:${login.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 export function RegistrationsView({
@@ -152,10 +163,42 @@ export function RegistrationsView({
       onYes: async () => void (await run(deleteRegistrationAction, { id: row.id })),
     });
 
+  /** Undo a mistaken "Generate credentials": delete the crew, keep the sign-up. */
+  const removeCrew = (row: RegistrationRow) => {
+    const teamId = row.teamId;
+    if (!teamId) return;
+    ask({
+      title: `Delete crew ${teamId}?`,
+      body: "Removes the crew, its Team ID, passcode and any tasks. The sign-up goes back to pending so you can generate new credentials. Crews already in the heist must be switched out first.",
+      cta: "Delete crew",
+      tone: "red",
+      onYes: async () => {
+        const res = await run(deleteCrewAction, { teamId });
+        if (!res.ok) return;
+        setOpenLogin((cur) => {
+          const next = new Set(cur);
+          next.delete(row.id);
+          return next;
+        });
+        setLogins((cur) => {
+          const next = { ...cur };
+          delete next[row.id];
+          return next;
+        });
+        setShown((cur) => {
+          const next = new Set(cur);
+          next.delete(row.id);
+          return next;
+        });
+      },
+    });
+  };
+
   return (
     <>
       <PageHead eyebrow="Before the event" title="Registration">
-        Open crew sign-ups, review who has applied, then pick your 40 and hand out Team IDs.
+        Open crew sign-ups, review who has applied, then generate their Team IDs and passcodes.
+        Crews only enter the heist when you switch them in on the Crews page.
       </PageHead>
 
       <div className="stats">
@@ -266,14 +309,19 @@ export function RegistrationsView({
                     </button>
                   )}
                   {r.status === "selected" && r.teamId && (
-                    <button
-                      className="btn ghost sm"
-                      aria-expanded={openLogin.has(r.id)}
-                      onClick={() => toggleCreds(r)}
-                    >
-                      <KeyIcon size={15} />
-                      {openLogin.has(r.id) ? "Hide login" : "View login"}
-                    </button>
+                    <div className="rowacts">
+                      <button
+                        className="btn ghost sm"
+                        aria-expanded={openLogin.has(r.id)}
+                        onClick={() => toggleCreds(r)}
+                      >
+                        <KeyIcon size={15} />
+                        {openLogin.has(r.id) ? "Hide login" : "View login"}
+                      </button>
+                      <button className="btn danger sm" onClick={() => removeCrew(r)}>
+                        Delete
+                      </button>
+                    </div>
                   )}
                 </span>
               </div>
@@ -306,6 +354,10 @@ export function RegistrationsView({
                             <CopyIcon size={15} />
                             Copy
                           </button>
+                          <a className="btn ghost sm" href={mailto(logins[r.id])}>
+                            <MailIcon size={15} />
+                            Email
+                          </a>
                         </span>
                       </div>
                     ) : (

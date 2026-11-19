@@ -8,6 +8,8 @@ import {
   completeMissionAction,
   markTaskAction,
   resetPasswordAction,
+  revertMissionAction,
+  setTeamAdmissionAction,
   setTeamStatusAction,
   setWantedAction,
   unmarkTaskAction,
@@ -214,10 +216,11 @@ export function CrewDetail({ team, bribe, tasks, missions, approvals }: CrewDeta
             </div>
 
             <div>
-              <span className="section-t">Status</span>
+              <span className="section-t">Heist entry &amp; status</span>
               <div className="row" style={{ marginTop: 8, gap: 10 }}>
                 <select aria-label="Status" value={status} onChange={(e) => setStatus(e.target.value)}>
-                  <option value="selected">In play (selected)</option>
+                  <option value="registered">Not in heist</option>
+                  <option value="selected">In heist (selected)</option>
                   <option value="waitlisted">Waitlisted</option>
                   <option value="eliminated">Eliminated</option>
                   <option value="champion">Champion</option>
@@ -225,11 +228,31 @@ export function CrewDetail({ team, bribe, tasks, missions, approvals }: CrewDeta
                 <button
                   className="btn ghost sm"
                   disabled={status === team.status || working === "status"}
-                  onClick={() => step("status", () => run(setTeamStatusAction, { teamId: team.teamId, status }))}
+                  onClick={() =>
+                    step("status", async () => {
+                      // Entry/removal goes through the same switch as the Crews page.
+                      const enteringOrLeaving =
+                        (status === "selected" || status === "registered") &&
+                        status !== team.status;
+                      if (enteringOrLeaving) {
+                        const res = await run(setTeamAdmissionAction, {
+                          teamId: team.teamId,
+                          admitted: status === "selected",
+                        });
+                        if (!res.ok) setStatus(team.status);
+                      } else {
+                        const res = await run(setTeamStatusAction, { teamId: team.teamId, status });
+                        if (!res.ok) setStatus(team.status);
+                      }
+                    })
+                  }
                 >
                   Update
                 </button>
               </div>
+              <p className="mute small" style={{ marginTop: 6 }}>
+                Switching a crew in deals the current round's board. Switching it out signs the leader out and keeps their score.
+              </p>
             </div>
 
             <div>
@@ -394,7 +417,25 @@ export function CrewDetail({ team, bribe, tasks, missions, approvals }: CrewDeta
                   </div>
                 </div>
                 {m.done ? (
-                  <span className="tag cash">Completed</span>
+                  <div className="row" style={{ gap: 8 }}>
+                    <span className="tag cash">Completed</span>
+                    <button
+                      className="btn ghost sm"
+                      disabled={working === m.id}
+                      onClick={() =>
+                        ask({
+                          title: `Revert “${m.title}”?`,
+                          body: "Takes back the points and cash this Dexter mission paid, and marks it not done for this crew.",
+                          cta: "Revert",
+                          tone: "red",
+                          onYes: async () => void (await run(revertMissionAction, { missionId: m.id, teamId: team.teamId })),
+                        })
+                      }
+                    >
+                      <UndoIcon size={14} />
+                      Revert
+                    </button>
+                  </div>
                 ) : (
                   <button
                     className="btn violet sm"

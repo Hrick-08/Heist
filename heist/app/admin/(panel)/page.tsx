@@ -1,3 +1,4 @@
+import { io } from "next/cache";
 import { Suspense } from "react";
 
 import { Skeleton } from "@/components/admin/skeleton";
@@ -39,6 +40,9 @@ async function Overview() {
 
   const photo = new Map(teams.map((t) => [t.teamId, t.hasPhoto]));
   const champion = teams.find((t) => t.status === "champion");
+
+  // time() formats a timestamp with `new Date()`; defer that to request time.
+  await io();
 
   return (
     <OverviewView

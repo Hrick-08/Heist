@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import { io } from "next/cache";
 import { randomBytes, scrypt as nodeScrypt, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 
@@ -55,6 +56,10 @@ export function generatePassword(length = 10): string {
 /* ------------------------------------------------------------------ */
 
 export async function getSession(): Promise<SessionPayload | null> {
+  // jose's jwtVerify() reads the current time to check `exp`. Keep that read
+  // out of the prerender pass, just like the Mongo driver in lib/db.ts.
+  // `io()` resolves immediately in requests and server actions.
+  await io();
   const store = await cookies();
   return verifySession(store.get(SESSION_COOKIE)?.value);
 }

@@ -12,16 +12,20 @@ import {
   createMission,
   createTask,
   crownChampion,
+  deleteCrew,
   deleteMission,
   deleteTask,
   dismissApproval,
   getEventState,
+  getTeam,
   listPendingApprovals,
   listSelectedTeams,
   logAudit,
   markTaskComplete,
   registerTeam,
+  revertMission,
   rewindRound,
+  setTeamAdmission,
   setTeamStatus,
   setWanted,
   syncWantedFromLeaderboard,
@@ -154,7 +158,7 @@ export async function registerTeamAction(
   revalidatePath("/admin");
   return {
     ok: true,
-    message: `${team.name} registered as ${team.teamId} (${team.status}). Passcode: ${password}`,
+    message: `${team.name} registered as ${team.teamId}. Passcode: ${password}. Flip "In heist" on the Crews page to admit them.`,
     data: {
       name: team.name,
       teamId: team.teamId,
@@ -162,6 +166,93 @@ export async function registerTeamAction(
       passcode: password,
       loginEmail: email,
     },
+  };
+}
+
+/** The per-crew "In heist" switch: controls entry, login and board allotment. */
+export async function setTeamAdmissionAction(
+  _prev: AdminActionResult,
+  formData: FormData,
+): Promise<AdminActionResult> {
+  const session = await requireAdmin();
+  const teamId = text(formData, "teamId", 16);
+  if (!TEAM_ID.test(teamId)) return { ok: false, message: "Unknown crew." };
+  const admitted = bool(formData, "admitted");
+
+  const result = await setTeamAdmission(teamId, admitted);
+  if (result.ok) {
+    await logAudit(
+      session.name,
+      admitted ? "admit-crew" : "remove-crew",
+      teamId,
+      admitted ? "Crew added to the heist" : "Crew removed from the heist",
+    );
+    revalidatePath("/admin/teams");
+    revalidatePath(`/admin/teams/${teamId}`);
+    revalidatePath("/admin");
+    revalidatePath("/leaderboard");
+    revalidatePath("/dashboard");
+  }
+  return { ok: result.ok, message: result.message };
+}
+
+/**
+ * Reads a crew's Team ID, login email and passcode on demand (admin only), so
+ * the operator can copy them or mail them to the leader by hand. Credentials
+ * are never shipped inside the page data.
+ */
+export async function getTeamLoginAction(
+  _prev: AdminActionResult,
+  formData: FormData,
+): Promise<AdminActionResult> {
+  await requireAdmin();
+  const teamId = text(formData, "teamId", 16);
+  if (!TEAM_ID.test(teamId)) return { ok: false, message: "Unknown crew." };
+  const team = await getTeam(teamId);
+  if (!team) return { ok: false, message: `Crew ${teamId} could not be found.` };
+  return {
+    ok: true,
+    message: "",
+    data: {
+      teamId: team.teamId,
+      email: team.email,
+      passcode: team.passcode,
+      name: team.name,
+    },
+  };
+}
+
+/**
+ * Undoes a mistaken crew creation. Only crews that have not entered the heist
+ * can be deleted; switch them out first if they were admitted by accident.
+ */
+export async function deleteCrewAction(
+  _prev: AdminActionResult,
+  formData: FormData,
+): Promise<AdminActionResult> {
+  const session = await requireAdmin();
+  const teamId = text(formData, "teamId", 16);
+  if (!TEAM_ID.test(teamId)) return { ok: false, message: "Unknown crew." };
+  const team = await getTeam(teamId);
+  if (!team) return { ok: false, message: `${teamId} has already been deleted.` };
+  if (team.status !== "registered" && team.status !== "waitlisted") {
+    return {
+      ok: false,
+      message: "Switch this crew out of the heist before deleting it.",
+    };
+  }
+
+  const removed = await deleteCrew(teamId);
+  if (!removed) return { ok: false, message: "That crew could not be deleted." };
+  await logAudit(session.name, "delete-crew", teamId, `${team.name} deleted; sign-up reset to pending`);
+  revalidatePath("/admin/teams");
+  revalidatePath(`/admin/teams/${teamId}`);
+  revalidatePath("/admin/registrations");
+  revalidatePath("/admin");
+  revalidatePath("/leaderboard");
+  return {
+    ok: true,
+    message: `${team.name} (${teamId}) deleted. Any sign-up for it is back in the review queue.`,
   };
 }
 
@@ -225,6 +316,23 @@ export async function setTeamStatusAction(
   if (!TEAM_ID.test(teamId)) return { ok: false, message: "Unknown crew." };
   const status = oneOf<TeamStatus>(text(formData, "status", 16), TEAM_STATUSES, "registered");
   if (status !== text(formData, "status", 16)) return { ok: false, message: "Unknown status." };
+
+  // Entry is never a raw status write: going into play must check the slot
+  // limit and deal the round's board, exactly like the "In heist" switch.
+  const team = await getTeam(teamId);
+  if (!team) return { ok: false, message: "Unknown crew." };
+  if (status === "selected" && team.status !== "selected") {
+    const result = await setTeamAdmission(teamId, true);
+    if (result.ok) {
+      await logAudit(session.name, "set-status", teamId, "admitted to heist");
+      revalidatePath("/admin/teams");
+      revalidatePath(`/admin/teams/${teamId}`);
+      revalidatePath("/dashboard");
+      revalidatePath("/leaderboard");
+    }
+    return { ok: result.ok, message: result.message };
+  }
+
   await setTeamStatus(teamId, status);
   await logAudit(session.name, "set-status", teamId, status);
   revalidatePath("/admin/teams");
@@ -448,6 +556,22 @@ export async function completeMissionAction(
   revalidatePath("/admin/dexter");
   revalidatePath("/admin/approvals");
   revalidatePath(`/admin/teams/${teamId}`);
+  revalidatePath("/dashboard");
+  return { ok: result.ok, message: result.message };
+}
+
+export async function revertMissionAction(
+  _prev: AdminActionResult,
+  formData: FormData,
+): Promise<AdminActionResult> {
+  const session = await requireAdmin();
+  const missionId = text(formData, "missionId", 40);
+  const teamId = text(formData, "teamId", 16);
+  const result = await revertMission(missionId, teamId, session.name);
+  revalidatePath("/admin/dexter");
+  revalidatePath("/admin/approvals");
+  revalidatePath(`/admin/teams/${teamId}`);
+  revalidatePath("/admin");
   revalidatePath("/dashboard");
   return { ok: result.ok, message: result.message };
 }

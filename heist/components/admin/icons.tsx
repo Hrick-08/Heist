@@ -37,3 +37,4 @@ export const UndoIcon = I("M12.5 8c-2.7 0-5.1 1-6.9 2.6L2 7v9h9l-3.6-3.6A8 8 0 0
 export const CrownIcon = I("M3.5 18 2.5 7l5 4 4.5-7 4.5 7 5-4-1 11zM4 20h16v2H4z");
 export const InboxIcon = I("M4 4h16l2 8v8H2v-8zm1.8 2L4.3 12H9l1 2h4l1-2h4.7L18.2 6zM4 14v4h16v-4h-3.8l-1 2H8.8l-1-2z");
 export const KeyIcon = I("M7.5 14a4.5 4.5 0 1 1 4.3-5.8H22v3.3h-2.2v2.4h-3.3v-2.4h-4.7A4.5 4.5 0 0 1 7.5 14zm0-6.4a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8z");
+export const MailIcon = I("M2 5h20v14H2zm2.3 2L12 12.3 19.7 7zM4 17h16V9.4l-8 5.3-8-5.3z");

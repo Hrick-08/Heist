@@ -31,5 +31,5 @@ export const STATUS_TAG: Record<string, [string, string]> = {
   eliminated: ["Eliminated", "red"],
   waitlisted: ["Waitlisted", "gold"],
   champion: ["Champion", "cash"],
-  registered: ["Registered", ""],
+  registered: ["Not in heist", "gold"],
 };

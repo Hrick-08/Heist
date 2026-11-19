@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 
 import { registrationsCol } from "./collections";
 import { generatePassword } from "./auth";
-import { registerTeam, updateTeam } from "./game";
+import { registerTeam } from "./game";
 import type { Member, Registration, RegistrationRow } from "./types";
 
 export interface CreateRegistrationInput {
@@ -126,7 +126,7 @@ export async function selectRegistrations(
     });
 
     if (!wasCreated) {
-      // A crew with this leader email already exists (e.g. selected earlier).
+      // A crew with this leader email already exists (e.g. created earlier).
       alreadyRegistered.push(`${row.crewName} (${team.teamId})`);
       await col.updateOne(
         { _id: row._id },
@@ -135,9 +135,8 @@ export async function selectRegistrations(
       continue;
     }
 
-    // registerTeam waitlists once `maxTeams` is reached; an admin choosing this
-    // sign-up by hand means it should always come in as a live crew.
-    await updateTeam(team.teamId, { status: "selected" });
+    // Creating the crew mints credentials but does NOT enter it in the heist.
+    // That is a separate, explicit decision on the Crews page ("In heist").
     await col.updateOne(
       { _id: row._id },
       { $set: { status: "selected", teamId: team.teamId } },
@@ -146,7 +145,11 @@ export async function selectRegistrations(
   }
 
   const parts: string[] = [];
-  if (created > 0) parts.push(`${created} crew${created === 1 ? "" : "s"} got a Team ID and passcode`);
+  if (created > 0) {
+    parts.push(
+      `${created} crew${created === 1 ? "" : "s"} got a Team ID and passcode — flip "In heist" on the Crews page to admit them`,
+    );
+  }
   if (alreadyRegistered.length > 0) {
     parts.push(`${alreadyRegistered.length} already had an account (${alreadyRegistered.join(", ")})`);
   }
