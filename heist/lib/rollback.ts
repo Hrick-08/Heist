@@ -8,13 +8,16 @@ import {
   teamTasksCol,
   teamsCol,
 } from "./collections";
-import { logAudit } from "./game";
+import { DEFAULT_STATE, logAudit } from "./game";
 import type { GameSnapshot, RollbackKind, RollbackRecord } from "./types";
 
 export interface ReversibleResult {
   ok: boolean;
   message: string;
 }
+
+/** The Undo button only ever offers the newest point, so keep a small window. */
+const ROLLBACK_KEEP = 10;
 
 /** Copy every mutable collection before an operator action touches it. */
 async function captureGame(): Promise<GameSnapshot> {
@@ -57,7 +60,23 @@ export async function withRollback<T extends ReversibleResult>(
     throw error;
   }
   if (!result.ok) await col.deleteOne({ _id: insertedId });
+  await pruneRollbacks(col);
   return result;
+}
+
+/** Keep only the newest `ROLLBACK_KEEP` points; older full copies are dead weight. */
+async function pruneRollbacks(col: Awaited<ReturnType<typeof rollbacksCol>>): Promise<void> {
+  const count = await col.countDocuments({});
+  const excess = count - ROLLBACK_KEEP;
+  if (excess <= 0) return;
+  const oldest = await col
+    .find({})
+    .sort({ createdAt: 1, _id: 1 })
+    .limit(excess)
+    .toArray();
+  if (oldest.length > 0) {
+    await col.deleteMany({ _id: { $in: oldest.map((r) => r._id) } });
+  }
 }
 
 /** The next restore point the Undo button would consume. */
@@ -108,7 +127,11 @@ export async function rollbackLast(actor: string): Promise<ReversibleResult> {
     if (s.teamTasks.length) await teamTasks.insertMany(s.teamTasks);
     if (s.missions.length) await missions.insertMany(s.missions);
     if (s.approvals.length) await approvals.insertMany(s.approvals);
-    if (s.eventState) await state.insertOne(s.eventState);
+    // When the state doc was absent at capture time, restore the same synthesized
+    // default getEventState() would produce, so a restore never silently resets it.
+    await state.insertOne(
+      s.eventState ?? { _id: "state", ...DEFAULT_STATE, updatedAt: new Date() },
+    );
 
     // Only consume the point once every collection has been restored.
     await col.deleteOne({ _id: record._id });

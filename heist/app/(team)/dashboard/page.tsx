@@ -76,6 +76,7 @@ async function Dashboard() {
         />
       </div>
 
+      <div className="home-side">
       <section className={team.wanted ? "heat hot a-heat" : "heat a-heat"}>
         <div className="row sp">
           <Stars n={stars} size={28} />
@@ -153,7 +154,9 @@ async function Dashboard() {
       <div className="a-funnel">
         <Funnel steps={getFunnel(state, survivors)} />
       </div>
+      </div>
 
+      <div className="home-main">
       {hasMissions && (
         <div className="a-dmis">
           <DexterMissions missions={pendingMissions} requestedIds={requestedIds} />
@@ -181,6 +184,7 @@ async function Dashboard() {
           bounty={team.wanted ? team.points : 0}
           since={formatTime(team.wantedAt)}
         />
+      </div>
       </div>
     </div>
   );
