@@ -244,6 +244,7 @@ export async function resetPasswordAction(
     return { ok: false, message: `Passcodes need at least ${MIN_PASSCODE} characters.` };
   }
   await updateTeam(teamId, {
+    passcode: password,
     passwordHash: await hashPassword(password),
     passwordChangedAt: new Date(),
   });

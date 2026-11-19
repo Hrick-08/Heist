@@ -27,6 +27,8 @@ export interface Team {
   name: string;
   /** Leader's email — this is the login id. */
   email: string;
+  /** Stored in plain text so control can read it out and email it to the crew. */
+  passcode: string;
   passwordHash: string;
   leader: Member & { photo: string };
   members: Member[];

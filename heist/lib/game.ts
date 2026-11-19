@@ -145,6 +145,7 @@ export async function registerTeam(
       teamId,
       name: input.name,
       email,
+      passcode: input.password,
       passwordHash,
       leader: input.leader,
       members: input.members,
