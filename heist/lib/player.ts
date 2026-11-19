@@ -98,14 +98,12 @@ function toPlayerTask(
   };
 }
 
-/** Live round first, then older pending tasks, then everything cleared. */
-function taskOrder(a: PlayerTask, b: PlayerTask, currentRound: number): number {
-  const group = (t: PlayerTask) =>
-    t.status === "completed" ? 2 : t.round === currentRound ? 0 : 1;
+/** Live tasks first, then the pinned endgame board. */
+function taskOrder(a: PlayerTask, b: PlayerTask): number {
   return (
-    group(a) - group(b) ||
-    Number(a.isEndgame) - Number(b.isEndgame) ||
-    a.round - b.round
+    Number(b.isEndgame) - Number(a.isEndgame) ||
+    a.round - b.round ||
+    a.id.localeCompare(b.id)
   );
 }
 
@@ -122,8 +120,12 @@ export async function getPlayerTasks(
   const pendingRefs = new Set(approvals.map((a) => String(a.refId)));
   return allotments
     .map((a) => toPlayerTask(a, state, pendingRefs))
-    .filter((t): t is PlayerTask => t !== null)
-    .sort((a, b) => taskOrder(a, b, state.currentRound));
+    // Only the round in play is shown. Endgame boards stay visible once unlocked.
+    .filter(
+      (t): t is PlayerTask =>
+        t !== null && (t.isEndgame || t.round === state.currentRound),
+    )
+    .sort(taskOrder);
 }
 
 export async function getPlayerTask(
@@ -367,7 +369,7 @@ export async function getNotifySnapshot(
     endgameUnlocked: team.endgameUnlocked,
     status: team.status,
     tasks: allotments
-      .filter((v) => v.task)
+      .filter((v) => v.task && (v.isEndgame || v.round === state.currentRound))
       .map((v) => ({
         id: String(v._id),
         title: v.task!.title,
