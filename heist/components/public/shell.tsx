@@ -87,7 +87,6 @@ export function PublicFooter({ registrationOpen = false }: { registrationOpen?: 
             <Link href="/login">Team login</Link>
           </>
         )}
-        <Link href="/admin/login">Control room</Link>
       </span>
     </footer>
   );

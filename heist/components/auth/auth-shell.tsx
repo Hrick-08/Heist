@@ -151,22 +151,21 @@ export function AuthShell({
         <section className="au-side">
           <div className="au-top">
             <Link href="/">← Back to the briefing</Link>
-            {!registrationOpen && !register && <Link href="/leaderboard">Leaderboard</Link>}
+            {register ? (
+              // Top right, above the fold: crews see the sign-in door before the form.
+              <Link href="/login" className="au-cta">
+                Already have a Team ID?
+                <span aria-hidden>→</span>
+              </Link>
+            ) : (
+              !registrationOpen && !register && <Link href="/leaderboard">Leaderboard</Link>
+            )}
           </div>
 
           {children}
 
-          {register ? (
-            <Link href="/login" className="au-door">
-              Already have a Team ID?
-              <span aria-hidden>→</span>
-            </Link>
-          ) : team ? (
-            <Link href="/admin/login" className="au-door">
-              Control room login
-              <span aria-hidden>→</span>
-            </Link>
-          ) : (
+          {/* The control room has no door here — /admin/login is typed into the URL by design. */}
+          {!team && !register && (
             <Link href="/login" className="au-door">
               <span aria-hidden>←</span>
               Back to crew login

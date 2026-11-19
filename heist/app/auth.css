@@ -70,6 +70,11 @@
 .au-top a{padding:8px 14px;border-radius:99px;background:rgba(0,0,0,.4);border:1px solid var(--line);color:var(--mute);min-height:40px;display:inline-flex;align-items:center;backdrop-filter:blur(6px);transition:color .15s,border-color .15s,transform .1s}
 .au-top a:hover{color:var(--text);border-color:var(--mute)}
 .au-top a:active{transform:scale(.97)}
+/* register: the sign-in door sits top right — a gold pill so crews see it first */
+.au-top a.au-cta{color:#f1c85a;border-color:rgba(220,171,60,.5);background:rgba(220,171,60,.1);gap:8px}
+.au-top a.au-cta:hover{color:#f1c85a;border-color:var(--gold);background:rgba(220,171,60,.18)}
+.au-top a.au-cta span{transition:transform .15s}
+.au-top a.au-cta:hover span{transform:translateX(4px)}
 .au-door{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:18px;min-height:52px;padding:12px 18px 12px 38px;border-radius:14px;border:1px dashed #6b5a26;background:rgba(0,0,0,.4);color:var(--text);font:700 16px var(--body);backdrop-filter:blur(6px);transition:border-color .15s,background .15s,transform .1s;overflow:hidden}
 .au-admin .au-door{padding-left:18px}
 .au-door:hover{border-color:var(--gold);background:rgba(220,171,60,.1)}
@@ -194,8 +199,6 @@
   .au-register .au-big{font-size:clamp(34px,4vw,52px)}
   .au-register .au-facts{flex-direction:column}
   .au-register .au-facts li{width:100%}
-  .au-register .au-top{justify-content:flex-start}
-  .au-register .au-door{display:flex;width:fit-content;margin-left:auto;margin-right:auto}
 }
 @media (min-width:1240px){
   /* leader gets its own first row slot, crew fill 3 across: 3 + 2 */
