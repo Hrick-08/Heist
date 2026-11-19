@@ -413,3 +413,19 @@
 .ad .crews .tr.body>.hide-m{display:none}
 .ad .crews .tr.body .t-main span{white-space:normal}
 .ad .crews .rowacts{grid-column:1/-1;justify-content:flex-start}}
+
+/* registrations: expandable login (Team ID + passcode) under a crew row */
+.ad .tr.cred{padding:0 20px 14px;background:rgba(220,171,60,.05)}
+.ad .credtbl{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel2)}
+.ad .credrow{display:grid;grid-template-columns:110px minmax(160px,1.4fr) minmax(140px,1fr) auto;gap:12px;align-items:center;padding:10px 14px}
+.ad .credrow + .credrow{border-top:1px solid var(--line)}
+.ad .credhead{font:600 12px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+.ad .credrow b{font:400 16px var(--display);color:var(--gold)}
+.ad .credrow code{font:700 15px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.08em;overflow-wrap:anywhere}
+.ad .credmail{overflow-wrap:anywhere;color:var(--mute);font-size:14px}
+.ad .credbtns{display:inline-flex;gap:8px;justify-content:flex-end}
+@media (max-width:700px){
+  .ad .credrow{grid-template-columns:1fr 1fr}
+  .ad .credhead{display:none}
+  .ad .credrow .r{grid-column:1/-1;justify-content:flex-start;text-align:left}
+}

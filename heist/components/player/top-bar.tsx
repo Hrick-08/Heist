@@ -60,8 +60,8 @@ export function TopBar({
           </div>
         </div>
         <div className="brand" aria-label="Event">
-          The Last Heist
-          <small>GDG Chitkara · GTA VI</small>
+          Cash, Chaos &amp; Code
+          <small>GDG Chitkara · The Ultimate Heist</small>
         </div>
         <div className="pills">
           <button

@@ -35,3 +35,5 @@ export const ExitIcon = I("M5 3h8v2H7v14h6v2H5zm11 4 5 5-5 5-1.4-1.4L17.2 13H9v-
 export const TrophyIcon = I("M7 3h10v2h3v3a4 4 0 0 1-3.6 4A5 5 0 0 1 13 14.9V17h3v2H8v-2h3v-2.1A5 5 0 0 1 7.6 12 4 4 0 0 1 4 8V5h3zm-1 4v1a2 2 0 0 0 1.2 1.8A5 5 0 0 1 7 9V7zm12 0h-1v2a5 5 0 0 1-.2.8A2 2 0 0 0 18 8zM8 21h8v1H8z");
 export const UndoIcon = I("M12.5 8c-2.7 0-5.1 1-6.9 2.6L2 7v9h9l-3.6-3.6A8 8 0 0 1 12.5 10c3.5 0 6.5 2.3 7.6 5.5l2.4-.8C21.1 10.6 17.1 8 12.5 8z");
 export const CrownIcon = I("M3.5 18 2.5 7l5 4 4.5-7 4.5 7 5-4-1 11zM4 20h16v2H4z");
+export const InboxIcon = I("M4 4h16l2 8v8H2v-8zm1.8 2L4.3 12H9l1 2h4l1-2h4.7L18.2 6zM4 14v4h16v-4h-3.8l-1 2H8.8l-1-2z");
+export const KeyIcon = I("M7.5 14a4.5 4.5 0 1 1 4.3-5.8H22v3.3h-2.2v2.4h-3.3v-2.4h-4.7A4.5 4.5 0 0 1 7.5 14zm0-6.4a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8z");

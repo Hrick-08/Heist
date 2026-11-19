@@ -6,7 +6,7 @@ import { AuthParallax } from "./parallax";
 
 import "@/app/auth.css";
 
-type Variant = "team" | "admin";
+type Variant = "team" | "admin" | "register";
 
 /** Deterministic skyline so the server and client always agree. */
 function Skyline({ layer }: { layer: "far" | "near" }) {
@@ -50,14 +50,18 @@ function Stars() {
 
 export function AuthShell({
   variant,
+  registrationOpen = false,
   children,
 }: {
   variant: Variant;
+  /** Hides the Leaderboard shortcut up top, same as the public header/footer. */
+  registrationOpen?: boolean;
   children: ReactNode;
 }) {
-  const team = variant === "team";
+  const team = variant === "team" || variant === "register";
+  const register = variant === "register";
   return (
-    <PublicShell className={`au au-${variant}`}>
+    <PublicShell className={`au au-${register ? "team au-register" : variant}`}>
       <AuthParallax>
         {team ? (
           <div className="lay" style={{ ["--d" as string]: 10 }}>
@@ -87,7 +91,25 @@ export function AuthShell({
       <main className="au-wrap">
         <section className="au-story">
           <PublicLogo />
-          {team ? (
+          {register ? (
+            <>
+              <span className="au-eyebrow">Crew sign-up</span>
+              <h2 className="au-big">
+                Build your
+                <br />
+                <em>crew.</em>
+              </h2>
+              <p className="au-lede">
+                Four to five people, one leader, one photo. Submit your crew&rsquo;s details below —
+                we will email the leader if your crew is selected to play.
+              </p>
+              <ul className="au-facts">
+                <li><b>4–5</b><span>per crew</span></li>
+                <li><b>40</b><span>crews picked</span></li>
+                <li><b>1</b><span>leader logs in</span></li>
+              </ul>
+            </>
+          ) : team ? (
             <>
               <span className="au-eyebrow">Crew access</span>
               <h2 className="au-big">
@@ -129,12 +151,17 @@ export function AuthShell({
         <section className="au-side">
           <div className="au-top">
             <Link href="/">← Back to the briefing</Link>
-            <Link href="/leaderboard">Leaderboard</Link>
+            {!registrationOpen && !register && <Link href="/leaderboard">Leaderboard</Link>}
           </div>
 
           {children}
 
-          {team ? (
+          {register ? (
+            <Link href="/login" className="au-door">
+              Already have a Team ID?
+              <span aria-hidden>→</span>
+            </Link>
+          ) : team ? (
             <Link href="/admin/login" className="au-door">
               Control room login
               <span aria-hidden>→</span>

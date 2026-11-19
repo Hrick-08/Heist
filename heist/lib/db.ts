@@ -32,6 +32,8 @@ async function ensureIndexes(db: Db): Promise<void> {
       ),
       db.collection("auditLog").createIndex({ at: -1 }),
       db.collection("rollbacks").createIndex({ createdAt: -1 }),
+      db.collection("registrations").createIndex({ createdAt: 1 }),
+      db.collection("registrations").createIndex({ "leader.email": 1 }),
     ]);
   } catch (error) {
     // Most likely pre-existing duplicate rows; the app keeps running and the log says why.

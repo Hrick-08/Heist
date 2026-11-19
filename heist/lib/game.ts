@@ -46,6 +46,8 @@ export const DEFAULT_STATE: Omit<EventState, "_id" | "updatedAt"> = {
   eventLive: true,
   eventEnded: false,
   championTeamId: null,
+  registrationOpen: false,
+  teamLoginOpen: true,
 };
 
 /* ------------------------------------------------------------------ */

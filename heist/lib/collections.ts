@@ -7,6 +7,7 @@ import type {
   ApprovalRequest,
   DexterMission,
   EventState,
+  Registration,
   RollbackRecord,
   Task,
   Team,
@@ -65,4 +66,9 @@ export async function approvalsCol(): Promise<Collection<ApprovalRequest>> {
 /** Undo stack of full-game snapshots, one per reversible operator action. */
 export async function rollbacksCol(): Promise<Collection<RollbackRecord>> {
   return (await getDb()).collection<RollbackRecord>("rollbacks");
+}
+
+/** Pre-event crew sign-ups, waiting to be picked and turned into real teams. */
+export async function registrationsCol(): Promise<Collection<Registration>> {
+  return (await getDb()).collection<Registration>("registrations");
 }

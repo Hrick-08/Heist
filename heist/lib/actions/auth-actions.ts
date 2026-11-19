@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { burnPasswordCheck, getSessionCookieOptions, verifyPassword } from "@/lib/auth";
-import { findAdmin, getTeam } from "@/lib/game";
+import { findAdmin, getEventState, getTeam } from "@/lib/game";
 import {
   THROTTLE_MESSAGE,
   checkLoginThrottle,
@@ -30,6 +30,10 @@ export async function teamLoginAction(
 
   if (!teamId || !password) {
     return { error: "Enter your Team ID and passcode." };
+  }
+
+  if ((await getEventState()).teamLoginOpen === false) {
+    return { error: "Team login is closed right now. Check back soon." };
   }
 
   const throttle = await checkLoginThrottle("team", teamId);

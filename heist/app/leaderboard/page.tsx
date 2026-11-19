@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { RanksView } from "@/components/player/ranks-view";
@@ -12,7 +13,12 @@ export const metadata: Metadata = {
   title: "Leaderboard",
 };
 
-export default function LeaderboardPage() {
+export default async function LeaderboardPage() {
+  // The board only means something once the game is running. While crews are
+  // still being signed up and picked, send visitors back to the briefing.
+  const gate = await getEventState();
+  if (gate.registrationOpen) redirect("/");
+
   return (
     <PublicShell>
       <PublicHeader current="leaderboard" />

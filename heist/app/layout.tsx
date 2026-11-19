@@ -6,11 +6,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "The Last Heist — GDG Chitkara",
-    template: "%s — The Last Heist",
+    default: "Cash, Chaos & Code — The Ultimate Heist — GDG Chitkara",
+    template: "%s — Cash, Chaos & Code",
   },
   description:
-    "The Last Heist: a GTA 6 themed campus heist event by GDG Chitkara. Collect points, buy clues, and empty the vault.",
+    "Cash, Chaos & Code — The Ultimate Heist: a GTA-style campus takeover by GDG Chitkara. Run missions, earn cash, dodge the Police and fight into the Big Heist.",
 };
 
 export const viewport: Viewport = {

@@ -246,7 +246,7 @@ async function renderPoster(p: PosterData): Promise<Blob> {
   ctx.font = `italic 600 28px ${body}`;
   ctx.fillText(`Wanted since ${p.since || "today"}. Approach with caution.`, 540, 1336);
   ctx.font = `700 21px ${body}`;
-  spaced(ctx, "THE LAST HEIST · GDG CHITKARA", 540, 1368, 5);
+  spaced(ctx, "CASH, CHAOS & CODE · GDG CHITKARA", 540, 1368, 5);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Could not make the image"))), "image/png");
@@ -263,7 +263,7 @@ export function SharePosterButton(props: PosterData) {
     try {
       const blob = await renderPoster(props);
       const file = new File([blob], `wanted-${props.teamId}.png`, { type: "image/png" });
-      const text = `${props.name} is WANTED in The Last Heist. Reward: ${props.bounty.toLocaleString("en-IN")} pts.`;
+      const text = `${props.name} is WANTED in Cash, Chaos & Code — The Ultimate Heist. Reward: ${props.bounty.toLocaleString("en-IN")} pts.`;
       if (typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: `WANTED: ${props.name}`, text });
         setState("idle");

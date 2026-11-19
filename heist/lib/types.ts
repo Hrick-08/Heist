@@ -125,7 +125,47 @@ export interface EventState {
   eventLive: boolean;
   eventEnded: boolean;
   championTeamId: string | null;
+  /** Public switch: while true the site shows crew sign-up instead of team login. */
+  registrationOpen: boolean;
+  /** Team login switch. Missing (older databases) counts as open; only an explicit false closes it. */
+  teamLoginOpen?: boolean;
+  /** Team sessions issued before this moment are rejected (set when team login is turned off). */
+  teamSessionsValidFrom?: Date;
   updatedAt: Date;
+}
+
+/* ------------------------------------------------------------------ */
+/* Pre-event crew sign-ups (the public /register form)                */
+/* ------------------------------------------------------------------ */
+
+export type RegistrationStatus = "pending" | "selected";
+
+export interface Registration {
+  _id?: ObjectId;
+  crewName: string;
+  leader: Member;
+  /** Data URL, stored separately from the rest of the record so lists stay light. */
+  leaderPhoto: string;
+  /** 2 to 4 crew mates beside the leader (crew size is leader + 3, +1 optional). */
+  members: Member[];
+  status: RegistrationStatus;
+  /** Set once an admin turns this sign-up into a real crew. */
+  teamId: string | null;
+  createdAt: Date;
+}
+
+/** Serializable projection of a sign-up, safe to pass into client components. */
+export interface RegistrationRow {
+  id: string;
+  crewName: string;
+  leaderName: string;
+  leaderEmail: string;
+  leaderPhone: string;
+  hasPhoto: boolean;
+  membersCount: number;
+  status: RegistrationStatus;
+  teamId: string | null;
+  createdAt: Date;
 }
 
 export interface SessionPayload {
@@ -363,6 +403,8 @@ export interface AdminSnap {
   round: number;
   totalRounds: number;
   ended: boolean;
+  /** Sign-ups still waiting for review (drives the badge on the Registration tab). */
+  registrations?: number;
   /** The restore point the next "Undo" would consume. */
   undo: { id: string; label: string; kind: RollbackKind; at: number } | null;
 }

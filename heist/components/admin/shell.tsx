@@ -13,6 +13,7 @@ import {
   ExitIcon,
   FlagIcon,
   GridIcon,
+  InboxIcon,
   ListIcon,
   ShadesIcon,
   SlidersIcon,
@@ -20,6 +21,7 @@ import {
 
 const TABS = [
   { href: "/admin", label: "Overview", Icon: GridIcon },
+  { href: "/admin/registrations", label: "Registration", Icon: InboxIcon },
   { href: "/admin/approvals", label: "Approvals", Icon: CheckIcon },
   { href: "/admin/teams", label: "Crews", Icon: CrewIcon },
   { href: "/admin/tasks", label: "Task pool", Icon: ListIcon },
@@ -38,8 +40,8 @@ export function TopBar({ operator }: { operator: string }) {
           <i className="live" />
         </span>
         <span className="nm">
-          <b>The Last Heist</b>
-          <small className="mute">GDG Chitkara · GTA VI</small>
+          <b>Cash, Chaos &amp; Code</b>
+          <small className="mute">GDG Chitkara · The Ultimate Heist</small>
         </span>
       </Link>
       <span className="badge">Control room</span>
@@ -74,7 +76,8 @@ export function TopBar({ operator }: { operator: string }) {
 
 export function SideNav() {
   const path = usePathname();
-  const { pending } = useAdmin();
+  const { pending, snap } = useAdmin();
+  const regs = snap.registrations ?? 0;
   return (
     <nav className="nav" aria-label="Control room">
       <span className="nav-label">Control room</span>
@@ -85,6 +88,11 @@ export function SideNav() {
             <Icon size={18} />
             {label}
             {label === "Approvals" && pending > 0 && <span className="count">{pending}</span>}
+            {label === "Registration" && regs > 0 && (
+              <span className="count" aria-label={`${regs} sign-ups waiting`}>
+                {regs}
+              </span>
+            )}
           </Link>
         );
       })}
