@@ -321,6 +321,30 @@ export interface NotifySnap {
   }[];
 }
 
+/** Operator actions we keep a restore point for, so a mispress can be undone. */
+export type RollbackKind = "round" | "champion" | "mission" | "approval";
+
+/** Every collection an operator action can mutate, captured verbatim before it runs.
+ *  Holding the whole picture keeps a restore exact — points, eliminations, task
+ *  allotments and approval queues all go back to the same instant. */
+export interface GameSnapshot {
+  teams: Team[];
+  teamTasks: TeamTask[];
+  missions: DexterMission[];
+  approvals: ApprovalRequest[];
+  eventState: EventState | null;
+}
+
+/** One entry in the undo stack. Newest entry is the next one rolled back. */
+export interface RollbackRecord {
+  _id?: ObjectId;
+  label: string;
+  kind: RollbackKind;
+  actor: string;
+  createdAt: Date;
+  snapshot: GameSnapshot;
+}
+
 /** Compact picture of the desk, diffed in the browser to raise admin notifications. */
 export interface AdminSnap {
   pending: {
@@ -337,4 +361,6 @@ export interface AdminSnap {
   round: number;
   totalRounds: number;
   ended: boolean;
+  /** The restore point the next "Undo" would consume. */
+  undo: { id: string; label: string; kind: RollbackKind; at: number } | null;
 }

@@ -7,6 +7,7 @@ import type {
   ApprovalRequest,
   DexterMission,
   EventState,
+  RollbackRecord,
   Task,
   Team,
   TeamTask,
@@ -59,4 +60,9 @@ export async function stateCol(): Promise<Collection<EventState>> {
 
 export async function approvalsCol(): Promise<Collection<ApprovalRequest>> {
   return (await getDb()).collection<ApprovalRequest>("approvals");
+}
+
+/** Undo stack of full-game snapshots, one per reversible operator action. */
+export async function rollbacksCol(): Promise<Collection<RollbackRecord>> {
+  return (await getDb()).collection<RollbackRecord>("rollbacks");
 }

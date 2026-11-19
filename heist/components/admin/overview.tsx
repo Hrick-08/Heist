@@ -13,7 +13,9 @@ import { Avatar } from "./avatar";
 import { money, num, STATUS_TAG } from "./format";
 import { Bolt, CheckIcon, Coin, CrownIcon } from "./icons";
 import { useAdmin } from "./provider";
+import { RewindControl } from "./rewind-control";
 import { Stars } from "./stars";
+import { UndoButton } from "./undo-button";
 import { Empty, PageHead, Panel, Stat } from "./ui";
 
 export interface OverviewProps {
@@ -143,7 +145,7 @@ export function OverviewView(p: OverviewProps) {
                   title: last ? "Close the final round?" : `Advance to round ${p.round + 1}?`,
                   body: last
                     ? "This closes the final round. Crown the champion afterwards."
-                    : `This eliminates ${Math.floor(p.counts.inPlay / 2)} crew(s) and allocates the next round. It cannot be undone.`,
+                    : `This eliminates ${Math.floor(p.counts.inPlay / 2)} crew(s) and allocates the next round. A mispress? Use Undo in the top bar to roll straight back.`,
                   cta: last ? "Close the final round" : `Advance to round ${p.round + 1}`,
                   tone: "red",
                   onYes: async () => void (await run(advanceRoundAction, {})),
@@ -152,6 +154,8 @@ export function OverviewView(p: OverviewProps) {
             >
               {last ? "Close the final round" : `Advance to round ${p.round + 1}`}
             </button>
+            <UndoButton />
+            <RewindControl current={p.round} />
 
             <p className="hint" style={{ marginTop: 14 }}>
               Ends the event, eliminates the rest and locks the final scores.

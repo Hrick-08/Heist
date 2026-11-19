@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { adminLogoutAction } from "@/lib/actions/auth-actions";
 import { useAdmin } from "./provider";
+import { UndoButton } from "./undo-button";
 import {
   BellIcon,
   CheckIcon,
@@ -50,6 +51,7 @@ export function TopBar({ operator }: { operator: string }) {
         <span className="pill hide-sm">
           <span className="mute">Operator:</span> {operator}
         </span>
+        <UndoButton compact />
         <button
           type="button"
           className={unread > 0 ? "icobtn bell on" : "icobtn bell"}

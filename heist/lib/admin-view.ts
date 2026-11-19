@@ -2,6 +2,7 @@ import "server-only";
 
 import { teamsCol } from "./collections";
 import { getEventState, listPendingApprovals } from "./game";
+import { getLatestRollback } from "./rollback";
 import type { AdminSnap, TeamRow, TeamStatus } from "./types";
 
 /**
@@ -40,7 +41,7 @@ export async function listTeamRows(): Promise<TeamRow[]> {
 
 /** What the live-update layer diffs between refreshes. Cheap enough to poll. */
 export async function getAdminSnapshot(): Promise<AdminSnap> {
-  const [state, pending, rows] = await Promise.all([
+  const [state, pending, rows, undo] = await Promise.all([
     getEventState(),
     listPendingApprovals(),
     teamsCol().then((col) =>
@@ -55,6 +56,7 @@ export async function getAdminSnapshot(): Promise<AdminSnap> {
         .sort({ createdAt: 1 })
         .toArray(),
     ),
+    getLatestRollback(),
   ]);
 
   const latest = rows.length ? rows[rows.length - 1] : null;
@@ -75,5 +77,6 @@ export async function getAdminSnapshot(): Promise<AdminSnap> {
     round: state.currentRound,
     totalRounds: state.totalRounds,
     ended: state.eventEnded,
+    undo,
   };
 }

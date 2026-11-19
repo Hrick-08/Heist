@@ -12,6 +12,7 @@ import type { MissionRow, TeamRow } from "@/lib/types";
 import { money, num } from "./format";
 import { Bolt, Coin, PlusIcon } from "./icons";
 import { useAdmin } from "./provider";
+import { UndoButton } from "./undo-button";
 import { Drawer, Empty, PageHead, Panel, Stat } from "./ui";
 
 type Diff = "easy" | "medium" | "hard";
@@ -172,10 +173,13 @@ export function DexterView({ missions, crews }: { missions: MissionRow[]; crews:
         eyebrow="Special targets"
         title="Dexter missions"
         actions={
-          <button className="btn" onClick={() => setDrawer("new")}>
-            <PlusIcon size={16} />
-            Push a mission
-          </button>
+          <div className="row wrap" style={{ gap: 8 }}>
+            <UndoButton />
+            <button className="btn" onClick={() => setDrawer("new")}>
+              <PlusIcon size={16} />
+              Push a mission
+            </button>
+          </div>
         }
       >
         Dexter missions pop up on the crew dashboard. Close one out at the desk and the crew banks the extra points and cash. Target every crew or pick who sees it.

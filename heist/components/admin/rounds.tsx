@@ -12,7 +12,9 @@ import { Avatar } from "./avatar";
 import { num } from "./format";
 import { Bolt } from "./icons";
 import { useAdmin } from "./provider";
+import { RewindControl } from "./rewind-control";
 import { Stars } from "./stars";
+import { UndoButton } from "./undo-button";
 import { Empty, PageHead, Panel, Stat } from "./ui";
 
 export interface RoundsProps {
@@ -74,7 +76,7 @@ export function RoundsView(p: RoundsProps) {
             onClick={() =>
               ask({
                 title: last ? "Close the final round?" : `Advance to round ${p.round + 1}?`,
-                body: `This eliminates ${Math.floor(p.inPlay / 2)} crew(s) and allocates the next round. It cannot be undone.`,
+                body: `This eliminates ${Math.floor(p.inPlay / 2)} crew(s) and allocates the next round. A mispress? Use Undo to roll straight back.`,
                 cta: last ? "Close the final round" : `Advance to round ${p.round + 1}`,
                 tone: "red",
                 onYes: async () => void (await run(advanceRoundAction, {})),
@@ -101,6 +103,8 @@ export function RoundsView(p: RoundsProps) {
           <button className="btn ghost" onClick={() => run(syncWantedAction, {})}>
             Sync wanted (top 3)
           </button>
+          <UndoButton />
+          <RewindControl current={p.round} />
         </div>
       </Panel>
 

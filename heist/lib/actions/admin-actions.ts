@@ -16,10 +16,12 @@ import {
   deleteTask,
   dismissApproval,
   getEventState,
+  listPendingApprovals,
   listSelectedTeams,
   logAudit,
   markTaskComplete,
   registerTeam,
+  rewindRound,
   setTeamStatus,
   setWanted,
   syncWantedFromLeaderboard,
@@ -31,6 +33,7 @@ import {
   updateTeam,
 } from "@/lib/game";
 import { requireAdmin } from "@/lib/session";
+import { rollbackLast, withRollback } from "@/lib/rollback";
 import { getMission } from "@/lib/game";
 import { seedEverything } from "@/lib/seed";
 import type { MissionScope, TaskType, TeamStatus } from "@/lib/types";
@@ -434,7 +437,13 @@ export async function completeMissionAction(
   const session = await requireAdmin();
   const missionId = text(formData, "missionId");
   const teamId = text(formData, "teamId");
-  const result = await completeMission(missionId, teamId, session.name);
+  const mission = await getMission(missionId);
+  const result = await withRollback(
+    `Dexter closure “${mission?.title ?? missionId}” for ${teamId}`,
+    "mission",
+    session.name,
+    () => completeMission(missionId, teamId, session.name),
+  );
   revalidatePath("/admin/dexter");
   revalidatePath("/admin/approvals");
   revalidatePath(`/admin/teams/${teamId}`);
@@ -452,7 +461,14 @@ export async function approveRequestAction(
 ): Promise<AdminActionResult> {
   const session = await requireAdmin();
   const id = text(formData, "requestId");
-  const result = await approveRequest(id, session.name);
+  const pending = await listPendingApprovals();
+  const req = pending.find((a) => a.id === id);
+  const result = await withRollback(
+    req ? `Approve ${req.title} for ${req.crewName}` : `Approve request ${id}`,
+    "approval",
+    session.name,
+    () => approveRequest(id, session.name),
+  );
   revalidatePath("/admin/approvals");
   revalidatePath("/admin");
   revalidatePath("/admin/teams");
@@ -482,8 +498,14 @@ export async function advanceRoundAction(
   _prev: AdminActionResult,
   _formData: FormData,
 ): Promise<AdminActionResult> {
-  await requireAdmin();
-  const result = await advanceRound();
+  const session = await requireAdmin();
+  const state = await getEventState();
+  const result = await withRollback(
+    `Advance to round ${state.currentRound + 1}`,
+    "round",
+    session.name,
+    () => advanceRound(),
+  );
   revalidatePath("/admin");
   revalidatePath("/admin/rounds");
   revalidatePath("/admin/teams");
@@ -517,8 +539,13 @@ export async function crownChampionAction(
   _prev: AdminActionResult,
   _formData: FormData,
 ): Promise<AdminActionResult> {
-  await requireAdmin();
-  const result = await crownChampion();
+  const session = await requireAdmin();
+  const result = await withRollback(
+    "Crown the champion",
+    "champion",
+    session.name,
+    () => crownChampion(),
+  );
   revalidatePath("/admin");
   revalidatePath("/admin/rounds");
   revalidatePath("/admin/teams");
@@ -562,4 +589,62 @@ export async function seedAction(
     ok: true,
     message: `Seed complete — ${result.tasks} new tasks, ${result.missions} new missions.`,
   };
+}
+
+/* ------------------------------------------------------------------ */
+/* Rollback (mispress recovery)                                         */
+/* ------------------------------------------------------------------ */
+
+/** Rebuild the funnel as it was during an earlier round. */
+export async function rewindRoundAction(
+  _prev: AdminActionResult,
+  formData: FormData,
+): Promise<AdminActionResult> {
+  const session = await requireAdmin();
+  const state = await getEventState();
+  const target = num(formData, "round", Math.max(1, state.currentRound - 1), state.totalRounds);
+  const result = await withRollback(
+    `Rewind to round ${target}`,
+    "round",
+    session.name,
+    () => rewindRound(target),
+  );
+  revalidatePath("/admin");
+  revalidatePath("/admin/approvals");
+  revalidatePath("/admin/teams");
+  revalidatePath("/admin/teams/[teamId]", "page");
+  revalidatePath("/admin/tasks");
+  revalidatePath("/admin/dexter");
+  revalidatePath("/admin/rounds");
+  revalidatePath("/dashboard");
+  revalidatePath("/tasks");
+  revalidatePath("/missions");
+  revalidatePath("/endgame");
+  revalidatePath("/ranks");
+  revalidatePath("/leaderboard");
+  return { ok: result.ok, message: result.message };
+}
+
+/** Restore the exact game state from before the most recent reversible action. */
+export async function rollbackAction(
+  _prev: AdminActionResult,
+  _formData: FormData,
+): Promise<AdminActionResult> {
+  const session = await requireAdmin();
+  const result = await rollbackLast(session.name);
+  revalidatePath("/admin");
+  revalidatePath("/admin/approvals");
+  revalidatePath("/admin/teams");
+  revalidatePath("/admin/teams/[teamId]", "page");
+  revalidatePath("/admin/tasks");
+  revalidatePath("/admin/dexter");
+  revalidatePath("/admin/rounds");
+  revalidatePath("/admin/settings");
+  revalidatePath("/dashboard");
+  revalidatePath("/tasks");
+  revalidatePath("/missions");
+  revalidatePath("/endgame");
+  revalidatePath("/ranks");
+  revalidatePath("/leaderboard");
+  return { ok: result.ok, message: result.message };
 }

@@ -31,6 +31,7 @@ async function ensureIndexes(db: Db): Promise<void> {
         { unique: true, partialFilterExpression: { status: "pending" } },
       ),
       db.collection("auditLog").createIndex({ at: -1 }),
+      db.collection("rollbacks").createIndex({ createdAt: -1 }),
     ]);
   } catch (error) {
     // Most likely pre-existing duplicate rows; the app keeps running and the log says why.

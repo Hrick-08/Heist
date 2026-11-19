@@ -1363,6 +1363,120 @@ export async function crownChampion(): Promise<AdvanceRoundResult> {
   };
 }
 
+export interface RewindRoundResult {
+  ok: boolean;
+  message: string;
+  round: number;
+  restored: string[];
+}
+
+/**
+ * Rebuild the funnel as it was while `target` was in play.
+ *
+ * Unlike the snapshot-based Undo, this reconstructs from elimination markers,
+ * so it also repairs rounds closed before Undo existed. Manual score edits made
+ * after the target round are intentionally left alone.
+ */
+export async function rewindRound(target: number): Promise<RewindRoundResult> {
+  const state = await getEventState();
+  if (!Number.isInteger(target) || target < 1 || target >= state.currentRound) {
+    return {
+      ok: false,
+      message: "Choose a round earlier than the current one.",
+      round: state.currentRound,
+      restored: [],
+    };
+  }
+
+  const teams = await teamsCol();
+  const all = await teams.find({}).toArray();
+  const restored: string[] = [];
+
+  // Crews knocked out in the target round or later (including the champion
+  // crowning sweep) come back in. Crews out in earlier rounds stay out.
+  for (const t of all) {
+    const outIn = t.eliminatedInRound;
+    const wasChampion = t.status === "champion" || state.championTeamId === t.teamId;
+    if ((outIn != null && outIn >= target) || wasChampion) {
+      await teams.updateOne(
+        { teamId: t.teamId },
+        {
+          $set: { status: "selected", round: target, updatedAt: new Date() },
+          $unset: { eliminatedInRound: "", finalPoints: "" },
+        },
+      );
+      restored.push(t.teamId);
+    } else if (t.status === "selected" && t.round > target) {
+      await teams.updateOne(
+        { teamId: t.teamId },
+        { $set: { round: target, updatedAt: new Date() } },
+      );
+    }
+  }
+
+  // Boards handed out after the target round are removed; payouts on the ones
+  // that were completed are taken back so scores match the earlier round.
+  const tt = await teamTasksCol();
+  const laterBoards = await tt.find({ round: { $gt: target } }).toArray();
+  for (const b of laterBoards) {
+    if (b.status !== "completed") continue;
+    await adjustTeamScore(b.teamId, -b.points, -b.money);
+    await clampScore(b.teamId);
+  }
+  if (laterBoards.length) await tt.deleteMany({ round: { $gt: target } });
+
+  // Dexter missions that only existed in later rounds are un-claimed too.
+  const missions = await missionsCol();
+  const laterMissions = await missions.find({ round: { $gt: target } }).toArray();
+  const reward = new Map(laterMissions.map((m) => [String(m._id), m]));
+  for (const t of all) {
+    const remove = (t.dexterCompleted ?? []).filter((id) => reward.has(id));
+    if (!remove.length) continue;
+    let points = 0;
+    let money = 0;
+    for (const id of remove) {
+      const m = reward.get(id)!;
+      points += m.points;
+      money += m.money;
+    }
+    await adjustTeamScore(t.teamId, -points, -money);
+    await clampScore(t.teamId);
+    const keep = (t.dexterCompleted ?? []).filter((id) => !reward.has(id));
+    await teams.updateOne(
+      { teamId: t.teamId },
+      { $set: { dexterCompleted: keep, updatedAt: new Date() } },
+    );
+    for (const id of remove) {
+      if (ObjectId.isValid(id)) {
+        await missions.updateOne(
+          { _id: new ObjectId(id) },
+          { $inc: { completions: -1 }, $set: { updatedAt: new Date() } },
+        );
+      }
+    }
+  }
+
+  await updateEventState({
+    currentRound: target,
+    eventEnded: false,
+    championTeamId: null,
+  });
+  await syncWantedFromLeaderboard(3);
+
+  return {
+    ok: true,
+    message: `Rewound to round ${target}. ${restored.length} crew(s) back in play, ${laterBoards.length} later-round board(s) removed.`,
+    round: target,
+    restored,
+  };
+}
+
+async function clampScore(teamId: string): Promise<void> {
+  const col = await teamsCol();
+  await col.updateOne({ teamId, points: { $lt: 0 } }, { $set: { points: 0 } });
+  await col.updateOne({ teamId, money: { $lt: 0 } }, { $set: { money: 0 } });
+}
+
 /* ------------------------------------------------------------------ */
 /* Admins                                                              */
 /* ------------------------------------------------------------------ */
