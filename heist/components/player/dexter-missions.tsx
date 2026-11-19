@@ -19,7 +19,7 @@ export function DexterMissions({
     <section>
       <h2 style={{ marginTop: 8 }}>Dexter missions</h2>
       {missions.length === 0 ? (
-        <p className="note ok">Every Dexter mission aimed at your crew is done. Stay sharp.</p>
+        <p className="note ok">No active Dexter missions for this round. Stay sharp.</p>
       ) : (
         <ul className="list">
           {missions.map((d) => {

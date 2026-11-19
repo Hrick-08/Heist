@@ -799,14 +799,14 @@ export async function deleteMission(id: string): Promise<void> {
   await col.deleteOne({ _id: new ObjectId(id) });
 }
 
-/** Missions visible to a given team for the given round. */
+/** Missions visible to a team playing the given round — that round only. */
 export async function getVisibleMissions(
   teamId: string,
   round: number,
 ): Promise<DexterMission[]> {
   const col = await missionsCol();
   const missions = await col
-    .find({ active: true, round: { $lte: round } })
+    .find({ active: true, round })
     .sort({ createdAt: -1 })
     .toArray();
   return missions.filter(

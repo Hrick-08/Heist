@@ -31,11 +31,11 @@ async function MissionDetail({ params }: { params: Promise<{ id: string }> }) {
   const state = await getEventState();
   const mission = await getMission(id);
 
-  // Same visibility rule the home screen uses: active, unlocked round, aimed at this crew.
+  // Same visibility rule the home screen uses: active, this round, aimed at this crew.
   const visible =
     mission &&
     mission.active &&
-    mission.round <= state.currentRound &&
+    mission.round === state.currentRound &&
     (mission.scope === "all" || mission.teamIds.includes(team.teamId));
   if (!mission || !visible) notFound();
 
