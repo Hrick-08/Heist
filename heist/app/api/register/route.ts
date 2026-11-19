@@ -69,7 +69,11 @@ export async function POST(request: Request) {
   const email = text(body.email, 160).toLowerCase();
   const leaderName = text(body.leaderName, 80);
   const leaderPhone = text(body.leaderPhone, 30);
+  const photo = cleanPhoto(body.leaderPhoto);
 
+  if (!photo) {
+    return json({ ok: false, error: "A leader photo is required." }, 422);
+  }
   if (name.length < 2) {
     return json({ ok: false, error: "Enter a crew name." }, 422);
   }
@@ -124,7 +128,7 @@ export async function POST(request: Request) {
         email,
         phone: leaderPhone,
         role: "leader",
-        photo: cleanPhoto(body.leaderPhoto),
+        photo,
       },
       members,
     });
@@ -133,8 +137,10 @@ export async function POST(request: Request) {
       return json(
         {
           ok: false,
+          teamId: team.teamId,
           error:
-            "A crew is already registered with this leader email. Contact event control if that is a mistake.",
+            `A crew is already registered with this leader email (Team ID ${team.teamId}). ` +
+            "Log in with the passcode from your confirmation, or ask event control to reset it.",
         },
         409,
       );

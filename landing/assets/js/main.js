@@ -28,7 +28,7 @@
     hintCost: 5,                               // points per hint — spec §3
     links: {
       discord: 'https://discord.gg/gdgchitkara',
-      register: 'https://gdg.community.dev/gdg-on-campus-chitkara-university-punjab-india/'
+      register: 'register.html'
     }
   };
 

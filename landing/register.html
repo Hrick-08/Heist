@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Register a crew — VICE CITY: THE CAMPUS TAKEOVER</title>
+<meta name="description" content="Register your crew for Vice City: The Campus Takeover. First come first served — crews past the slot limit are waitlisted automatically.">
+<meta name="theme-color" content="#100620">
+<!-- Override with the origin running the Heist app if it is not served from this domain. -->
+<meta name="heist-api-base" content="https://heist-snowy.vercel.app/">
+<link rel="icon" href="assets/img/favicon.png">
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/register.css">
+</head>
+<body id="top" class="register-page">
+
+<a class="skip" href="#registerForm">Skip to the registration form</a>
+
+<div class="crt" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="vig" aria-hidden="true"></div>
+
+<header class="masthead">
+  <div class="mast-top">
+    <a class="mast-logo" href="index.html" aria-label="Vice City: The Campus Takeover, back to the city">
+      <span class="mast-mark" aria-hidden="true"><img src="assets/img/vi-mark.png" alt="" width="720" height="405"></span>
+      <span class="mast-name">
+        <span class="mast-word">VICE<em>CITY</em></span>
+        <span class="mast-slug">The campus takeover <i>·</i> case 2027</span>
+      </span>
+    </a>
+    <p class="mast-wire">
+      <span class="wire-item"><i class="wire-dot" aria-hidden="true"></i>Registration desk</span>
+      <span class="wire-item">Sat 13 Feb 2027</span>
+      <span class="wire-item wire-item--dim">Chitkara × DGIT</span>
+    </p>
+    <div class="mast-cta">
+      <a class="btn btn--ghost btn--sm" href="index.html">&times; Close</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="chapter" id="register">
+    <div class="inner">
+      <header class="chapter-head">
+        <span class="chapter-no">Registration · New crew file</span>
+        <h1 class="chapter-title">REGISTER<br>A <em>CREW</em></h1>
+        <p class="chapter-dek">First come first served. Crews past the slot limit are waitlisted automatically.</p>
+      </header>
+
+      <div class="reg-shell">
+        <form class="idea-form reg-form" id="registerForm" novalidate>
+          <div class="reg-top">
+            <div>
+              <span class="role-tag role-tag--broker">Crew file · entry form</span>
+              <h2 class="reg-h2">Register a crew</h2>
+            </div>
+            <a class="btn btn--ghost btn--sm reg-close" href="index.html">Close</a>
+          </div>
+          <p class="reg-lede">First come first served. Crews past the slot limit are waitlisted automatically.</p>
+
+          <fieldset class="reg-set">
+            <legend><span>01</span> Crew &amp; leader</legend>
+
+            <div class="if-field">
+              <label for="crewName">Crew name <span>The name on the board, target list and wanted poster.</span></label>
+              <input id="crewName" name="crewName" type="text" maxlength="40" placeholder="Crew name" autocomplete="off" spellcheck="false" required>
+            </div>
+
+            <div class="if-field">
+              <label for="leaderEmail">Leader login email <span>This email is the crew's login id.</span></label>
+              <input id="leaderEmail" name="leaderEmail" type="email" maxlength="160" placeholder="Leader email" autocomplete="email" required>
+            </div>
+
+            <div class="reg-grid-2">
+              <div class="if-field">
+                <label for="leaderName">Leader name</label>
+                <input id="leaderName" name="leaderName" type="text" maxlength="80" placeholder="Leader name" autocomplete="name" required>
+              </div>
+              <div class="if-field">
+                <label for="leaderPhone">Leader phone</label>
+                <input id="leaderPhone" name="leaderPhone" type="tel" maxlength="30" placeholder="Leader phone" autocomplete="tel" required>
+              </div>
+            </div>
+
+            <div class="if-field">
+              <label for="leaderPhoto">Leader photo <span>Required. Used only for the internal wanted board, then deleted after the event.</span></label>
+              <div class="photo-row">
+                <img id="photoPreview" class="photo-preview" alt="Leader photo preview" hidden>
+                <span class="file-wrap">
+                  <input id="leaderPhoto" name="leaderPhoto" type="file" accept="image/*" required>
+                  <label class="file-btn" for="leaderPhoto">Choose file</label>
+                </span>
+                <span id="photoName" class="photo-name">No file chosen · required</span>
+              </div>
+              <small class="reg-hint">Resized to 480px and stored with the crew record.</small>
+            </div>
+
+            <div class="auto-row">
+              <span class="auto-label">Passcode</span>
+              <span class="auto-badge">auto</span>
+              <span class="auto-text">A passcode is generated for you when you register — there is no field to choose your own. Save the one shown after submission; you need it to log in.</span>
+            </div>
+          </fieldset>
+
+          <fieldset class="reg-set">
+            <legend><span>02</span> Crew members (leader + at least 3, up to 4)</legend>
+
+            <div class="member" data-member="1">
+              <h3>Member 1 <span>required</span></h3>
+              <div class="reg-grid-3">
+                <div class="if-field"><label for="m1name">Member 1 name</label><input id="m1name" type="text" maxlength="80" placeholder="Name" required></div>
+                <div class="if-field"><label for="m1email">email</label><input id="m1email" type="email" maxlength="160" placeholder="Email" required></div>
+                <div class="if-field"><label for="m1phone">phone</label><input id="m1phone" type="tel" maxlength="30" placeholder="Phone" required></div>
+              </div>
+            </div>
+
+            <div class="member" data-member="2">
+              <h3>Member 2 <span>required</span></h3>
+              <div class="reg-grid-3">
+                <div class="if-field"><label for="m2name">Member 2 name</label><input id="m2name" type="text" maxlength="80" placeholder="Name" required></div>
+                <div class="if-field"><label for="m2email">email</label><input id="m2email" type="email" maxlength="160" placeholder="Email" required></div>
+                <div class="if-field"><label for="m2phone">phone</label><input id="m2phone" type="tel" maxlength="30" placeholder="Phone" required></div>
+              </div>
+            </div>
+
+            <div class="member" data-member="3">
+              <h3>Member 3 <span>required</span></h3>
+              <div class="reg-grid-3">
+                <div class="if-field"><label for="m3name">Member 3 name</label><input id="m3name" type="text" maxlength="80" placeholder="Name" required></div>
+                <div class="if-field"><label for="m3email">email</label><input id="m3email" type="email" maxlength="160" placeholder="Email" required></div>
+                <div class="if-field"><label for="m3phone">phone</label><input id="m3phone" type="tel" maxlength="30" placeholder="Phone" required></div>
+              </div>
+            </div>
+
+            <div class="member member--optional" data-member="4">
+              <h3>Member 4 <span>optional · 5th member</span></h3>
+              <div class="reg-grid-3">
+                <div class="if-field"><label for="m4name">Member 4 name</label><input id="m4name" type="text" maxlength="80" placeholder="Name"></div>
+                <div class="if-field"><label for="m4email">email</label><input id="m4email" type="email" maxlength="160" placeholder="Email"></div>
+                <div class="if-field"><label for="m4phone">phone</label><input id="m4phone" type="tel" maxlength="30" placeholder="Phone"></div>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="if-actions reg-actions">
+            <button class="btn btn--go btn--xl" type="submit" id="submitBtn">Register crew</button>
+            <a class="btn btn--ghost" href="index.html">Cancel</a>
+          </div>
+          <p class="if-msg" id="regMsg" role="status" aria-live="polite">One registration = one crew = one crew ID. Nothing is charged — entry is free.</p>
+        </form>
+
+        <aside class="reg-aside">
+          <div class="crew-card">
+            <div class="crew-card-top">
+              <div class="qr" aria-hidden="true">
+                <svg viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fdf6ea"/><g fill="#150a20"><path d="M0 0h7v7H0zM2 2h3v3H2zM14 0h7v7h-7zM16 2h3v3h-3zM0 14h7v7H0zM2 16h3v3H2zM8 0h1v1H8zM10 1h1v1h-1zM8 3h2v1H8zM11 4h2v1h-2zM9 6h1v2H9zM12 8h2v1h-2zM8 9h1v2H8zM10 11h3v1h-3zM14 9h1v2h-1zM16 11h2v1h-2zM19 9h2v1h-2zM14 14h2v2h-2zM17 15h1v2h-1zM19 14h2v2h-2zM15 18h3v1h-3zM19 18h2v2h-2zM8 14h2v1H8zM9 16h2v1H9zM8 18h3v1H8zM0 9h2v1H0zM3 10h2v1H3zM1 12h3v1H1z"/></g></svg>
+              </div>
+              <div>
+                <p class="crew-tag">Crew file · issued at check-in</p>
+                <p class="crew-id" id="asideCrewName">YOUR CREW NAME</p>
+                <p class="crew-tag">One crew ID · the mission board in your pocket</p>
+              </div>
+            </div>
+            <div class="crew-card-body">
+              <div class="crew-field"><span>Slots</span><b id="asideSlots">First come, first served</b></div>
+              <div class="crew-field"><span>Crew size</span><b>4–5 students</b></div>
+              <div class="crew-field"><span>Entry</span><b>₹0 · free</b></div>
+              <div class="crew-field"><span>What you get</span><b>Team ID + passcode</b></div>
+            </div>
+          </div>
+          <ul class="assemble-check">
+            <li>crew name + 4–5 members</li>
+            <li>valid Chitkara IDs</li>
+            <li>team leader named for the poster</li>
+            <li>photo opt-out if you want it</li>
+          </ul>
+          <p class="reg-aside-note">// crews past the slot limit are waitlisted automatically and emailed the moment a slot opens.</p>
+        </aside>
+      </div>
+
+      <section class="reg-success" id="regSuccess" hidden aria-live="polite">
+        <span class="role-tag role-tag--broker">Crew file · confirmed</span>
+        <h2 class="reg-success-title" id="successTitle">YOU'RE IN THE CITY</h2>
+        <p class="reg-success-msg" id="successMsg"></p>
+        <div class="reg-credentials">
+          <div><span>Team ID</span><b id="successTeamId">—</b></div>
+          <div><span>Passcode</span><b id="successPasscode">—</b></div>
+        </div>
+        <p class="reg-success-hint">Save these two values. Your crew logs in with the Team ID and this auto-generated passcode.</p>
+        <div class="if-actions">
+          <a class="btn btn--go" id="successLogin" href="/login">Log in to your crew page →</a>
+          <a class="btn btn--ghost" href="index.html">Back to the city</a>
+          <button class="btn btn--ghost" type="button" id="registerAnother">Register another crew</button>
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer class="backcover reg-footer">
+  <div class="bc-inner">
+    <div class="bc-fine">
+      <span>© <span data-event-year>2027</span> GDG on Campus, Chitkara University, with DGIT Gaming Club. A student event site made in the spirit of a fictional crime-city theme. Not affiliated with, endorsed by, or representing Google LLC, Rockstar Games or Take-Two Interactive. All in-game currency is fictional; all photos are deleted at close.</span>
+      <span>One crew. One ID. One city.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/register.js"></script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+/* ==========================================================================
+   VICE CITY · REGISTRATION PAGE
+   Additions on top of style.css — the tokens and base components are shared.
+   ========================================================================== */
+
+.reg-shell{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,340px);
+  gap:clamp(14px,2.4vw,30px);align-items:start
+}
+.reg-form{gap:14px}
+.reg-form[hidden]{display:none}
+.reg-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.reg-h2{font-size:clamp(24px,3.4vw,40px);color:var(--bone);margin-top:.45rem}
+.reg-close{flex:0 0 auto}
+.reg-lede{
+  margin:0;padding:.6rem .8rem;border-left:3px solid var(--amber);
+  background:rgba(255,176,46,.08);font-size:.95rem;color:var(--ink-70)
+}
+.reg-lede b{color:var(--amber)}
+
+.reg-set{
+  margin:0;padding:clamp(12px,1.8vw,18px);display:grid;gap:12px;
+  border:var(--frame) solid rgba(160,120,255,.32);border-radius:4px;
+  background:rgba(9,3,20,.42)
+}
+.reg-set legend{
+  display:flex;align-items:center;gap:.6em;padding:0 .5em;
+  font-family:var(--hud);font-weight:700;font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--bone)
+}
+.reg-set legend span{font-family:var(--sign);color:var(--pink);text-shadow:0 0 12px rgba(255,42,109,.7)}
+
+.reg-grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.reg-grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+
+/* leader photo */
+.photo-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.photo-preview{
+  inline-size:56px;block-size:56px;object-fit:cover;border-radius:3px;
+  border:var(--frame) solid rgba(34,217,245,.55);box-shadow:var(--glow-cyan)
+}
+.file-wrap{position:relative;display:inline-flex}
+.file-wrap input[type=file]{
+  position:absolute;inline-size:1px;block-size:1px;opacity:0;overflow:hidden;pointer-events:none
+}
+.file-btn{
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+  padding:.55em .9em;border:var(--frame) solid rgba(34,217,245,.55);border-radius:3px;
+  font-family:var(--sign);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  color:#bff1fb;background:rgba(34,217,245,.08)
+}
+.file-btn:hover{background:rgba(34,217,245,.18)}
+.file-wrap input[type=file]:focus-visible + .file-btn{outline:3px solid var(--amber);outline-offset:3px}
+.photo-name{font-family:var(--mono);font-size:11.5px;color:var(--ink-45)}
+.reg-hint{font-family:var(--mono);font-size:11px;color:var(--gold)}
+
+/* auto-generated passcode notice — deliberately not an input */
+.auto-row{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;
+  padding:.55rem .75rem;border:1px dashed rgba(34,217,245,.42);border-radius:3px;
+  background:rgba(34,217,245,.05)
+}
+.auto-label{font-family:var(--hud);font-weight:600;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan)}
+.auto-badge{
+  font-family:var(--sign);font-size:10px;letter-spacing:.14em;padding:.15em .5em;
+  border:var(--frame) solid var(--amber);border-radius:2px;color:var(--amber)
+}
+.auto-text{flex:1 1 260px;font-family:var(--mono);font-size:11.5px;color:var(--ink-70)}
+
+/* crew member cards */
+.member{
+  padding:clamp(10px,1.5vw,14px);border:var(--frame) solid rgba(34,217,245,.28);border-radius:3px;
+  background:rgba(20,8,38,.6)
+}
+.member--optional{border-style:dashed;opacity:.92}
+.member h3{
+  margin:0 0 .6rem;font-family:var(--hud);font-weight:700;font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--bone)
+}
+.member h3 span{
+  margin-left:.5em;font-family:var(--hud);font-weight:600;font-size:10px;letter-spacing:.08em;
+  color:var(--cyan)
+}
+.member--optional h3 span{color:var(--ink-45)}
+
+.reg-actions{padding-top:.3rem}
+.reg-actions .btn--go[disabled]{opacity:.6;cursor:wait;transform:none}
+
+/* side column */
+.reg-aside{display:grid;gap:12px;align-content:start;position:sticky;top:calc(var(--mast-h) + 14px)}
+.reg-aside .crew-card{margin:0}
+.reg-aside .crew-card-top .qr svg{inline-size:64px;block-size:64px}
+.reg-aside .crew-id{font-size:clamp(15px,1.7vw,21px);line-height:1.1;overflow-wrap:anywhere}
+.reg-aside .crew-card-body{grid-template-columns:repeat(2,minmax(0,1fr))}
+.reg-aside-note{
+  margin:0;font-family:var(--mono);font-size:11.5px;line-height:1.55;color:var(--gold)
+}
+
+/* success panel */
+.reg-success{
+  margin-top:var(--gut);padding:clamp(18px,3vw,34px);
+  border:var(--frame) solid var(--money);border-radius:4px;
+  background:linear-gradient(160deg,rgba(22,201,141,.14),rgba(11,4,22,.96));
+  box-shadow:0 0 0 1px rgba(22,201,141,.35),0 0 46px -14px rgba(22,201,141,.55),var(--lift)
+}
+.reg-success[hidden]{display:none}
+.reg-success-title{font-size:clamp(30px,5vw,56px);color:var(--bone);margin:.5rem 0}
+.reg-success-msg{margin:0 0 1rem;color:var(--ink-70);max-width:60ch}
+.reg-credentials{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:1rem
+}
+.reg-credentials div{
+  display:grid;gap:4px;padding:.75rem .9rem;border:var(--frame) solid rgba(34,217,245,.45);
+  border-radius:3px;background:rgba(9,3,20,.8)
+}
+.reg-credentials span{
+  font-family:var(--hud);font-weight:600;font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--cyan)
+}
+.reg-credentials b{
+  font-family:var(--mono);font-size:clamp(18px,2.6vw,26px);color:var(--amber);
+  letter-spacing:.06em;overflow-wrap:anywhere
+}
+.reg-success-hint{font-family:var(--mono);font-size:11.5px;color:var(--gold);margin-bottom:1rem}
+.reg-footer{padding-block:clamp(22px,3vw,38px)}
+
+@media (max-width:900px){
+  .reg-shell{grid-template-columns:minmax(0,1fr)}
+  .reg-aside{position:static;grid-template-columns:minmax(0,1fr)}
+  .reg-aside .crew-card-body{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:620px){
+  .reg-grid-2,.reg-grid-3,.reg-credentials{grid-template-columns:minmax(0,1fr)}
+  .mast-wire{display:none}
+}
