@@ -7,7 +7,6 @@
 
   var msg = document.getElementById("regMsg");
   var submitBtn = document.getElementById("submitBtn");
-  var success = document.getElementById("regSuccess");
   var fileInput = document.getElementById("leaderPhoto");
   var photoName = document.getElementById("photoName");
   var photoPreview = document.getElementById("photoPreview");
@@ -158,11 +157,7 @@
           attempts.push(endpointLabel(urls[i]) + " → HTTP " + res.status + " (" + type + ")");
           continue;
         }
-        return {
-          ok: res.ok,
-          data: await res.json(),
-          origin: new URL(urls[i], window.location.href).origin,
-        };
+        return { ok: res.ok, data: await res.json() };
       } catch (err) {
         var why = err && err.name === "TypeError"
           ? "blocked / network error (check CORS or the page's CSP)"
@@ -205,7 +200,8 @@
         setMsg(result.data && result.data.error ? result.data.error : "Registration failed. Please try again.", "bad");
         return;
       }
-      showSuccess(result.data, result.origin);
+      document.getElementById("regToast").classList.add("is-in");
+      window.setTimeout(function () { window.location.assign("index.html"); }, 1600);
     } catch (err) {
       var detail = err.attempts ? " Tried: " + err.attempts.join(" · ") : "";
       setMsg(
@@ -217,32 +213,5 @@
       submitBtn.disabled = false;
       submitBtn.textContent = "Register crew";
     }
-  });
-
-  function showSuccess(data, origin) {
-    document.getElementById("successTitle").textContent = data.waitlisted
-      ? "CREW WAITLISTED"
-      : "YOU'RE IN THE CITY";
-    document.getElementById("successMsg").textContent = data.message || "";
-    document.getElementById("successTeamId").textContent = data.teamId;
-    document.getElementById("successPasscode").textContent = data.passcode;
-    document.getElementById("successLogin").href = origin.replace(/\/$/, "") + "/login";
-    form.hidden = true;
-    success.hidden = false;
-    success.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  document.getElementById("registerAnother").addEventListener("click", function () {
-    form.reset();
-    photoDataUrl = "";
-    photoPreview.hidden = true;
-    photoPreview.removeAttribute("src");
-    showAsidePhoto("");
-    photoName.textContent = "No file chosen · required";
-    asideCrewName.textContent = "YOUR CREW NAME";
-    setMsg("One registration = one crew = one crew ID. Nothing is charged — entry is free.");
-    success.hidden = true;
-    form.hidden = false;
-    form.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 })();

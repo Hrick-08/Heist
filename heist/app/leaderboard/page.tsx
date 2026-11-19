@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   title: "Leaderboard",
 };
 
+export const instant = false;
+
 export default async function LeaderboardPage() {
   // The board only means something once the game is running. While crews are
   // still being signed up and picked, send visitors back to the briefing.

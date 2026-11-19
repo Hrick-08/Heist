@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+export const instant = false;
+
 export default async function TeamLoginPage() {
   const state = await getEventState();
 

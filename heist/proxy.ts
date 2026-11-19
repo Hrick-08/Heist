@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { connection, NextResponse, type NextRequest } from "next/server";
 
 import { SESSION_COOKIE, verifySession } from "@/lib/token";
 
@@ -11,6 +11,7 @@ function isTeamPath(pathname: string): boolean {
 }
 
 export async function proxy(request: NextRequest) {
+  await connection();
   const { pathname } = request.nextUrl;
   const session = await verifySession(
     request.cookies.get(SESSION_COOKIE)?.value,

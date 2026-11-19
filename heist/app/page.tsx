@@ -23,6 +23,8 @@ import {
   WANTED_CHOICES,
 } from "@/lib/event-content";
 
+export const instant = false;
+
 /*
  * Each card gets its own glow spots: different corners, sizes and tints.
  * Seeded, so the server and every visitor see the same cards (no hydration drift).

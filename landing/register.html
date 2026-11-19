@@ -185,21 +185,6 @@
         </aside>
       </div>
 
-      <section class="reg-success" id="regSuccess" hidden aria-live="polite">
-        <span class="role-tag role-tag--broker">Crew file · confirmed</span>
-        <h2 class="reg-success-title" id="successTitle">YOU'RE IN THE CITY</h2>
-        <p class="reg-success-msg" id="successMsg"></p>
-        <div class="reg-credentials">
-          <div><span>Team ID</span><b id="successTeamId">—</b></div>
-          <div><span>Passcode</span><b id="successPasscode">—</b></div>
-        </div>
-        <p class="reg-success-hint">Save these two values. Your crew logs in with the Team ID and this auto-generated passcode. You'll hear from us on the leader email you gave — we'll be mailing the selected crews.</p>
-        <div class="if-actions">
-          <a class="btn btn--go" id="successLogin" href="/login">Log in to your crew page →</a>
-          <a class="btn btn--ghost" href="index.html">Back to the city</a>
-          <button class="btn btn--ghost" type="button" id="registerAnother">Register another crew</button>
-        </div>
-      </section>
     </div>
   </section>
 </main>
@@ -212,6 +197,8 @@
     </div>
   </div>
 </footer>
+
+<div class="toast" id="regToast" role="status" aria-live="polite"><b>Registration confirmed</b></div>
 
 <script src="assets/js/register.js"></script>
 </body>
