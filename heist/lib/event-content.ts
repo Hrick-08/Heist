@@ -10,11 +10,11 @@ export const EVENT = {
   tagline: "The Ultimate Heist",
   host: "GDG Chitkara",
   /** Fill these in when they are fixed. Until then the page says "To be announced". */
-  date: null as string | null,
-  venue: null as string | null,
+  date: "25-Nov-2026 (9:00 AM)",
+  venue: "Einstein Hall, Galileo Block",
   crews: 40,
   crewSize: "4–5",
-  endsBy: "3:30 PM",
+  endsBy: "4:00 PM",
   topFinalists: 5,
   lede:
     "Campus turns into a GTA-style game world for one day. Form a crew of 4–5, run missions across campus, " +
